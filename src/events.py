@@ -172,6 +172,7 @@ class Regime(str, Enum):
     NORMAL = "normal"
     SUPPLIER_DELAY = "supplier_delay"
     DEMAND_SURGE = "demand_surge"
+    SUPPLIER_CAPACITY_DROP = "supplier_capacity_drop"
 
 
 # Regime prior — the NoInfo controller knows this distribution

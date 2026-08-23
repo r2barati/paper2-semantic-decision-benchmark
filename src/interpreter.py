@@ -559,6 +559,7 @@ def perfect_semantic_regime_belief(true_regime: Regime) -> RegimeInterpretation:
         Regime.NORMAL: (0, 0, 1.0),
         Regime.SUPPLIER_DELAY: (4, 10, 1.0),
         Regime.DEMAND_SURGE: (0, 10, 1.75),
+        Regime.SUPPLIER_CAPACITY_DROP: (0, 0, 1.0),
     }
     lt, dur, mult = params[true_regime]
 

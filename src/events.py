@@ -180,6 +180,7 @@ REGIME_PRIOR: dict[str, float] = {
     Regime.NORMAL: 0.35,
     Regime.SUPPLIER_DELAY: 0.35,
     Regime.DEMAND_SURGE: 0.30,
+    Regime.SUPPLIER_CAPACITY_DROP: 0.0,
 }
 
 # Operational parameters for each regime
@@ -199,6 +200,11 @@ REGIME_PARAMS: dict[str, dict] = {
         "description": "Strong customer purchasing increases demand.",
         "lead_time_increase": 0,
         "demand_multiplier": 1.75,
+    },
+    Regime.SUPPLIER_CAPACITY_DROP: {
+        "description": "Supplier capacity reduction. Not used in Phase 5 env; see Phase 9 divergent topology.",
+        "lead_time_increase": 0,
+        "demand_multiplier": 1.0,
     },
 }
 

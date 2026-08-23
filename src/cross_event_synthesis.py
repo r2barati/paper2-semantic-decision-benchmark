@@ -32,12 +32,12 @@ phase9a = {
 }
 
 phase9b_baseline = {
-    "NoInfo":                   {"sivr": 0.000, "fill_rate": 0.894, "bel_acc": 0.375, "mean_reward": 1333.5},
-    "RuleBased":                {"sivr": 0.383, "fill_rate": 0.894, "bel_acc": 0.938, "mean_reward": 1486.4},
-    "TFIDF_LogReg_Raw":         {"sivr": 0.119, "fill_rate": 0.860, "bel_acc": 0.875, "mean_reward": 1381.2},
-    "TFIDF_LogReg_Calibrated":  {"sivr": 0.205, "fill_rate": 0.871, "bel_acc": 0.812, "mean_reward": 1415.4},
-    "gpt-4o":                   {"sivr": 0.232, "fill_rate": 0.874, "bel_acc": 0.938, "mean_reward": 1426.1},
-    "OracleSemantic":           {"sivr": 1.000, "fill_rate": 0.973, "bel_acc": 1.000, "mean_reward": 1732.7},
+    "NoInfo":                   {"sivr": 0.000, "fill_rate": 0.845, "bel_acc": 0.375, "mean_reward": 1323.6},
+    "RuleBased":                {"sivr": 0.383, "fill_rate": 0.894, "bel_acc": 0.938, "mean_reward": 1473.0},
+    "TFIDF_LogReg_Raw":         {"sivr": 0.119, "fill_rate": 0.861, "bel_acc": 0.875, "mean_reward": 1371.2},
+    "TFIDF_LogReg_Calibrated":  {"sivr": 0.205, "fill_rate": 0.870, "bel_acc": 0.812, "mean_reward": 1402.0},
+    "gpt-4o":                   {"sivr": 0.232, "fill_rate": 0.875, "bel_acc": 0.938, "mean_reward": 1416.0},
+    "OracleSemantic":           {"sivr": 1.000, "fill_rate": 0.971, "bel_acc": 1.000, "mean_reward": 1713.6},
 }
 
 
@@ -81,11 +81,10 @@ def print_synthesis():
     print("1. Oracle SIVR=1.000 in BOTH events → value-of-information framework is event-agnostic")
     print("2. RuleBased: DemandSurge (1.198) > CapacityDrop (0.823) > baseline (0.383)")
     print("   → Rule-based inference is more effective for demand-side shocks")
-    print("3. gpt-4o: CapacityDrop (0.507) > DemandSurge (0.797) is NOT true —")
-    print("   actually gpt-4o does better on CapacityDrop by belief accuracy (0.938 vs 0.958)")
-    print("   The SIVR difference is driven by the OIV range, not information quality")
-    print("4. TFIDF_Raw: significant in BOTH events (8B: 0.575, 9A: 0.261)")
-    print("   → Classical NLP generalizes across shock types but with lower value on supply-side")
+    print("3. gpt-4o: CapacityDrop (0.507) < DemandSurge (0.797)")
+    print("   → SIVR difference is driven by OIV range, not information quality")
+    print("4. TFIDF_Raw: Phase 8B is primary generalization (24 held-out, SIVR=0.575)")
+    print("   Phase 9A includes 9/16 training templates (in-distribution, SIVR=0.261)")
     print("5. Fill rates: all sensors improve fill rate vs NoInfo in both events")
     print("   → Semantic information consistently improves operational performance")
 

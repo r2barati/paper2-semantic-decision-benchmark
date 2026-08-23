@@ -70,7 +70,7 @@ Families (delay/surge/normal) are shared intentionally — the model must genera
 | **Phase 9A confirmation** | **4000–4029** | **30** | **Cross-dynamics confirmation** |
 | Phase 9B robustness | 4100–4109 | 10 | One-factor-at-a-time (×6 variants) |
 
-**All seed ranges are pairwise disjoint.** Phase-9A seeds (4000–4029) are disjoint from Phase 8B (3100–3129), Phase 8A (1–20, 2000–2019), Phase 7 (2000–2019), Phase 6 (2000–2049), and Phase 5/5.5 (1000–1014). Phase-9B seeds (4100–4109) are disjoint from all prior phases.
+**Publication phases (8B, 9A, 9B) use pairwise-disjoint seed ranges.** Phase-9A seeds (4000–4029) are disjoint from Phase 8B (3100–3129) and Phase 9B (4100–4109). Non-publication phases (5.5, 6, 7, 8A) may share seed ranges with each other; this is acceptable because they are not pooled for confirmatory inference.
 
 ---
 
@@ -214,6 +214,12 @@ Families (delay/surge/normal) are shared intentionally — the model must genera
 | gpt-4o | 0.507 | 1426.2 | 0.875 | 0.938 |
 | OracleSemantic | 1.000 | 1516.3 | 0.904 | 1.000 |
 
+> **Note:** Phase 9A SIVR is computed over all 16 templates (9 training + 7 held-out).
+> For TFIDF_LogReg_Raw and TFIDF_LogReg_Calibrated, this includes 9 templates seen during
+> TF-IDF fitting (in-distribution). Phase 8B (24 held-out templates) is the primary
+> linguistic-generalization result. Phase 9A TF-IDF numbers should be reported as
+> in-distribution evidence, not generalization evidence.
+
 ### Hierarchical Bootstrap CIs (vs NoInfo)
 
 | Sensor | Mean Diff | 95% CI | Significant |
@@ -272,8 +278,8 @@ Oracle SIVR = 1.000 in all events confirms framework is event-agnostic.
 
 | Sensor | Held-out Accuracy | AggSIVR (Phase 7) | AggSIVR (Phase 8B) | AggSIVR (Phase 9A) |
 |--------|------------------:|-------------------:|-------------------:|-------------------:|
-| TFIDF_Raw | 88.9% | 0.250 | 0.575 | 0.261 |
-| TFIDF_Calibrated | 86.1% | 0.648 | 0.841 | 0.434 |
+| TFIDF_LogReg_Raw | 88.9% | 0.250 | 0.575 | 0.261 |
+| TFIDF_LogReg_Calibrated | 86.1% | 0.648 | 0.841 | 0.434 |
 | gpt-4o | — | 0.767 | 0.797 | 0.507 |
 
 **Lower accuracy (86.1% vs 88.9%) but higher SIVR (0.648 vs 0.250, 0.841 vs 0.575).** Calibration trades classification accuracy for better-calibrated probabilities, which the operational controller converts into superior decisions.

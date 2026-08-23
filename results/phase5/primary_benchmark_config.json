@@ -1,0 +1,59 @@
+{
+  "phase": 5,
+  "description": "Multi-regime information-value benchmark",
+  "regimes": [
+    "normal",
+    "supplier_delay",
+    "demand_surge"
+  ],
+  "regime_prior": {
+    "normal": 0.35,
+    "supplier_delay": 0.35,
+    "demand_surge": 0.3
+  },
+  "primary_benchmark_regime": "demand_surge",
+  "primary_benchmark_rationale": "Highest OIV (373.5, 14.7%), most impactful regime, clear action differences",
+  "horizon": 40,
+  "normal_lead_time": 4,
+  "demand_mean": 8.0,
+  "event_start": 20,
+  "event_duration": 10,
+  "warning_time": 12,
+  "regime_params": {
+    "normal": {
+      "lead_time_increase": 0,
+      "demand_multiplier": 1.0
+    },
+    "supplier_delay": {
+      "lead_time_increase": 4,
+      "demand_multiplier": 1.0
+    },
+    "demand_surge": {
+      "lead_time_increase": 0,
+      "demand_multiplier": 1.75
+    }
+  },
+  "cost_params": {
+    "revenue_per_unit": 10.0,
+    "ordering_fixed_cost": 5.0,
+    "ordering_variable_cost": 2.0,
+    "holding_cost_per_unit": 1.0,
+    "stockout_cost_per_unit": 8.0,
+    "initial_inventory": 30
+  },
+  "gate_a_results": {
+    "normal": {
+      "oiv": 169.9,
+      "oiv_pct": 8.3
+    },
+    "supplier_delay": {
+      "oiv": 72.7,
+      "oiv_pct": 3.6
+    },
+    "demand_surge": {
+      "oiv": 373.5,
+      "oiv_pct": 14.7
+    }
+  },
+  "frozen": true
+}

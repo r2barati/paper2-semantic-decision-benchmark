@@ -318,6 +318,9 @@ def _load_cache(text: str, model: str) -> Optional[dict]:
     p = _cache_path(text, model)
     if p.exists():
         return json.loads(p.read_text())
+    frozen = p.parent.parent / "results" / "frozen_llm_outputs" / p.name
+    if frozen.exists():
+        return json.loads(frozen.read_text())
     return None
 
 
@@ -350,9 +353,6 @@ def llm_interpret_with_result(
     if model is None:
         model = os.environ.get("LLM_MODEL", "gpt-4o-mini")
 
-    if not api_key:
-        raise RuntimeError("LLM_API_KEY not set.")
-
     # Check cache first
     cached = _load_cache(text, model)
     if cached is not None:
@@ -364,6 +364,9 @@ def llm_interpret_with_result(
             latency_ms=0.0,
             from_cache=True,
         )
+
+    if not api_key:
+        raise RuntimeError("LLM_API_KEY not set and no frozen semantic cache entry exists.")
 
     client = _get_client(api_key, base_url)
 
@@ -717,9 +720,6 @@ def llm_regime_interpret_with_result(
     if model is None:
         model = os.environ.get("LLM_MODEL", "gpt-4o-mini")
 
-    if not api_key:
-        raise RuntimeError("LLM_API_KEY not set.")
-
     # Use the existing LLM call infrastructure with the regime prompt
     # Build a temporary regime-specific call
     import hashlib
@@ -729,8 +729,9 @@ def llm_regime_interpret_with_result(
     cache_dir.mkdir(exist_ok=True)
     cache_file = cache_dir / f"{h}.json"
 
-    if cache_file.exists():
-        cached = json.loads(cache_file.read_text())
+    frozen_cache_file = cache_file.parent.parent / "results" / "frozen_llm_outputs" / cache_file.name
+    if cache_file.exists() or frozen_cache_file.exists():
+        cached = json.loads((cache_file if cache_file.exists() else frozen_cache_file).read_text())
         regime_interp = RegimeInterpretation.from_dict(cached)
         llm_result = LLMResult(
             interpretation=Interpretation("regime", 0.0, 0, 0),
@@ -740,6 +741,9 @@ def llm_regime_interpret_with_result(
             from_cache=True,
         )
         return regime_interp, llm_result
+
+    if not api_key:
+        raise RuntimeError("LLM_API_KEY not set and no frozen semantic cache entry exists.")
 
     client = _get_client(api_key, base_url)
     last_error = None

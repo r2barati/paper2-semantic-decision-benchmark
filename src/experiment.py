@@ -1763,12 +1763,11 @@ def _compute_matrix_analysis(episodes, sensors, controllers, llm_models, templat
         j_ps = mean_profit(f"{SENSOR_PERFECT}+{controller}")
         for sensor in all_sensor_labels:
             j_cond = mean_profit(f"{sensor}+{controller}")
-            denom = j_ps - j_noinfo
             sivr_rows.append({
                 "controller": controller, "sensor": sensor,
                 "j_no_info": j_noinfo, "j_perfect_semantic": j_ps,
                 "j_condition": j_cond,
-                "sivr": (j_cond - j_noinfo) / denom if abs(denom) > 1e-9 else 0.0,
+                "sivr": information_value(j_cond, j_noinfo, j_ps),
             })
 
     with open(output_dir / "sivr_by_model_controller.csv", "w", newline="") as f:
@@ -1834,13 +1833,12 @@ def _compute_matrix_analysis(episodes, sensors, controllers, llm_models, templat
                     j_ps = mean_profit(f"{SENSOR_PERFECT}+{controller}")
                     j_noinfo = mean_profit(f"{SENSOR_NOINFO}+{controller}")
                     j_cond = float(np.mean([m.total_profit for m in ms]))
-                    denom = j_ps - j_noinfo
                     lt_errors = [m.lead_time_error for m in ms if m.lead_time_error is not None]
                     dur_errors = [m.duration_error for m in ms if m.duration_error is not None]
                     ambig_rows.append({
                         "model": model, "ambiguity_level": alevel, "controller": controller,
                         "mean_profit": j_cond,
-                        "sivr": (j_cond - j_noinfo) / denom if abs(denom) > 1e-9 else 0.0,
+                        "sivr": information_value(j_cond, j_noinfo, j_ps),
                         "mean_lt_error": float(np.mean(lt_errors)) if lt_errors else None,
                         "mean_duration_error": float(np.mean(dur_errors)) if dur_errors else None,
                         "n": len(ms),

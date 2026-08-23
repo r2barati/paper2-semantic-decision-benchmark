@@ -1,0 +1,31 @@
+{
+  "phase": "9B",
+  "description": "One-factor-at-a-time robustness for SupplierCapacityDrop",
+  "seeds": [
+    4100,
+    4101,
+    4102,
+    4103,
+    4104,
+    4105,
+    4106,
+    4107,
+    4108,
+    4109
+  ],
+  "n_seeds": 10,
+  "n_templates": 16,
+  "n_sensors": 6,
+  "n_variants": 6,
+  "total_episodes": 5760,
+  "variants": {
+    "baseline": "Baseline (Phase-9A settings)",
+    "short_lead": "SHORT_LEAD (L\u00d70.5)",
+    "long_lead": "LONG_LEAD (L\u00d72.0)",
+    "lost_sales": "LOST_SALES (backlog=False)",
+    "low_noise": "LOW_NOISE (noise_scale=0.0)",
+    "high_noise": "HIGH_NOISE (noise_scale=2.0)"
+  },
+  "regime": "supplier_capacity_drop",
+  "llm_model": "gpt-4o"
+}

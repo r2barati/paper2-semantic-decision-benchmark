@@ -9,15 +9,15 @@
 OIV = V(OracleSemantic) - V(NoInfo)
 ```
 
-**Interpretation:** The maximum operational value achievable through perfect semantic interpretation. Measures how much information a semantic system *could* recover if it were perfectly accurate.
+**Interpretation:** The operational reference value of perfect semantic belief passed through the same fixed controller. It is not an optimal-policy or hindsight upper bound.
 
 **Units:** Same as V (profit or reward, depending on environment).
 
-**Sign convention:** Non-negative when semantic information has positive operational value. Zero means the environment does not benefit from regime discrimination (e.g., short horizons where buffer stock dominates).
+**Sign convention:** Positive means the Oracle-Belief Reference outperforms NoInfo; negative means the fixed controller/environment combination performs worse with that belief.
 
-**Edge cases:** If OracleSemantic and NoInfo yield identical performance (e.g., no disruption occurs across all seeds), OIV = 0 and SIVR is undefined (denominator = 0).
+**Edge cases:** If `|OIV| <= epsilon`, SIVR is `NaN` with status `ZERO_OR_NEAR_ZERO_REFERENCE_VALUE`. If OIV is negative, the signed diagnostic is retained with status `NEGATIVE_ORACLE_REFERENCE_VALUE`; it is not interpreted as information-value recovery.
 
-**Canonical path:** `src.metrics.information_value(j_perfect, j_noinfo, j_perfect)` — computed as the denominator in the SIVR formula.
+**Canonical path:** `src.metrics.signed_sivr` and `src.metrics.information_value`.
 
 ---
 
@@ -37,7 +37,7 @@ AggregateSIVR(M) = [E[V(M)] - E[V(NoInfo)]] / [E[V(OracleSemantic)] - E[V(NoInfo
 
 Computed over paired seeds. E[·] is the mean over operational seeds and templates.
 
-**Interpretation:** What fraction of the oracle-semantic operational value does sensor M recover? SIVR = 0 means no value recovered (equivalent to NoInfo). SIVR = 1 means full recovery (equivalent to OracleSemantic).
+**Interpretation:** When OIV is positive, what fraction of the Oracle-Belief Reference's incremental operational value does sensor M recover? It is a secondary normalization; raw reward and regime-specific deltas are primary.
 
 **Sign convention:**
 - SIVR = 0: Sensor provides no operational value
@@ -51,7 +51,7 @@ Computed over paired seeds. E[·] is the mean over operational seeds and templat
 2. An imperfect belief that happens to interact more favorably with the controller's operating point can exceed the oracle reference
 3. The controller is fixed and not globally optimal — its interaction with different belief distributions is non-monotonic
 
-**Canonical path:** `src.metrics.information_value(j_condition, j_noinfo, j_perfect_semantic)`
+**Canonical path:** `src.metrics.signed_sivr(j_condition, j_noinfo, j_perfect_semantic)`; the denominator is signed, never absolute-valued.
 
 ---
 
@@ -120,14 +120,14 @@ TotalGap = V(HindsightOracle) - V(M)
 
 **Definition:**
 ```
-Brier(M) = E[(p_correct - 1)^2]
+Brier(M) = E[ Σ_k (p_k - y_k)^2 ]
 ```
 
-where p_correct is the predicted probability assigned to the true regime.
+where `y` is the one-hot regime vector. A true-class-only squared error is not reported as standard Brier.
 
 **Interpretation:** Mean squared error of probabilistic predictions. Lower is better. Ranges from 0 (perfect) to 1 (worst for binary, 2 for 3-class).
 
-**Canonical path:** Computed per sensor in `src/experiment_phase8b.py` and `src/experiment_phase6.py`.
+**Canonical path:** `src.metrics.standard_brier_score`, used by the phase runners and corrected audit.
 
 ---
 
@@ -176,12 +176,14 @@ CI = percentile(bootstrap resamples of Δ, [α/2, 1-α/2])
 
 ### Hierarchical Paired Bootstrap
 
-**Definition:** Template-family resampled first, then seeds within templates:
+**Definition:** Regime-stratified family/variant/seed resampling:
 ```
 For each bootstrap iteration b:
-  1. Sample template families with replacement
-  2. For each sampled template, sample seeds with replacement
-  3. Compute mean difference over resampled data
+  1. Apply the declared regime weights (equal weights for the primary estimand; deployment prior for the secondary estimand)
+  2. Within each regime, sample template families with replacement
+  3. Within each selected family, sample variants with replacement
+  4. Within each selected variant, sample paired seeds with replacement
+  5. Compute the weighted paired mean difference
 CI = percentile over bootstrap distribution
 ```
 
@@ -189,7 +191,7 @@ CI = percentile over bootstrap distribution
 
 **Significance criterion:** CI excludes zero.
 
-**Canonical path:** `src.experiment_phase8b.hierarchical_paired_bootstrap(diffs_by_template, n_boot=5000, alpha=0.05, seed=42)`
+**Canonical path:** `src.metrics.family_seed_bootstrap_ci`.
 
 ---
 

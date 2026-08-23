@@ -10,7 +10,10 @@ Paper-1 `gym-invmgmt` v0.1.0 (commit `a745fd5`), Serial-v0 scenario. Multi-echel
 
 ## Regime Space
 
-2-class: Normal (no disruption) and DemandSurge (demand doubling at t=15). Regime prior: P(Normal)=0.70, P(DemandSurge)=0.30.
+2-class: Normal (no disruption) and DemandSurge (demand doubling at t=15).
+NoInfo uses P(Normal)=0.70, P(DemandSurge)=0.30, but the 12/12 evaluation
+template set makes the primary benchmark estimand balanced 50/50. Both are
+reported.
 
 ## Controller
 
@@ -26,21 +29,24 @@ BeliefAdaptiveController: base-stock order-up-to policy where effective_mu = P(N
 - **Held-out language:** Templates never seen during TF-IDF training
 - **Frozen config:** No retuning based on Phase-8B results
 - **Corrected fill rate:** Uses retail sales (env.S), not replenishment orders (env.R)
-- **Hierarchical bootstrap:** Template-family × seed resampling for CIs
+- **Hierarchical bootstrap:** Regime-stratified family × variant × paired-seed resampling
 - **No leakage:** Controller reads only current-period inventory state
 
-## Results (Headline)
+## Results (Headline; corrected)
 
 | Sensor | AggSIVR | Mean Reward | Fill Rate | Belief Acc | Hier. 95% CI |
 |--------|--------:|------------:|----------:|-----------:|:-------------|
 | NoInfo | 0.000 | 467.7 | 0.858 | 0.500 | — |
-| RuleBased | 1.198 | 568.7 | 0.947 | 0.792 | [54.3, 148.1] sig |
-| TFIDF_Raw | 0.575 | 516.2 | 0.901 | 0.917 | [26.7, 70.9] sig |
-| TFIDF_Calibrated | 0.841 | 538.6 | 0.911 | 0.958 | [25.8, 117.8] sig |
-| gpt-4o | 0.797 | 534.9 | 0.906 | 0.958 | [18.4, 118.4] sig |
+| RuleBased | 1.198 | 568.7 | 0.947 | 0.792 | [96.7, 104.2] sig (Δ reward) |
+| TFIDF_Raw | 0.575 | 516.2 | 0.901 | 0.917 | [36.1, 58.2] sig (Δ reward) |
+| TFIDF_Calibrated | 0.841 | 538.6 | 0.911 | 0.958 | [29.9, 96.1] sig (Δ reward) |
+| gpt-4o | 0.797 | 534.9 | 0.906 | 0.958 | [33.9, 84.5] sig (Δ reward) |
 | OracleSemantic | 1.000 | 552.0 | 0.920 | 1.000 | — |
 
-All four imperfect sensors have hierarchical bootstrap CIs excluding zero (significant vs NoInfo).
+The table is the balanced benchmark estimate. The separate deployment-prior
+table applies 70/30 weights. Raw reward deltas are primary; SIVR is secondary.
+`OracleSemantic` is perfect semantic belief through the same fixed controller,
+not an optimal policy or reward upper bound.
 
 ## Interpretation
 

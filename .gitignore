@@ -4,4 +4,11 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .llm_cache/
+!.llm_cache/
+!.llm_cache/**
 results/
+# Frozen and historical results are part of the reproducibility surface.
+!results/
+!results/**
+results/**/__pycache__/
+results/**/*.pyc

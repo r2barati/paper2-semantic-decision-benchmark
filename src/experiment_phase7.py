@@ -38,6 +38,7 @@ from src.experiment_phase6 import (
     brier_score, log_loss_safe, aggregate_sivr, macro_sivr,
     paired_bootstrap_ci, hierarchical_bootstrap_ci, calibration_analysis,
 )
+from src.metrics import signed_sivr
 from src.confirmation_templates import CONFIRMATION_TEMPLATES
 from src.classical_baseline import (
     TFIDFLogReg, build_dataset, grouped_train_test_split,
@@ -301,8 +302,7 @@ def run_phase7(
             s_mean = np.mean([ep["total_profit"] for ep in s_regime]) if s_regime else 0
             rov = s_mean - ni_mean
             sr = ps_mean - s_mean
-            denom = ps_mean - ni_mean
-            sivr_val = rov / denom if abs(denom) > 1e-9 else 0.0
+            sivr_val = signed_sivr(s_mean, ni_mean, ps_mean).value
 
             sivr_rows.append({
                 "sensor": sensor, "regime": regime.value,
@@ -359,8 +359,7 @@ def run_phase7(
             ni_m = np.mean([ep["total_profit"] for ep in ni_amb]) if ni_amb else 0
             ps_m = np.mean([ep["total_profit"] for ep in ps_amb]) if ps_amb else 0
             s_m = np.mean([ep["total_profit"] for ep in s_amb])
-            denom = ps_m - ni_m
-            sivr_val = (s_m - ni_m) / denom if abs(denom) > 1e-9 else 0.0
+            sivr_val = signed_sivr(s_m, ni_m, ps_m).value
 
             ambiguity_rows.append({
                 "sensor": sensor, "ambiguity_level": amb,

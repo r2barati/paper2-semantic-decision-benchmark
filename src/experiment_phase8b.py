@@ -55,6 +55,7 @@ from src.gym_adapter import (
 )
 from src.classical_baseline import TFIDFLogReg
 from src.confirmation_templates import CONFIRMATION_TEMPLATES
+from src.metrics import signed_sivr, standard_brier_score
 
 RESULTS_DIR = ROOT / "results" / "phase8b_gym_confirmation"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -345,8 +346,7 @@ def _compute_and_save(rows, seeds, templates):
         ni = ni_rewards.get(key, 0.0)
         oracle = oracle_rewards.get(key, 0.0)
         r.oiv = oracle - ni
-        denom = oracle - ni
-        r.sivr = (r.total_reward - ni) / abs(denom) if abs(denom) > 1e-9 else 0.0
+        r.sivr = signed_sivr(r.total_reward, ni, oracle).value
 
     operational_rows = [asdict(r) for r in rows]
     _save_csv(operational_rows, RESULTS_DIR / "operational_results.csv")
@@ -363,8 +363,8 @@ def _compute_and_save(rows, seeds, templates):
         oracle_arr = np.array([oracle_rewards.get((r.seed, r.regime, r.template_id), 0.0) for r in sensor_rows])
 
         num = float(np.sum(rewards - ni_arr))
-        denom = float(np.sum(oracle_arr - ni_arr))
-        agg_sivr = num / abs(denom) if abs(denom) > 1e-9 else 0.0
+        agg_sivr = signed_sivr(float(np.mean(rewards)), float(np.mean(ni_arr)),
+                               float(np.mean(oracle_arr))).value
 
         sivr_vals = [r.sivr for r in sensor_rows]
         belief_corrects = [r.belief_correct for r in sensor_rows]
@@ -391,9 +391,10 @@ def _compute_and_save(rows, seeds, templates):
         beliefs = []
         for r in sensor_rows:
             true = r.regime
-            b = r.belief_normal if true == "normal" else r.belief_surge
-            beliefs.append(b)
-        brier_scores[sensor] = float(np.mean([(1 - b) ** 2 for b in beliefs])) if beliefs else 0.0
+            probs = {"normal": r.belief_normal, "demand_surge": r.belief_surge}
+            beliefs.append(standard_brier_score(probs, true,
+                                                 class_order=["normal", "demand_surge"]))
+        brier_scores[sensor] = float(np.mean(beliefs)) if beliefs else 0.0
         print(f"  {sensor:25s} Brier={brier_scores[sensor]:.4f}")
 
     _save_csv(
@@ -547,7 +548,7 @@ def _compute_and_save(rows, seeds, templates):
         "fill_rate_formula": "sum(retail_sales_S[:,retail_link]) / sum(customer_demand_D)",
         "paper1_version": "0.1.0",
         "paper1_commit": "a745fd5186a73d177dd94d283a4f8f8e8d329977",
-        "paper1_source": "/Users/sanamimani/Paper 1/final-github-clean/gym-invmgmt-paper",
+        "paper1_source": "third_party/gym-invmgmt-paper (Paper-1 commit a745fd5)",
         "tfidf_raw_model": "results/phase7_classical_baseline/tfidf_logreg_model.pkl",
         "tfidf_calibrated_model": "results/phase7_classical_baseline/tfidf_logreg_calibrated_model.pkl",
         "controller_mapping": "effective_mu = base_mu * (1 + P(surge) * (surge_multiplier - 1))",

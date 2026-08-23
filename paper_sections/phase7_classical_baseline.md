@@ -23,7 +23,7 @@ TF-IDF vectorization (max_features=500, ngram_range=(1,2), sublinear_tf=True) fo
 | Brier | 0.552 | 0.240 |
 | LogLoss | 0.932 | 0.397 |
 
-## Operational Results (Phase 7)
+## Operational Results (Phase 7; corrected signed-SIVR recomputation)
 
 | Sensor | AggregateSIVR |
 |--------|-------------:|
@@ -36,4 +36,9 @@ TF-IDF vectorization (max_features=500, ngram_range=(1,2), sublinear_tf=True) fo
 
 ## Key Finding
 
-Calibration transforms the classical baseline from a weak operational performer into a competitive one. The calibrated model achieves AggregateSIVR = 0.648 despite lower classification accuracy than the raw model (86.1% vs 88.9%). This demonstrates that classification accuracy alone does not predict downstream operational value.
+Calibration transforms the classical baseline from a weak operational performer
+into a competitive one. The calibrated model achieves AggregateSIVR = 0.648
+despite lower classification accuracy than the raw model (86.1% vs 88.9%).
+This demonstrates that classification accuracy alone does not predict
+downstream operational value. Raw reward deltas and conventional multiclass
+Brier scores are the primary evidence; SIVR is a secondary normalization.

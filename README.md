@@ -16,8 +16,8 @@ The framework separates perception (interpreting text) from control (making deci
 
 ## Key Metrics
 
-- **OIV (Oracle Information Value):** Maximum value achievable through perfect semantic interpretation
-- **SIVR (Semantic Information Value Recovery):** Fraction of oracle value recovered by a given sensor
+- **OIV (Oracle Information Value):** Reward difference between Oracle-Belief Reference and NoInfo under the same fixed controller
+- **SIVR (Semantic Information Value Recovery):** Signed secondary normalization of raw reward delta; undefined near zero OIV and diagnostic-only when OIV is negative
 - **Semantic Regret:** Operational value lost due to imperfect interpretation
 
 ## Environments
@@ -44,8 +44,8 @@ Multi-echelon supply chain (`gym-invmgmt` v0.1.0). 2 regimes (Normal, DemandSurg
 
 ## Key Findings
 
-1. Semantic information has measurable operational value (all sensors SIVR > 0, CIs exclude zero)
-2. Classification accuracy does not determine operational value (TFIDF_Raw: 88.9% acc, 0.250 SIVR vs TFIDF_Calibrated: 86.1% acc, 0.648 SIVR)
+1. Semantic beliefs can alter downstream reward, but realized value depends on calibration, the fixed controller, and system dynamics
+2. Classification accuracy does not determine operational value; the corrected Phase-7 calibration and Phase-8B reward tables report this directly
 3. Probability calibration materially changes downstream value
 4. The phenomenon survives transfer to a richer multi-echelon supply chain
 
@@ -79,7 +79,7 @@ python3 -m benchmark.run --experiment controlled --sensor gpt4o --live
 │   ├── gym_adapter.py            # Paper-1 Gymnasium adapter
 │   ├── confirmation_templates.py # Held-out templates
 │   └── experiment_phase*.py      # Experiment runners
-├── tests/                        # 244 tests (all passing)
+├── tests/                        # deterministic benchmark and correction tests
 ├── results/                      # Frozen experimental results
 │   ├── phase5/                   # Controlled benchmark (original)
 │   ├── phase5_5/                 # Real-LLM evaluation

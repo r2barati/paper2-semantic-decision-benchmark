@@ -1,27 +1,46 @@
-# Results Summary
+# Corrected Results Summary
 
-## Primary Claims and Supporting Evidence
+The corrected analysis treats balanced performance over the deliberately
+constructed evaluation set as the primary benchmark estimand. Expected value
+under the declared deployment prior is secondary. All reward comparisons are
+paired and use the regime-stratified family/variant/seed bootstrap; simultaneous
+sensor comparisons in Phase 8B and Phase 9A use Holm adjustment. Phase 9B is
+descriptive robustness/boundary evidence.
 
-### Claim 1: Semantic information has measurable operational value
+## Defensible findings
 
-**Evidence:** All imperfect semantic sensors achieve SIVR > 0 with hierarchical bootstrap CIs excluding zero (Phase 8B: all four sensors significant vs NoInfo).
+- In Phase 7, calibrated TF-IDF has lower conventional multiclass Brier score
+  than raw TF-IDF (0.240 vs 0.552) and lower log-loss (0.397 vs 0.932), while
+  raw TF-IDF has higher accuracy (0.889 vs 0.861). This calibration result
+  remains supported.
+- In balanced Phase 8B, all four non-reference sensors have positive raw reward
+  deltas versus NoInfo: approximately 101.0 (RuleBased), 48.5 (raw TF-IDF),
+  70.8 (calibrated TF-IDF), and 67.1 (gpt-4o). The held-out
+  linguistic/operational-complexity result remains, but it is a realized effect
+  under the fixed controller.
+- The corrected Phase 8B SIVRs are 1.198, 0.575, 0.841, and 0.797 for
+  RuleBased, raw TF-IDF, calibrated TF-IDF, and gpt-4o, respectively, under
+  the balanced estimand. These are secondary normalizations; RuleBased
+  exceeding one is permitted because OracleSemantic is not an upper bound.
+- Phase 9A establishes cross-event operational transfer. It does not by itself
+  establish clean linguistic generalization because the original evaluation
+  includes TF-IDF training templates. The test-template-only analysis is
+  reported separately when supported by saved episodes.
+- Phase 9B establishes robustness and boundary behavior of the fixed
+  belief-to-control mapping. `long_lead` and `lost_sales` are not automatically
+  semantic-sensing failures: the audit separately reports oracle-vs-NoInfo
+  reward, sensor deltas, and signed OIV status.
 
-### Claim 2: Imperfect semantic systems recover different fractions of oracle value
+## Interpretation boundary
 
-**Evidence:** SIVR ranges from 0.575 (TFIDF_Raw) to 1.198 (RuleBased) in Phase 8B, and from -0.206 (gpt-3.5-turbo) to 0.767 (gpt-4o) in Phase 7.
+The evidence supports the narrower claim that semantic classification accuracy
+alone does not determine operational decision value. Realized value depends
+jointly on belief quality, probability calibration, the downstream
+belief-to-control mapping, and operational system dynamics. It does not
+establish LLM superiority, universal semantic information value,
+controller-independent value, industrial deployment effectiveness, arbitrary
+event/topology generalization, or universal SIVR robustness.
 
-### Claim 3: Classification accuracy alone does not determine operational value
-
-**Evidence:** TFIDF_Raw has higher held-out accuracy than TFIDF_Calibrated (88.9% vs 86.1%) but lower SIVR in both Phase 7 (0.250 vs 0.648) and Phase 8B (0.575 vs 0.841).
-
-### Claim 4: Probability calibration materially changes downstream value
-
-**Evidence:** Calibration improves SIVR by +0.398 in Phase 7 and +0.266 in Phase 8B, despite reducing classification accuracy.
-
-### Claim 5: Conventional NLP can outperform LLMs in some settings
-
-**Evidence:** In Phase 8B, TFIDF_Calibrated (0.841) outperforms gpt-4o (0.797) in SIVR despite gpt-4o having better belief quality metrics (Brier: 0.033 vs 0.046).
-
-### Claim 6: The phenomenon survives transfer to richer operational dynamics
-
-**Evidence:** Phase 8B (Paper-1 Gymnasium) shows the same qualitative patterns as Phase 7 (controlled benchmark): all sensors achieve SIVR > 0, calibration helps, accuracy ≠ value.
+Corrected tables are generated from frozen episode CSVs by
+`results/publication/generate_corrected_tables.py`; historical Phase 7/8/9
+reports remain unchanged for provenance.

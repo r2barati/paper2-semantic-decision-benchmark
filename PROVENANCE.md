@@ -1,7 +1,7 @@
 # Provenance
 
 ## Source
-- **Original project**: `/Users/sanamimani/paper2_semantic_decision_mvp`
+- **Original project**: Paper 2 semantic decision benchmark (repository-local provenance)
 - **Copy date**: 2026-08-22
 - **Source commit**: N/A (no git repo in source)
 - **Destination commit**: `77c8447` (Initial import)

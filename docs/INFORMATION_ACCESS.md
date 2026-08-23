@@ -16,6 +16,10 @@ Warning Text
 
 **Critical:** LLMs, classifiers, and rule-based extractors do NOT directly control inventory actions. They only produce probabilistic beliefs that the fixed controller converts to actions.
 
+`OracleSemantic` (also called the Oracle Semantic Belief reference) supplies
+perfect semantic regime belief to that same fixed controller. It is not an
+optimal policy, hindsight oracle, or guaranteed upper bound on reward.
+
 ## Information Access Table
 
 ### Controlled Benchmark (Experiment A)

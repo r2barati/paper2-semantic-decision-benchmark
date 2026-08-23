@@ -1,0 +1,7 @@
+sensor,brier_score
+NoInfo,0.25
+RuleBased,0.16372448979591842
+TFIDF_LogReg_Raw,0.20317490745735137
+TFIDF_LogReg_Calibrated,0.4179996326053817
+gpt-4o,0.386875
+OracleSemantic,0.0

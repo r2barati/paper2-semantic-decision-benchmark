@@ -42,7 +42,7 @@ from src.interpreter import (
     RegimeInterpretation, no_info_regime_belief, perfect_semantic_regime_belief,
     rule_based_regime_extract, llm_regime_interpret_with_result, load_dotenv,
 )
-from src.metrics import compute_episode_metrics, information_value
+from src.metrics import compute_episode_metrics, information_value, signed_sivr
 
 # Results directory
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results" / "phase5"
@@ -473,8 +473,7 @@ def run_semantic_sensor_evaluation(
             ni_profit = no_info_by_regime.get(regime.value, 0.0)
             ps_profit = perfect_by_regime.get(regime.value, 0.0)
             sensor_profit = np.mean(sensor_results[sensor][regime.value]) if sensor_results[sensor][regime.value] else 0.0
-            denom = ps_profit - ni_profit
-            sivr = (sensor_profit - ni_profit) / denom if abs(denom) > 1e-9 else 0.0
+            sivr = signed_sivr(sensor_profit, ni_profit, ps_profit).value
 
             sivr_results.append({
                 "sensor": sensor,

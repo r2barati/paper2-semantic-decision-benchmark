@@ -1,0 +1,9 @@
+sensor,vs_sensor,mean_diff,ci_lower,ci_upper,significant,ci_type
+RuleBased,NoInfo,100.97484740008336,54.294036967139334,148.10642282035172,True,hierarchical_template_seed
+TFIDF_LogReg_Raw,NoInfo,48.48372313431445,26.683111615276953,70.90864674585345,True,hierarchical_template_seed
+TFIDF_LogReg_Calibrated,NoInfo,70.84535289625327,25.83917895307914,117.8257298528167,True,hierarchical_template_seed
+gpt-4o,NoInfo,67.1207407509789,18.382444761307696,118.42305304122863,True,hierarchical_template_seed
+RuleBased,NoInfo,100.97484740008336,92.53578051750422,109.2967786435056,True,seed_level_flat
+TFIDF_LogReg_Raw,NoInfo,48.48372313431445,44.450060571242545,52.443774131082726,True,seed_level_flat
+TFIDF_LogReg_Calibrated,NoInfo,70.84535289625327,62.15512103613214,79.4506120418704,True,seed_level_flat
+gpt-4o,NoInfo,67.1207407509789,57.98336841816252,76.07472326928368,True,seed_level_flat

@@ -1,0 +1,12 @@
+template_id,ambiguity_level,ps_mean_profit,awo_mean_profit,ps_mean_fill_rate,awo_mean_fill_rate,ps_mean_lost_sales,awo_mean_lost_sales,ps_mean_avg_inventory,awo_mean_avg_inventory,ps_mean_stockout_periods,awo_mean_stockout_periods
+clear_1,clear,512.27,739.47,0.6588,0.7763,108.7,71.3,3.82,13.25,21.9,14.3
+clear_2,clear,512.27,739.47,0.6588,0.7763,108.7,71.3,3.82,13.25,21.9,14.3
+clear_3,clear,512.27,739.47,0.6588,0.7763,108.7,71.3,3.82,13.25,21.9,14.3
+moderate_1,moderate,512.27,777.40,0.6588,0.7495,108.7,79.9,3.82,9.00,21.9,15.9
+moderate_2,moderate,512.27,777.40,0.6588,0.7495,108.7,79.9,3.82,9.00,21.9,15.9
+moderate_3,moderate,512.27,582.13,0.6588,0.6867,108.7,99.9,3.82,5.68,21.9,18.7
+moderate_4,moderate,512.27,706.27,0.6588,0.7600,108.7,76.4,3.82,12.25,21.9,15.5
+vague_1,vague,512.27,799.13,0.6588,0.7327,108.7,85.3,3.82,6.01,21.9,17.5
+vague_2,vague,512.27,582.13,0.6588,0.6867,108.7,99.9,3.82,5.68,21.9,18.7
+vague_3,vague,512.27,582.13,0.6588,0.6867,108.7,99.9,3.82,5.68,21.9,18.7
+vague_4,vague,512.27,622.47,0.6588,0.7152,108.7,90.9,3.82,8.29,21.9,17.7

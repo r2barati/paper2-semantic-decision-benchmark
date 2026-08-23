@@ -16,12 +16,17 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
+import os
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
-PAPER1_PATH = Path("/Users/sanamimani/Paper 1/final-github-clean/gym-invmgmt-paper")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+PAPER1_PATH = Path(os.environ.get(
+    "GYM_INVMGMT_PATH",
+    REPO_ROOT / "third_party" / "gym-invmgmt-paper",
+))
 if str(PAPER1_PATH) not in sys.path:
     sys.path.insert(0, str(PAPER1_PATH))
 

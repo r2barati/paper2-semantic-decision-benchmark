@@ -1,0 +1,18 @@
+{
+  "analysis": "post_correction_recomputed_from_frozen_raw_episode_csvs",
+  "new_simulations": 0,
+  "primary_estimand": "balanced_benchmark",
+  "secondary_estimand": "deployment_prior",
+  "sivr": "src.metrics.signed_sivr; signed denominator; NaN for near-zero OIV",
+  "bootstrap": "src.metrics.family_seed_bootstrap_ci; regime -> family -> variant -> paired seed",
+  "brier": "standard multiclass sum_k_(p_k-y_k)^2",
+  "phase9a_test_template_ids": [
+    "cd_clear_3",
+    "cd_moderate_2",
+    "cd_vague_1",
+    "cd_vague_2",
+    "cd_vague_3",
+    "cn_moderate_2",
+    "cn_vague_2"
+  ]
+}

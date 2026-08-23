@@ -39,6 +39,7 @@ from src.interpreter import (
 )
 from src.experiment_phase5 import _run_p5_episode
 from src.confirmation_templates import CONFIRMATION_TEMPLATES
+from src.metrics import signed_sivr, standard_brier_score
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results" / "phase6"
 
@@ -58,12 +59,10 @@ def compute_paired_comparison_count(num_comparison_sensors, num_seeds, num_regim
     return num_comparison_sensors * num_seeds * num_regimes
 
 def brier_score(predicted, true_regime):
-    score = 0.0
-    for regime in ["normal", "supplier_delay", "demand_surge"]:
-        observed = 1.0 if regime == true_regime else 0.0
-        prob = predicted.get(regime, 1.0 / 3)
-        score += (prob - observed) ** 2
-    return score
+    return standard_brier_score(
+        predicted, true_regime,
+        class_order=["normal", "supplier_delay", "demand_surge"],
+    )
 
 def log_loss_safe(predicted, true_regime, eps=1e-10):
     prob = max(predicted.get(true_regime, eps), eps)
@@ -71,10 +70,8 @@ def log_loss_safe(predicted, true_regime, eps=1e-10):
 
 def aggregate_sivr(sensor_profits, ni_profits, ps_profits):
     num = np.sum(sensor_profits - ni_profits)
-    denom = np.sum(ps_profits - ni_profits)
-    if abs(denom) < 1e-9:
-        return 0.0
-    return float(num / denom)
+    return signed_sivr(float(np.mean(sensor_profits)), float(np.mean(ni_profits)),
+                       float(np.mean(ps_profits))).value
 
 def macro_sivr(sivr_values):
     if not sivr_values:
@@ -376,8 +373,7 @@ def run_confirmation_experiment(
             sensor_mean = float(np.mean(all_sensor_profits)) if all_sensor_profits else 0.0
             ni_mean = ni_means[regime.value]
             ps_mean = ps_means[regime.value]
-            denom = ps_mean - ni_mean
-            overall_sivr = (sensor_mean - ni_mean) / denom if abs(denom) > 1e-9 else 0.0
+            overall_sivr = signed_sivr(sensor_mean, ni_mean, ps_mean).value
 
             sivr_rows.append({
                 "sensor": sensor, "regime": regime.value,
@@ -411,10 +407,10 @@ def run_confirmation_experiment(
             sensor_mean = float(np.mean(sensor_profits))
             ni_mean = float(np.mean(all_ni))
             ps_mean = float(np.mean(all_ps))
-            oiv = ps_mean - ni_mean
             rov = sensor_mean - ni_mean
             sr = ps_mean - sensor_mean
-            sivr = rov / oiv if abs(oiv) > 1e-9 else 0.0
+            sivr = signed_sivr(sensor_mean, ni_mean, ps_mean).value
+            oiv = ps_mean - ni_mean
 
             sivr_ambig_rows.append({
                 "sensor": sensor, "ambiguity_level": alevel,

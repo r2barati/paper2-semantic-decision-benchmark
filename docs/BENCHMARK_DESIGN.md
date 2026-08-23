@@ -22,9 +22,9 @@ Isolate the causal relationship between semantic belief quality and sequential o
 - **SupplierDelay:** Lead time increase at t~18
 - **DemandSurge:** Not used in Experiment A
 
-### Regime Prior
-- P(Normal) = 0.70
-- P(SupplierDelay) = 0.30
+### Declared Regime Prior
+- `REGIME_PRIOR`: Normal 0.35, SupplierDelay 0.35, DemandSurge 0.30.
+- The corrected primary estimate is balanced over the constructed evaluation set; the prior-weighted estimate is secondary.
 
 ### Controllers
 - **Heuristic policy:** Threshold-based disruption-aware controller (fixed)
@@ -73,9 +73,9 @@ Test whether the semantic-value phenomenon survives transfer to a richer multi-e
 - **Normal:** No disruption (base_mu=10.0 throughout)
 - **DemandSurge:** Demand shock at t=15 (base_mu=20.0 from t=15 onward)
 
-### Regime Prior
-- P(Normal) = 0.70
-- P(DemandSurge) = 0.30
+### Declared NoInfo Prior
+- Phase 8B NoInfo code uses P(Normal)=0.70 and P(DemandSurge)=0.30.
+- The frozen Phase-8B set contains 12 Normal and 12 DemandSurge templates, so the primary benchmark estimate is balanced 50/50; the 70/30 result is reported separately.
 
 ### Controller
 - **BeliefAdaptiveController:** Base-stock order-up-to policy
@@ -83,6 +83,10 @@ Test whether the semantic-value phenomenon survives transfer to a richer multi-e
   - target = effective_mu × avg_lead_time + safety_factor × sqrt(avg_lt × effective_mu)
   - order = max(0, target - inventory_position)
 - Fixed across all conditions (isolate belief quality)
+
+`OracleSemantic` means perfect semantic belief passed through this same fixed
+controller. It is not an optimal policy, hindsight oracle, or guaranteed upper
+bound on reward.
 
 ### Interpreters/Sensors
 - NoInfo (prior only)
@@ -103,7 +107,7 @@ Test whether the semantic-value phenomenon survives transfer to a richer multi-e
 ### Validity Controls
 - Held-out linguistic templates (24, never seen during TF-IDF training)
 - Disjoint seed set (3100–3129, never used in any prior experiment)
-- Hierarchical bootstrap CI (template-family × seed resampling)
+- Regime-stratified hierarchical bootstrap CI (family × variant × paired seed)
 - Corrected fill rate (retail sales, not replenishment orders)
 - Frozen operational config (no retuning based on Phase-8B results)
 
@@ -116,6 +120,21 @@ Test whether the semantic-value phenomenon survives transfer to a richer multi-e
 - Terminology: "operational-complexity transfer / replication" (not "exact replication")
 
 ---
+
+## Estimands and evidence taxonomy
+
+The primary benchmark estimand is balanced performance over the constructed
+evaluation set: equal regime weight, then equal template family, variant, and
+paired seed weight. The secondary deployment-prior estimand applies the prior
+actually declared or passed to NoInfo. These quantities are reported
+separately.
+
+Phase 8B is evidence for held-out linguistic generalization and
+operational-complexity replication. Phase 9A is evidence for cross-event
+operational transfer; its original evaluation includes training templates, so
+the test-template-only subset is the clean linguistic analysis. Phase 9B is a
+descriptive robustness/boundary analysis of the fixed controller, not proof of
+broad arbitrary-event or arbitrary-topology generalization.
 
 ## Experimental Hierarchy
 

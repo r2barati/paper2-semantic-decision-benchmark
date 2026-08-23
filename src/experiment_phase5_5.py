@@ -38,7 +38,9 @@ from src.interpreter import (
     rule_based_regime_extract, llm_regime_interpret_with_result, load_dotenv,
     EXTRACTION_PROMPT,
 )
-from src.metrics import compute_episode_metrics, information_value
+from src.metrics import (
+    compute_episode_metrics, information_value, signed_sivr, standard_brier_score,
+)
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results" / "phase5_5"
 
@@ -108,12 +110,10 @@ def compute_frozen_manifest() -> dict:
 
 def brier_score(predicted: dict[str, float], true_regime: str) -> float:
     """Brier score for a single prediction (lower is better)."""
-    score = 0.0
-    for regime in ["normal", "supplier_delay", "demand_surge"]:
-        observed = 1.0 if regime == true_regime else 0.0
-        prob = predicted.get(regime, 1.0 / 3)
-        score += (prob - observed) ** 2
-    return score
+    return standard_brier_score(
+        predicted, true_regime,
+        class_order=["normal", "supplier_delay", "demand_surge"],
+    )
 
 
 def log_loss_safe(predicted: dict[str, float], true_regime: str, eps: float = 1e-10) -> float:
@@ -324,8 +324,7 @@ def run_phase5_5(
             sensor_mean = np.mean(sensor_profits)
             ni_mean = ni_means[regime.value]
             ps_mean = ps_means[regime.value]
-            denom = ps_mean - ni_mean
-            sivr = (sensor_mean - ni_mean) / denom if abs(denom) > 1e-9 else 0.0
+            sivr = signed_sivr(sensor_mean, ni_mean, ps_mean).value
 
             sivr_rows.append({
                 "sensor": sensor, "regime": regime.value,
@@ -349,8 +348,8 @@ def run_phase5_5(
             if not sensor_profits or not all_ni or not all_ps:
                 continue
             sensor_mean = np.mean(sensor_profits)
-            denom = np.mean(all_ps) - np.mean(all_ni)
-            sivr = (sensor_mean - np.mean(all_ni)) / denom if abs(denom) > 1e-9 else 0.0
+            sivr = signed_sivr(sensor_mean, float(np.mean(all_ni)),
+                               float(np.mean(all_ps))).value
 
             sivr_ambig_rows.append({
                 "sensor": sensor, "ambiguity_level": alevel,

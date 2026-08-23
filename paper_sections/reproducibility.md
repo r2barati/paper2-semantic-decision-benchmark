@@ -5,7 +5,8 @@
 ```bash
 pip install -r requirements.txt
 pip install gymnasium
-pip install -e "Paper 1/final-github-clean/gym-invmgmt-paper"
+python3 -m pip install -r requirements.lock
+# Paper-1 gym-invmgmt is vendored at third_party/gym-invmgmt-paper (a745fd5).
 ```
 
 ## Offline Reproduction

@@ -1,0 +1,6 @@
+{
+  "event_type": "supply_disruption",
+  "probability": 0.5,
+  "estimated_lead_time_increase": 2,
+  "estimated_duration": 7
+}

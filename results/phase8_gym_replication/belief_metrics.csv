@@ -1,0 +1,6 @@
+sensor,brier_score
+NoInfo,0.29000000000000004
+RuleBased,0.08913076341647773
+TFIDF_LogReg,0.0
+gpt-4o,0.016023432204921136
+PerfectSemantic,0.0

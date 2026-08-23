@@ -12,7 +12,7 @@
 
 ## Publication Packaging — DONE
 
-- [x] Full test audit: 244 tests, all passing (FINAL_TEST_AUDIT.md)
+- [x] Full test audit: current count is reported by pytest after correction pass
 - [x] Scientific ledger (SCIENTIFIC_LEDGER.md)
 - [x] Metrics documentation (docs/METRICS.md)
 - [x] Information-access audit (docs/INFORMATION_ACCESS.md)
@@ -29,4 +29,6 @@
 ## Repository Status
 
 **Benchmark frozen: paper2-benchmark-v1.0**
-244 tests passing. No further experiments required before manuscript preparation/submission.
+Historical audit results remain preserved. The post-correction paper-readiness
+verdict is authoritative; no new simulation is justified merely to recover old
+headline numbers.

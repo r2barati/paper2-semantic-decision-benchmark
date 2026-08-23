@@ -1,0 +1,7 @@
+sensor,template_source,ece,num_bins
+NoInfo,confirmation,0.01666666666666672,1
+RuleBased,confirmation,0.20423040359519484,3
+PerfectSemantic,confirmation,0.0,0
+LLM:gpt-4o-mini,confirmation,0.1736111111111111,3
+LLM:gpt-4o,confirmation,0.17352941176470577,3
+LLM:gpt-3.5-turbo,confirmation,0.6038461538461538,3

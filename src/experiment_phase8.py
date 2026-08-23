@@ -62,6 +62,7 @@ from src.experiment_phase6 import (
     paired_bootstrap_ci,
     brier_score,
 )
+from src.metrics import signed_sivr, standard_brier_score
 
 RESULTS_DIR = ROOT / "results" / "phase8_gym_replication"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -257,9 +258,8 @@ def _compute_and_save(rows, seeds, templates, base_mu, shock_mag):
         key = (r.seed, r.regime, r.template_id)
         ni = ni_rewards.get(key, 0.0)
         ps = ps_rewards.get(key, 0.0)
-        denom = ps - ni if abs(ps - ni) > 1e-9 else 1.0
         r.oiv = ps - ni
-        r.sivr = (r.total_reward - ni) / abs(denom) if abs(denom) > 1e-9 else 0.0
+        r.sivr = signed_sivr(r.total_reward, ni, ps).value
 
     operational_rows = [asdict(r) for r in rows]
     _save_csv(operational_rows, RESULTS_DIR / "operational_results.csv")
@@ -308,9 +308,11 @@ def _compute_and_save(rows, seeds, templates, base_mu, shock_mag):
         beliefs = []
         for r in sensor_rows:
             true = r.regime
-            b = r.belief_normal if true == "normal" else r.belief_surge
-            beliefs.append(b)
-        brier_scores[sensor] = float(np.mean([(1 - b) ** 2 for b in beliefs])) if beliefs else 0.0
+            probs = {"normal": r.belief_normal, "demand_surge": r.belief_surge}
+            beliefs.append(standard_brier_score(
+                probs, true, class_order=["normal", "demand_surge"],
+            ))
+        brier_scores[sensor] = float(np.mean(beliefs)) if beliefs else 0.0
 
     _save_csv(
         [{"sensor": s, "brier_score": b} for s, b in brier_scores.items()],

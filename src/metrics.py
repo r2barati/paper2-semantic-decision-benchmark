@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Dict, Mapping, Optional
 
 from src.env import InventoryState, DEMAND_MEAN, HORIZON
 
@@ -85,6 +85,145 @@ def compute_episode_metrics(
     return m
 
 
+# ---------------------------------------------------------------------------
+# Authoritative semantic-value metrics
+# ---------------------------------------------------------------------------
+
+SIVR_VALID = "VALID"
+SIVR_ZERO_OR_NEAR_ZERO_REFERENCE_VALUE = "ZERO_OR_NEAR_ZERO_REFERENCE_VALUE"
+SIVR_NEGATIVE_ORACLE_REFERENCE_VALUE = "NEGATIVE_ORACLE_REFERENCE_VALUE"
+
+
+@dataclass(frozen=True)
+class SIVRResult:
+    """Signed SIVR together with the reference-value status.
+
+    OracleSemantic is a fixed-controller semantic reference, not an upper
+    bound on reward.  Consequently the denominator is signed and a negative
+    oracle information value is explicitly marked rather than normalized
+    with ``abs``.
+    """
+
+    value: float
+    oiv: float
+    status: str
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {"sivr": self.value, "oiv": self.oiv, "status": self.status}
+
+
+def signed_sivr(
+    j_condition: float,
+    j_no_info: float,
+    j_oracle_semantic: float,
+    epsilon: float = 1e-9,
+) -> SIVRResult:
+    """Compute the canonical signed SIVR.
+
+    If the oracle reference value is zero or numerically negligible, SIVR is
+    undefined and returned as NaN.  If the oracle reference is negative, the
+    signed diagnostic is returned but marked as unsuitable for an
+    information-value-recovery interpretation.
+    """
+
+    oiv = float(j_oracle_semantic - j_no_info)
+    if abs(oiv) <= epsilon:
+        return SIVRResult(float("nan"), oiv, SIVR_ZERO_OR_NEAR_ZERO_REFERENCE_VALUE)
+    status = SIVR_VALID if oiv > 0 else SIVR_NEGATIVE_ORACLE_REFERENCE_VALUE
+    return SIVRResult(float((j_condition - j_no_info) / oiv), oiv, status)
+
+
+def standard_brier_score(
+    probabilities: Mapping[str, float],
+    true_label: str,
+    class_order: Optional[list] = None,
+) -> float:
+    """Return the conventional multiclass Brier score.
+
+    This is ``sum_k (p_k - y_k)^2`` over the supplied class order.  Missing
+    classes receive probability zero, and the result is not the older
+    true-class-only squared error used by some historical runners.
+    """
+
+    classes = list(class_order) if class_order is not None else sorted(probabilities)
+    return float(sum((float(probabilities.get(c, 0.0)) - (1.0 if c == true_label else 0.0)) ** 2
+                     for c in classes))
+
+
+def family_seed_bootstrap_ci(
+    diffs_by_regime_family_variant: Mapping[str, Mapping[str, Mapping[str, np.ndarray]]],
+    regime_weights: Optional[Mapping[str, float]] = None,
+    n_boot: int = 5000,
+    alpha: float = 0.05,
+    seed: int = 42,
+) -> Dict[str, Any]:
+    """Bootstrap paired effects at the regime/family/variant/seed hierarchy.
+
+    Within each regime, template families are sampled with replacement.  For
+    every sampled family, its observed variant count is retained while
+    variants are sampled with replacement; paired seeds are then sampled with
+    replacement within each selected variant.  Regime means are combined with
+    explicit weights, giving separate balanced and deployment-prior
+    estimands without changing the frozen episodes.
+    """
+
+    regimes = sorted(diffs_by_regime_family_variant)
+    if not regimes:
+        raise ValueError("At least one regime is required")
+    if regime_weights is None:
+        weights = {r: 1.0 / len(regimes) for r in regimes}
+    else:
+        raw = {r: float(regime_weights.get(r, 0.0)) for r in regimes}
+        total = sum(raw.values())
+        if total <= 0:
+            raise ValueError("Regime weights must have positive mass")
+        weights = {r: raw[r] / total for r in regimes}
+
+    def point_regime_mean(regime: str) -> float:
+        family_means = []
+        for family in sorted(diffs_by_regime_family_variant[regime]):
+            variant_means = [float(np.mean(np.asarray(values, dtype=float)))
+                             for values in diffs_by_regime_family_variant[regime][family].values()]
+            if variant_means:
+                family_means.append(float(np.mean(variant_means)))
+        if not family_means:
+            raise ValueError("Each regime must contain at least one family")
+        return float(np.mean(family_means))
+
+    point = float(sum(weights[r] * point_regime_mean(r) for r in regimes))
+    rng = np.random.default_rng(seed)
+    boot = np.empty(n_boot, dtype=float)
+    for b in range(n_boot):
+        regime_means = {}
+        for regime in regimes:
+            families = sorted(diffs_by_regime_family_variant[regime])
+            sampled_family_ids = rng.choice(families, size=len(families), replace=True)
+            sampled_family_means = []
+            for family in sampled_family_ids:
+                variants = sorted(diffs_by_regime_family_variant[regime][family])
+                sampled_variants = rng.choice(variants, size=len(variants), replace=True)
+                variant_means = []
+                for variant in sampled_variants:
+                    values = np.asarray(diffs_by_regime_family_variant[regime][family][variant], dtype=float)
+                    if values.size == 0:
+                        continue
+                    sampled_values = values[rng.integers(0, values.size, size=values.size)]
+                    variant_means.append(float(np.mean(sampled_values)))
+                sampled_family_means.append(float(np.mean(variant_means)))
+            regime_means[regime] = float(np.mean(sampled_family_means))
+        boot[b] = sum(weights[r] * regime_means[r] for r in regimes)
+
+    return {
+        "mean": point,
+        "ci_lower": float(np.percentile(boot, 100 * alpha / 2)),
+        "ci_upper": float(np.percentile(boot, 100 * (1 - alpha / 2))),
+        "bootstrap_samples": boot,
+        "regime_weights": weights,
+        "bootstrap_seed": seed,
+        "bootstrap_hierarchy": "regime -> template_family -> variant -> paired_seed",
+    }
+
+
 def information_value(
     j_condition: float,
     j_no_info: float,
@@ -98,10 +237,7 @@ def information_value(
     NOT HindsightOracle. This isolates the value of semantic interpretation quality.
     Returns 0.0 if PerfectSemantic provides no gain (denominator near zero).
     """
-    denom = j_perfect_semantic - j_no_info
-    if abs(denom) < 1e-9:
-        return 0.0
-    return (j_condition - j_no_info) / denom
+    return signed_sivr(j_condition, j_no_info, j_perfect_semantic).value
 
 
 def regret_to_perfect_semantic(j_condition: float, j_perfect_semantic: float) -> float:

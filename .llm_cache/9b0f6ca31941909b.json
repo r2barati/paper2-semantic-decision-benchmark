@@ -1,0 +1,10 @@
+{
+  "regime_probabilities": {
+    "normal": 0.95,
+    "supplier_delay": 0.03,
+    "demand_surge": 0.02
+  },
+  "estimated_lt_increase": 0,
+  "estimated_duration": 0,
+  "estimated_demand_multiplier": 1.0
+}

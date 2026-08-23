@@ -1,0 +1,14 @@
+sensor,template_source,bin_lo,bin_hi,mean_confidence,mean_accuracy,count
+NoInfo,confirmation,0.2,0.4,0.35000000000000003,0.3333333333333333,720
+RuleBased,confirmation,0.2,0.4,0.3500000000000001,0.4,100
+RuleBased,confirmation,0.4,0.6000000000000001,0.49905582922824304,0.75,240
+RuleBased,confirmation,0.6000000000000001,0.8,0.6904761904761905,1.0,40
+LLM:gpt-4o-mini,confirmation,0.4,0.6000000000000001,0.5874999999999999,0.125,160
+LLM:gpt-4o-mini,confirmation,0.6000000000000001,0.8,0.7,0.7,200
+LLM:gpt-4o-mini,confirmation,0.8,1.0,0.8583333333333333,1.0,360
+LLM:gpt-4o,confirmation,0.4,0.6000000000000001,0.5999999999999999,1.0,20
+LLM:gpt-4o,confirmation,0.6000000000000001,0.8,0.6999999999999998,0.5,120
+LLM:gpt-4o,confirmation,0.8,1.0,0.8650000000000001,1.0,200
+LLM:gpt-3.5-turbo,confirmation,0.4,0.6000000000000001,0.6,0.5,40
+LLM:gpt-3.5-turbo,confirmation,0.6000000000000001,0.8,0.7,0.0,380
+LLM:gpt-3.5-turbo,confirmation,0.8,1.0,0.84,0.4,100

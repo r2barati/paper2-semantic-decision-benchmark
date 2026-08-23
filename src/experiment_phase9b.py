@@ -53,6 +53,7 @@ from src.experiment_phase9a import (
     hierarchical_paired_bootstrap,
     _rulebased_probs_9,
 )
+from src.metrics import signed_sivr, standard_brier_score
 
 ROBUSTNESS_DIR = ROOT / "results" / "phase9b_robustness"
 ROBUSTNESS_DIR.mkdir(parents=True, exist_ok=True)
@@ -248,8 +249,7 @@ def _compute_variant_metrics(rows, variant_name, variant_dir):
         ni = ni_rewards.get(key, 0.0)
         oracle = oracle_rewards.get(key, 0.0)
         r.oiv = oracle - ni
-        denom = oracle - ni
-        r.sivr = (r.total_reward - ni) / abs(denom) if abs(denom) > 1e-9 else 0.0
+        r.sivr = signed_sivr(r.total_reward, ni, oracle).value
 
     _save_csv([asdict(r) for r in rows], variant_dir / "operational_results.csv")
 
@@ -262,9 +262,8 @@ def _compute_variant_metrics(rows, variant_name, variant_dir):
         ni_arr = np.array([ni_rewards.get((r.seed, r.template_id), 0.0) for r in s_rows])
         oracle_arr = np.array([oracle_rewards.get((r.seed, r.template_id), 0.0) for r in s_rows])
 
-        num = float(np.sum(rewards - ni_arr))
-        denom = float(np.sum(oracle_arr - ni_arr))
-        agg_sivr = num / abs(denom) if abs(denom) > 1e-9 else 0.0
+        agg_sivr = signed_sivr(float(np.mean(rewards)), float(np.mean(ni_arr)),
+                               float(np.mean(oracle_arr))).value
 
         sensor_agg[sensor] = {
             "sensor": sensor,
@@ -281,9 +280,13 @@ def _compute_variant_metrics(rows, variant_name, variant_dir):
         s_rows = [r for r in rows if r.sensor == sensor]
         beliefs = []
         for r in s_rows:
-            b = r.belief_normal if r.regime == "normal" else r.belief_capacity_drop
-            beliefs.append(b)
-        brier_scores[sensor] = float(np.mean([(1 - b) ** 2 for b in beliefs])) if beliefs else 0.0
+            probs = {"normal": r.belief_normal,
+                     "supplier_capacity_drop": r.belief_capacity_drop}
+            beliefs.append(standard_brier_score(
+                probs, r.regime,
+                class_order=["normal", "supplier_capacity_drop"],
+            ))
+        brier_scores[sensor] = float(np.mean(beliefs)) if beliefs else 0.0
     _save_csv(
         [{"sensor": s, "brier_score": b} for s, b in brier_scores.items()],
         variant_dir / "belief_metrics.csv",

@@ -1,6 +1,7 @@
 """Tests for the experiment runner."""
 
 import json
+import math
 from pathlib import Path
 import numpy as np
 
@@ -128,7 +129,7 @@ def test_information_value():
     assert information_value(1080, 1000, 1080) == 1.0
     assert information_value(1040, 1000, 1080) == 0.5
     assert information_value(1000, 1000, 1080) == 0.0
-    assert information_value(1000, 1000, 1000) == 0.0  # zero denominator
+    assert math.isnan(information_value(1000, 1000, 1000))  # zero denominator is undefined
 
 
 def test_regret_to_perfect_semantic():

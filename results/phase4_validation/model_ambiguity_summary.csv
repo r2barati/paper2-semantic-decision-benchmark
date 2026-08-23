@@ -1,0 +1,7 @@
+model,ambiguity_level,controller,mean_profit,sivr,mean_lt_error,mean_duration_error,n
+gpt-4o-mini,clear,Heuristic,97.66666666666667,0.0,0.0,0.0,9
+gpt-4o-mini,clear,CausalOptimizer,1590.0,0.0,0.0,0.0,9
+gpt-4o-mini,moderate,Heuristic,97.66666666666667,0.0,1.5,10.0,12
+gpt-4o-mini,moderate,CausalOptimizer,1590.0,0.0,1.5,10.0,12
+gpt-4o-mini,vague,Heuristic,97.66666666666667,0.0,3.25,6.25,12
+gpt-4o-mini,vague,CausalOptimizer,1590.0,0.0,3.25,6.25,12

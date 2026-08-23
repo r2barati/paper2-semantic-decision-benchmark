@@ -1,0 +1,70 @@
+{
+  "phase": "6",
+  "frozen": true,
+  "status": "CONFIRMATION (held-out)",
+  "created_before_evaluation": true,
+  "num_templates": 36,
+  "templates_per_regime": {
+    "demand_surge": 12,
+    "normal": 12,
+    "supplier_delay": 12
+  },
+  "templates_per_ambiguity": {
+    "clear": 12,
+    "moderate": 12,
+    "vague": 12
+  },
+  "regimes": [
+    "demand_surge",
+    "normal",
+    "supplier_delay"
+  ],
+  "ambiguity_levels": [
+    "clear",
+    "moderate",
+    "vague"
+  ],
+  "template_ids": [
+    "cd_clear_1",
+    "cd_clear_2",
+    "cd_clear_3",
+    "cd_clear_4",
+    "cd_moderate_1",
+    "cd_moderate_2",
+    "cd_moderate_3",
+    "cd_moderate_4",
+    "cd_vague_1",
+    "cd_vague_2",
+    "cd_vague_3",
+    "cd_vague_4",
+    "cn_clear_1",
+    "cn_clear_2",
+    "cn_clear_3",
+    "cn_clear_4",
+    "cn_moderate_1",
+    "cn_moderate_2",
+    "cn_moderate_3",
+    "cn_moderate_4",
+    "cn_vague_1",
+    "cn_vague_2",
+    "cn_vague_3",
+    "cn_vague_4",
+    "cs_clear_1",
+    "cs_clear_2",
+    "cs_clear_3",
+    "cs_clear_4",
+    "cs_moderate_1",
+    "cs_moderate_2",
+    "cs_moderate_3",
+    "cs_moderate_4",
+    "cs_vague_1",
+    "cs_vague_2",
+    "cs_vague_3",
+    "cs_vague_4"
+  ],
+  "template_hash": "6feb066d8ef25a35",
+  "template_manifest_hash": "66c1bcb3172b52dc",
+  "original_template_hash": "ad6c4eeaa4cc84e9",
+  "no_text_overlap_with_original": true,
+  "no_id_overlap_with_original": true
+}

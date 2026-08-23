@@ -6,7 +6,7 @@ We introduce a framework for evaluating the decision value of probabilistic sema
 
 ## Core Design Principle
 
-The central insight is the **perception-control separation**: semantic interpreters (LLMs, classifiers, rule-based systems) produce probabilistic beliefs about the state of the world, while operational controllers convert these beliefs into actions. By holding the controller fixed and varying only the interpreter, we isolate the operational value of semantic information quality.
+The central insight is the **perception-control separation**: semantic interpreters (LLMs, classifiers, rule-based systems) produce probabilistic beliefs about the state of the world, while operational controllers convert these beliefs into actions. By holding the controller fixed and varying only the interpreter, we estimate realized value under a specified belief-to-control mapping; this is not controller-independent information value.
 
 ## Semantic Information Value Recovery (SIVR)
 
@@ -14,7 +14,7 @@ The primary metric measures what fraction of an oracle-semantic reference's oper
 
 SIVR(M) = [V(M) - V(NoInfo)] / [V(OracleSemantic) - V(NoInfo)]
 
-where V(·) denotes expected operational value. SIVR = 0 means no value recovered; SIVR = 1 means full recovery. Critically, SIVR is not bounded to [0,1] — values above 1 are possible when imperfect beliefs interact favorably with a misspecified controller.
+where V(·) denotes expected operational value. The denominator is signed. If OIV is near zero, SIVR is undefined (`NaN`, status `ZERO_OR_NEAR_ZERO_REFERENCE_VALUE`). If OIV is negative, the signed diagnostic is retained but is not interpreted as information-value recovery. Values above 1 remain possible because `OracleSemantic` is a fixed-controller reference, not an upper bound.
 
 ## Decomposition
 
@@ -26,4 +26,9 @@ This separates the loss due to imperfect interpretation from the loss due to con
 
 ## Statistical Inference
 
-All comparisons use paired same-seed evaluation. Primary uncertainty quantification uses hierarchical paired bootstrap resampling (template-family × seed), which respects the hierarchical structure of the experimental design.
+All comparisons use paired same-seed evaluation. The primary estimand is balanced benchmark performance; a declared deployment-prior estimate is secondary. Primary uncertainty uses regime-stratified resampling of template families, variants, and paired seeds. Simultaneous sensor comparisons use Holm-adjusted p-values; Phase 9B is reported as descriptive robustness/boundary analysis.
+
+Belief quality is reported with the conventional multiclass Brier score,
+`sum_k (p_k-y_k)^2`, together with accuracy and log-loss. `OracleSemantic`
+means perfect semantic belief passed through the same fixed controller; it is
+not an optimal policy, hindsight oracle, or guaranteed reward upper bound.

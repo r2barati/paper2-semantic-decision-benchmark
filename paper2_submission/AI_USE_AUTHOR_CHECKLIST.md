@@ -2,14 +2,15 @@
 
 This checklist does not infer author behavior. Complete it before submission.
 
-- [ ] List any generative-AI assistance used in manuscript drafting, editing,
-      coding, analysis, or figure generation, according to the target venue.
-- [ ] Distinguish cached GPT-4o experiment outputs (an experimental baseline)
-      from any authoring assistance.
-- [ ] Confirm that all authors reviewed and take responsibility for the final
-      manuscript and code.
-- [ ] Complete TMLR/OpenReview declarations, broader-impact statement if
-      applicable, funding, conflicts, and human-subjects fields.
-- [ ] Complete any KDD/ACM generative-AI disclosure if KDD is later selected.
+| Item | Status | Evidence/action |
+|---|---|---|
+| Cached GPT-4o experiment outputs | REPOSITORY_EVIDENCED | Frozen experimental baseline outputs; separate from authoring assistance. |
+| Literature exploration, drafting, editing, coding, debugging, analysis, LaTeX, or citation discovery assistance | AUTHOR_CONFIRMATION_REQUIRED | Authors must confirm which activities occurred and disclose them under the selected venue's current policy. |
+| All authors reviewed and take responsibility | AUTHOR_CONFIRMATION_REQUIRED | Human sign-off. |
+| TMLR/OpenReview, funding, conflicts, ethics, and broader-impact fields | AUTHOR_CONFIRMATION_REQUIRED | Complete at submission. |
+| KDD/ACM generative-AI disclosure | UNKNOWN / conditional | Required only if KDD is selected and its current form asks for it. |
+
+Do not describe repository evidence as proof of author behavior. The final
+disclosure must remain author-confirmed.
 
 Status: **HUMAN_ACTION_REQUIRED**. No disclosure text is fabricated here.

@@ -3,8 +3,11 @@
 TMLR is the recommended primary venue. Its official author guidance states
 that submissions are double-blind and anonymized, use the mandatory TMLR LaTeX
 style, allow flexible manuscript length with appendices, use OpenReview, and
-encourage reproducibility supplements. TMLR emphasizes technical correctness
-and accepts empirical studies that provide insight into learning systems.
+encourage reproducibility supplements. TMLR's acceptance criteria ask whether
+claims are supported by accurate, convincing, clear evidence and whether at
+least some TMLR readers would be interested in the findings. Method novelty is
+not a necessary acceptance criterion, but originality, correctness, interest,
+and non-overlap remain required.
 
 ## Fit
 
@@ -15,7 +18,7 @@ should not be sold as a new universal theory.
 ## Machine-complete
 
 - Official TMLR style is staged under `manuscript/tmlr-style-file-main/`.
-- `manuscript/main.tex` and `manuscript/appendix.tex` compile to a 6-page PDF.
+- `manuscript/main.tex` and `manuscript/appendix.tex` compile to a 7-page PDF.
 - The final LaTeX log has no fatal errors, undefined citations/references, or
   overfull-box diagnostics.
 
@@ -28,6 +31,7 @@ should not be sold as a new universal theory.
 - Human-review all numerical claims and cached-model provenance.
 
 TMLR is rolling, so there is no reason to wait for an unpublished conference
-deadline. Source: [TMLR author guidelines](https://jmlr.org/tmlr/author-guide.html),
-[submission instructions](https://jmlr.org/tmlr/submissions.html), and
-[editorial policies](https://jmlr.org/tmlr/editorial-policies.html).
+deadline. Sources: [TMLR author guide](https://jmlr.org/tmlr/author-guide.html),
+[submission instructions](https://jmlr.org/tmlr/submissions.html),
+[editorial policies](https://jmlr.org/tmlr/editorial-policies.html), and
+[acceptance criteria](https://jmlr.org/tmlr/acceptance-criteria.html).

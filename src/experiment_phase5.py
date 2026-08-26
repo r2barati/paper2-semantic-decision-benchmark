@@ -45,7 +45,8 @@ from src.interpreter import (
 from src.metrics import compute_episode_metrics, information_value, signed_sivr
 
 # Results directory
-RESULTS_DIR = Path(__file__).resolve().parent.parent / "results" / "phase5"
+default_results_dir = Path(__file__).resolve().parent.parent / "results" / "phase5"
+RESULTS_DIR = Path(os.environ.get("PAPER2_PHASE5_RESULTS_DIR", str(default_results_dir)))
 
 # --- Sensor/Controller labels ---
 SENSOR_NOINFO = "NoInfo"

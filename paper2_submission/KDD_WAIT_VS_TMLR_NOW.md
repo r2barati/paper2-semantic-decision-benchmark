@@ -4,9 +4,10 @@
 
 As of 2026-08-26, the official KDD 2027 first-cycle deadline listed for the
 Research and Datasets & Benchmarks tracks was July 26, 2026. The official KDD
-FAQ says the February cycle date is still to be confirmed and that the February
-cycle primarily permits the immediately preceding KDD resubmit decisions; a
-rejected August-cycle paper is not simply eligible as a fresh February
+FAQ corrects the earlier record: the February cycle accepts NEW submissions as
+well as eligible resubmissions. Its exact dates remain to be confirmed, and a
+resubmission must satisfy the FAQ's immediately-preceding-cycle eligibility
+rule; an ordinary rejected August paper is not automatically an eligible
 resubmission.
 
 Paper 2’s strongest identity is a rigorous empirical-methodology study, not a

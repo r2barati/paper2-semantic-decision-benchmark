@@ -11,7 +11,7 @@
 | Arumugam & Van Roy, Value of Information When Deciding What to Learn | NeurIPS 2021 | abstract information | target distribution | yes | learning/exploration | yes | no | no | theory | information acquisition theory; Paper 2 uses fixed semantic sensors |
 | Voelcker et al., Calibrated VAML | ICML 2025 | no | probabilistic model | MBRL | value planner | yes | central | limited | MLE | recent value-aware/calibration threat; not text or semantic sensing |
 | Boute et al., Benchmarking RL for Supply Chain Management | EJOR 2022 | no | no | supply chain | policy | KPI/reward | no | scenario transfer | RL/OR | domain benchmark lineage; no semantic/controller factorization |
-| Quan et al., LLMs for Supply Chain Decision Support | 2024 | text/LLM | model output | varied | variable | KPI/task outcome | variable | variable | LLM | closest operational-language evidence; not frozen paired protocol |
+| Li et al., LLMs for Supply Chain Optimization / OptiGuide | 2023 | text/LLM | model output | optimization interface | variable | KPI/what-if outcome | not central | application-dependent | LLM | closest operational-language evidence; not frozen paired semantic-sensing protocol |
 | **Paper 2** | this work | warning text | explicit regime belief | finite-horizon inventory | fixed controller | paired reward/OIV/SIVR | central empirical result | held-out templates and supply-side transfer | rule, TF--IDF, GPT, oracle, NoInfo | bounded empirical characterization |
 
 No row supports a “first” claim. The defensible distinction is the combination

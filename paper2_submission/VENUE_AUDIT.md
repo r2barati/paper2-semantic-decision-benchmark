@@ -6,7 +6,7 @@
 
 **Primary: TMLR.** Paper 2 is primarily an empirical-science study with a consequential-evaluation framework and a reproducible operational benchmark. TMLR's scope explicitly accommodates empirical studies, evaluation, formalization, and application work when it yields generalizable insight. Its technical-correctness emphasis and rolling review make it the best realistic immediate path.
 
-**Conditional fallback: KDD 2027 Research Track.** The paper can fit KDD Research if rewritten as a data-mining/operational-ML study with a sharper generalization claim. The first KDD 2027 cycle is already closed as of this audit. The announced February cycle is not a general fresh-submission route: the FAQ describes it primarily for immediately preceding August-cycle resubmissions, and its exact date is still to be confirmed.
+**Conditional fallback: KDD 2027 Research Track.** The paper can fit KDD Research if rewritten as a data-mining/operational-ML study with a sharper generalization claim. The first KDD 2027 cycle is already closed as of this audit. The current FAQ states that the February cycle accepts new submissions as well as eligible resubmissions; the exact February dates remain to be confirmed, and resubmission eligibility is restricted to papers receiving a February-eligible resubmit decision from the immediately preceding cycle.
 
 **Not primary:** KDD Datasets & Benchmarks. The artifact is useful infrastructure, but the manuscript's strongest contribution is the empirical semantic-to-utility finding, not a standalone dataset release. D&B is single-blind and has its own scope and no track transfer.
 
@@ -15,7 +15,7 @@
 | Venue | Current status / format | Fit | Main risk | Decision |
 |---|---|---:|---|---|
 | TMLR | Rolling OpenReview submissions; double-blind; mandatory TMLR style; flexible manuscript length with appendix after references; reproducibility encouraged | 9/10 | Review may require sharper generality and claim boundaries | **Primary now** |
-| KDD 2027 Research | First-cycle paper deadline July 26, 2026; 8 content pages plus references/optional appendix; double-blind; first cycle closed | 7/10 | Later February cycle is restricted/uncertain; paper may read as application/evaluation rather than data-mining research | Conditional fallback |
+| KDD 2027 Research | First-cycle paper deadline July 26, 2026; 8 content pages plus references/optional appendix; double-blind; first cycle closed. February cycle accepts new submissions; exact dates TBC | 7/10 | Later timing is unconfirmed; paper may read as application/evaluation rather than data-mining research | Conditional fallback |
 | KDD 2027 Datasets & Benchmarks | 8 content pages; single-blind; separate track; no transfer between tracks | 6/10 | Benchmark is not the paper's only or primary scientific object | Do not wait |
 | AAAI-27 Main | Full-paper deadline July 28, 2026; 7 content pages plus 2 reference/ethics pages; double-blind; current cycle closed | 6/10 | Deadline has passed; compressed format would force loss of mechanism detail | Not available |
 | NeurIPS 2026 Main | Paper deadline May 6, 2026; 8-page main paper; current cycle closed | 7/10 | Deadline passed and main-track novelty bar is high | Not available |

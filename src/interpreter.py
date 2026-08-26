@@ -309,7 +309,8 @@ def _get_client(api_key: str, base_url: str):
 def _cache_path(text: str, model: str) -> Path:
     """Deterministic cache file path for a given (text, model) pair."""
     h = hashlib.sha256(f"{model}||{text}".encode()).hexdigest()[:16]
-    cache_dir = Path(__file__).resolve().parent.parent / ".llm_cache"
+    default_cache_dir = Path(__file__).resolve().parent.parent / ".llm_cache"
+    cache_dir = Path(os.environ.get("PAPER2_LLM_CACHE_DIR", str(default_cache_dir)))
     cache_dir.mkdir(exist_ok=True)
     return cache_dir / f"{h}.json"
 
@@ -725,7 +726,8 @@ def llm_regime_interpret_with_result(
     import hashlib
     cache_key = f"regime_{model}||{text}"
     h = hashlib.sha256(cache_key.encode()).hexdigest()[:16]
-    cache_dir = Path(__file__).resolve().parent.parent / ".llm_cache"
+    default_cache_dir = Path(__file__).resolve().parent.parent / ".llm_cache"
+    cache_dir = Path(os.environ.get("PAPER2_LLM_CACHE_DIR", str(default_cache_dir)))
     cache_dir.mkdir(exist_ok=True)
     cache_file = cache_dir / f"{h}.json"
 

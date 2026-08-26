@@ -63,7 +63,7 @@ python3 -m benchmark.run --experiment controlled --sensor tfidf_calibrated
 python3 -m benchmark.run --experiment gym --sensor oracle_semantic
 
 # Run with live LLM (requires API key)
-echo "OPENAI_API_KEY=sk-..." > .env
+echo "OPENAI_API_KEY=<optional-key>" > .env
 python3 -m benchmark.run --experiment controlled --sensor gpt4o --live
 ```
 

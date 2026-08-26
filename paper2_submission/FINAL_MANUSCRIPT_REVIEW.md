@@ -39,4 +39,4 @@ the controlled scientific characterization rather than a new algorithm.
 
 The actual Paper-2 manuscript was compiled with the official TMLR style on
 2026-08-26. The final log has no fatal errors, undefined citations/references,
-or overfull-box diagnostics; the output is 7 pages with 12 bibliography items.
+or overfull-box diagnostics; the output is 7 pages with 11 bibliography items.

@@ -13,3 +13,6 @@
 Unsupported numerical claims: **0 in the planned manuscript**. Unsupported
 novelty claims: **0**, provided the paper uses the bounded language in
 `NOVELTY_LEDGER.md`.
+
+Unsupported generality claims: **0** under the controlled-environment scope in
+`GENERALITY_CLAIM_AUDIT.md`.

@@ -1,4 +1,4 @@
-\begin{thebibliography}{8}
+\begin{thebibliography}{12}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -25,6 +25,13 @@ Adam~N. Elmachtoub and Paul Grigas.
 \newblock Smart "predict, then optimize".
 \newblock In \emph{Management Science}, 2022.
 
+\bibitem[Farahmand et~al.(2017)Farahmand, Nabi, and
+  Nikovski]{farahmand2017value}
+Amir-massoud Farahmand, Shakir Nabi, and Daniel Nikovski.
+\newblock Value-aware loss function for model-based reinforcement learning.
+\newblock In \emph{Proceedings of the 20th International Conference on
+  Artificial Intelligence and Statistics}, 2017.
+
 \bibitem[Guo et~al.(2017)Guo, Pleiss, Sun, and Weinberger]{guo2017calibration}
 Chuan Guo, Geoff Pleiss, Yu~Sun, and Kilian~Q. Weinberger.
 \newblock On calibration of modern neural networks.
@@ -37,6 +44,21 @@ Christian~D. Hubbs et~al.
   problems.
 \newblock In \emph{arXiv preprint arXiv:2008.06319}, 2020.
 
+\bibitem[Lambert et~al.(2020)Lambert, Amos, Yadan, and
+  Calandra]{lambert2020objective}
+Nathan Lambert, Brandon Amos, Omry Yadan, and Roberto Calandra.
+\newblock Objective mismatch in model-based reinforcement learning.
+\newblock In \emph{Proceedings of the 2nd Conference on Learning for Dynamics
+  and Control}, volume 120 of \emph{Proceedings of Machine Learning Research},
+  pp.\  761--770, 2020.
+
+\bibitem[Mandi et~al.(2022)Mandi, Bucarey, Tchomba, and Guns]{mandi2022rank}
+Jayanta Mandi, Victor Bucarey, Maxime Mulamba~Ke Tchomba, and Tias Guns.
+\newblock Decision-focused learning: Through the lens of learning to rank.
+\newblock In \emph{Proceedings of the 39th International Conference on Machine
+  Learning}, volume 162 of \emph{Proceedings of Machine Learning Research},
+  pp.\  14935--14947, 2022.
+
 \bibitem[Puterman(1994)]{puterman1994markov}
 Martin~L. Puterman.
 \newblock Markov decision processes: Discrete stochastic dynamic programming.
@@ -46,5 +68,12 @@ Martin~L. Puterman.
 T.~Quan et~al.
 \newblock Large language models for supply chain decision support.
 \newblock \emph{arXiv preprint}, 2024.
+
+\bibitem[Zhao et~al.(2021)Zhao, Kim, Sahoo, Ma, and Ermon]{zhao2021decision}
+Shengjia Zhao, Michael Kim, Roshni Sahoo, Tengyu Ma, and Stefano Ermon.
+\newblock Calibrating predictions to decisions: A novel approach to multi-class
+  calibration.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~34, 2021.
 
 \end{thebibliography}

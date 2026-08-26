@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  26 AUG 2026 15:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  26 AUG 2026 15:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -486,7 +486,7 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 Underfull \vbox (badness 1033) has occurred while \output is active []
 
  [3]
-[4] (./main.bbl) (./appendix.tex [5]) [6] (./main.aux)
+[4] (./main.bbl [5]) (./appendix.tex) [6] [7] (./main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -495,13 +495,13 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: DAE4E4A6A532BB8523C0EFF867726152;4371.
  ) 
 Here is how much of TeX's memory you used:
- 11330 strings out of 469006
- 170548 string characters out of 5454814
- 589985 words of memory out of 5000000
- 39801 multiletter control sequences out of 15000+600000
+ 11347 strings out of 469006
+ 170938 string characters out of 5454814
+ 590244 words of memory out of 5000000
+ 39813 multiletter control sequences out of 15000+600000
  682322 words of font info for 78 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 75i,11n,90p,1238b,454s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,90p,1238b,570s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></u
 sr/local/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/lo
 cal/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/t
@@ -515,10 +515,10 @@ e1/public/lm/lmssbx10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/
 public/lm/lmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/publi
 c/lm/lmsy7.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsf
 onts/symbols/msbm10.pfb>
-Output written on main.pdf (6 pages, 223447 bytes).
+Output written on main.pdf (7 pages, 225920 bytes).
 PDF statistics:
- 272 PDF objects out of 1000 (max. 8388607)
- 233 compressed objects within 3 object streams
- 51 named destinations out of 1000 (max. 500000)
+ 290 PDF objects out of 1000 (max. 8388607)
+ 250 compressed objects within 3 object streams
+ 56 named destinations out of 1000 (max. 500000)
  201 words of extra memory for PDF output out of 10000 (max. 10000000)
 

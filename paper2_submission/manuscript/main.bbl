@@ -84,7 +84,7 @@ Shengjia Zhao, Michael Kim, Roshni Sahoo, Tengyu Ma, and Stefano Ermon.
 \newblock Calibrating predictions to decisions: A novel approach to multi-class
   calibration.
 \newblock In \emph{Advances in Neural Information Processing Systems},
-  volume~34, 2021.
+  volume~34, pp.\  22313--22324, 2021.
 \newblock URL
   \url{https://proceedings.neurips.cc/paper_files/paper/2021/hash/bbc92a647199b832ec90d7cf57074e9e-Abstract.html}.
 

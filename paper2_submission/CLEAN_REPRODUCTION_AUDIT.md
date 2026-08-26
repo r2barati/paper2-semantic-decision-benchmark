@@ -27,7 +27,10 @@ output directory.
 
 ## Result
 
-The repaired package is ready for a fresh run. The final recorded result,
-including Python version, dependency source, test count, warnings, and runtime,
-is appended after the clean run; no scientific experiment is run by this audit.
-
+Clean tracked export from commit `856a176`: **273 passed, 0 failed**, 295.42
+seconds (4:55.42), Python 3.9 environment, `requirements.lock` available, no
+network/API key, and no pytest cache warning (`-p no:cacheprovider`). Generated
+cache and Phase-5 outputs were empty temporary directories. The versioned
+`.llm_cache` remained because the existing offline test explicitly verifies its
+frozen cache completeness; it is a frozen input, not an inherited runtime
+cache. No scientific experiment was run by this audit.

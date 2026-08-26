@@ -18,5 +18,8 @@
 - Reinsert author-facing metadata only after acceptance or when venue policy
   allows it.
 
-Current issue count in the future export: **not yet certified**. Human PDF and
-supplement scanning is required before submission.
+Machine scan of the current anonymous manuscript source found no author name,
+affiliation, email, personal URL, absolute path, or repository identity.
+Official TMLR template sample names/URLs are excluded from the proposed
+supplement and are not Paper-2 identities. Current machine issue count:
+**0 detected; human PDF/supplement confirmation remains required**.

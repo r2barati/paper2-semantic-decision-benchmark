@@ -21,14 +21,16 @@ should not be sold as a new universal theory.
 - `manuscript/main.tex` and `manuscript/appendix.tex` compile to a 7-page PDF.
 - The final LaTeX log has no fatal errors, undefined citations/references, or
   overfull-box diagnostics.
+- Clean tracked export passes 273/273 offline tests with no network or API key.
 
 ## Required before submission
 
 - Complete anonymization and OpenReview profiles.
 - Add a concise ethics/broader-impact statement if required by the application.
 - Verify related work, self-overlap, and concurrent-submission policy.
-- Package anonymized code/data supplement up to the current official limit.
-- Human-review all numerical claims and cached-model provenance.
+- Package the anonymized code/data supplement up to the current official limit.
+- Human-review all numerical claims, cached-model provenance, and authorship/
+  AI-use metadata.
 
 TMLR is rolling, so there is no reason to wait for an unpublished conference
 deadline. Sources: [TMLR author guide](https://jmlr.org/tmlr/author-guide.html),

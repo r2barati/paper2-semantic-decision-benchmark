@@ -14,7 +14,6 @@ Audit date: 2026-08-26. All entries in `manuscript/references.bib` are used or d
 | lambert2020objective | VERIFIED_PRIMARY | Lambert, Amos, Yadan, Calandra; L4DC/PMLR 120:761--770, 2020. |
 | mandi2022rank | VERIFIED_PRIMARY | Mandi, Bucarey, Tchomba, Guns; ICML/PMLR 162:14935--14947, 2022. |
 | li2023optiguide | VERIFIED_PREPRINT | Li, Mellou, Zhang, Pathuri, Menache; arXiv:2307.03875, 2023; DOI 10.48550/arXiv.2307.03875. |
-| zhao2021decision | VERIFIED_PRIMARY | Zhao, Kim, Sahoo, Ma, Ermon; NeurIPS 34, 2021; official NeurIPS record. |
+| zhao2021decision | VERIFIED_PRIMARY | Zhao, Kim, Sahoo, Ma, Ermon; NeurIPS 34:22313--22324, 2021; official NeurIPS record. |
 
 Invalid entries: **0**. The approximate `Quan et al. (2024)` record was removed; the manuscript now cites the exact Li et al. (2023) OptiGuide preprint for the limited nearby LLM comparison. No entry is labeled current-frontier or state-of-the-art.
-

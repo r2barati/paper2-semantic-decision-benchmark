@@ -1,0 +1,57 @@
+\section{Additional protocol and result details}
+
+\subsection{Interpreter information access}
+
+NoInfo receives only the declared prior. RuleBased uses general keyword rules.
+The TF--IDF models are fit only on training templates in the applicable
+experiment. GPT-4o predictions are replayed from the frozen semantic-output
+artifacts in the publication package. OracleSemantic receives the true regime
+belief as a reference. No publication interpreter receives future demand,
+future state, or environment internals.
+
+\subsection{Phase accounting}
+
+\begin{table}[h]
+\caption{Frozen phase accounting.}
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Phase & Seeds & Templates & Sensors & Episodes \\
+\midrule
+7 & 20 & 36 & 6 & 4,320 \\
+8B & 30 & 24 & 6 & 4,320 \\
+9A & 30 & 16 & 6 & 2,880 \\
+9B & 10 per variant & 16 & 6 & 5,760 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Phase 8B is the primary held-out linguistic result. Phase 9A changes the
+operational event but does not provide a clean held-out TF--IDF language split
+in its all-template summary. Phase 9B is one-factor-at-a-time descriptive
+robustness analysis.
+
+\subsection{Metric edge cases}
+
+The aggregate SIVR numerator and denominator are computed over paired
+observations. When OracleSemantic has lower reward than NoInfo, the oracle
+information value is negative and SIVR is marked with a negative-reference
+status. When the denominator is near zero, the value is undefined. These rules
+prevent controller mismatch from being misreported as a semantic-sensing
+failure.
+
+\subsection{Reproduction}
+
+The frozen package includes cached model outputs, manifests, configuration
+files, corrected audit CSVs, publication generators, pinned requirements, and
+an offline test suite. The final audit reports 268/268 tests passing. A clean
+release should omit credentials, author metadata, private paths, and unrelated
+Paper-1/Paper-3 material.
+
+\subsection{Broader impact}
+
+The framework concerns automated operational decision support. Miscalibrated
+beliefs can cause costly or unsafe actions, so deployment should retain human
+oversight, domain validation, and conservative fallback policies. The present
+synthetic study does not establish deployment safety.

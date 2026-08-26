@@ -1,0 +1,50 @@
+\begin{thebibliography}{8}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Boute et~al.(2022)]{boute2022benchmark}
+Robert Boute et~al.
+\newblock Benchmarking reinforcement learning for supply chain management.
+\newblock \emph{European Journal of Operational Research}, 2022.
+
+\bibitem[DeGroot \& Fienberg(1983)DeGroot and Fienberg]{degroot1983comparison}
+Morris~H. DeGroot and Stephen~E. Fienberg.
+\newblock Comparing probability forecasters.
+\newblock \emph{The Statistician}, 1983.
+
+\bibitem[Donti et~al.(2017)Donti, Amos, and Kolter]{donti2017task}
+Priya~L. Donti, Brandon Amos, and J.~Zico Kolter.
+\newblock Task-based end-to-end model learning in stochastic optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2017.
+
+\bibitem[Elmachtoub \& Grigas(2022)Elmachtoub and Grigas]{elmachtoub2022smart}
+Adam~N. Elmachtoub and Paul Grigas.
+\newblock Smart "predict, then optimize".
+\newblock In \emph{Management Science}, 2022.
+
+\bibitem[Guo et~al.(2017)Guo, Pleiss, Sun, and Weinberger]{guo2017calibration}
+Chuan Guo, Geoff Pleiss, Yu~Sun, and Kilian~Q. Weinberger.
+\newblock On calibration of modern neural networks.
+\newblock \emph{Proceedings of the 34th International Conference on Machine
+  Learning}, 2017.
+
+\bibitem[Hubbs et~al.(2020)]{hubbs2020orgym}
+Christian~D. Hubbs et~al.
+\newblock Or-gym: A reinforcement learning library for operations research
+  problems.
+\newblock In \emph{arXiv preprint arXiv:2008.06319}, 2020.
+
+\bibitem[Puterman(1994)]{puterman1994markov}
+Martin~L. Puterman.
+\newblock Markov decision processes: Discrete stochastic dynamic programming.
+\newblock \emph{Wiley}, 1994.
+
+\bibitem[Quan et~al.(2024)]{quan2024llm}
+T.~Quan et~al.
+\newblock Large language models for supply chain decision support.
+\newblock \emph{arXiv preprint}, 2024.
+
+\end{thebibliography}

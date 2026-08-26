@@ -16,3 +16,27 @@
 Proceed to TMLR author sign-off after manuscript conversion and human audits.
 Do not reopen experiments. The largest risk is novelty/significance framing,
 not a demonstrated validity defect.
+
+## Final score
+
+| Dimension | Score |
+|---|---:|
+| Novelty | 8/15 |
+| Significance | 10/15 |
+| Technical soundness | 13/15 |
+| Experimental rigor | 13/15 |
+| Generality | 6/10 |
+| Empirical insight | 9/10 |
+| Clarity | 8/10 |
+| Reproducibility | 9/10 |
+| **Total** | **76/100** |
+
+This is a credible empirical-methodology submission for TMLR, but it remains
+borderline for an ICLR/NeurIPS/ICML main track because the novelty is primarily
+the controlled scientific characterization rather than a new algorithm.
+
+## Build verification
+
+The actual Paper-2 manuscript was compiled with the official TMLR style on
+2026-08-26. The final log has no fatal errors, undefined citations/references,
+or overfull-box diagnostics; the output is 7 pages with 12 bibliography items.

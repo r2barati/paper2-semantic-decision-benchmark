@@ -115,3 +115,14 @@ python3 -m benchmark.run --experiment controlled --sensor gpt4o --live
   year={2026}
 }
 ```
+
+## Reproducibility and external artifacts
+
+The repository contains source code, tests, frozen configuration, manuscript
+material, and selected frozen result summaries. Local environments, API
+credentials, LLM caches, raw response data, and large generated outputs are
+not upload candidates. The Phase 1 SHA-256 manifest for external artifacts is
+maintained outside this repository until an artifact-storage location is
+approved. Reproduction should use the pinned `requirements.lock`, offline
+tests, and explicitly documented input/output manifests; live LLM calls are
+optional and must use credentials supplied through the environment only.

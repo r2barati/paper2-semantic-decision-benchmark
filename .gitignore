@@ -4,11 +4,36 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .llm_cache/
-!.llm_cache/
-!.llm_cache/**
 results/
 # Frozen and historical results are part of the reproducibility surface.
 !results/
 !results/**
 results/**/__pycache__/
 results/**/*.pyc
+
+# Raw/volatile result payloads stay local; curated reports, aggregate tables,
+# plots, manifests, and documentation remain eligible for versioning.
+results/**/raw/
+results/**/*_raw.*
+results/**/raw_*
+results/frozen_llm_outputs/*.json
+results/**/real_llm_interpretations.csv
+results/**/*llm*responses*.csv
+results/**/*.pkl
+
+# New result files are external by default. Existing curated tracked results
+# remain in history; only reviewed manifests/README files may be added later.
+results/**
+!results/**/
+!results/**/README.md
+!results/**/manifest*.json
+!results/**/manifest*.jsonl
+
+# Local environments, coverage, and build products
+.venv/
+venv/
+*.log
+.coverage
+htmlcov/
+dist/
+build/

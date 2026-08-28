@@ -6,6 +6,8 @@ artifact storage:
 
 - `.env` files, provider credentials, and virtual environments;
 - LLM caches and raw LLM response files;
+- serialized model checkpoints (`*.pkl`), including the classical-baseline
+  checkpoints;
 - large or re-creatable raw experiment outputs.
 
 The Phase 2A local manifest is `../phase1_migration/manifests/paper2_semantic_decision_benchmark.external-artifacts.sha256`.

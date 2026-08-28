@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Phase-8B: Paper-1 Gymnasium confirmation results. All hierarchical bootstrap CIs exclude zero.}
+\label{tab:phase8b}
+\begin{tabular}{lrrrrrc}
+\toprule
+Sensor & AggSIVR & Reward & Fill Rate & Acc. & Brier & 95\% CI \\
+\midrule
+RuleBased & 1.198 & 568.7 & 0.947 & 0.792 & 0.1615 & $[54.3,\ 148.1]$ \\
+OracleSemantic & 1.000 & 552.0 & 0.920 & 1.000 & 0.0000 &  \\
+TFIDF_LogReg_Calibrated & 0.841 & 538.6 & 0.911 & 0.958 & 0.0463 & $[25.8,\ 117.8]$ \\
+gpt-4o & 0.797 & 534.9 & 0.906 & 0.958 & 0.0332 & $[18.4,\ 118.4]$ \\
+TFIDF_LogReg_Raw & 0.575 & 516.2 & 0.901 & 0.917 & 0.1812 & $[26.7,\ 70.9]$ \\
+NoInfo & 0.000 & 467.7 & 0.858 & 0.500 & 0.2900 &  \\
+\bottomrule
+\end{tabular}
+\end{table}

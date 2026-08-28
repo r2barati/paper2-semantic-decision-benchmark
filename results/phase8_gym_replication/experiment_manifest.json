@@ -1,0 +1,58 @@
+{
+  "phase": 8,
+  "description": "Paper-1 Gymnasium replication of semantic decision-value experiment",
+  "num_seeds": 20,
+  "seed_base": 2000,
+  "seeds": [
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ],
+  "templates_used": 12,
+  "sensors": [
+    "NoInfo",
+    "RuleBased",
+    "TFIDF_LogReg",
+    "gpt-4o",
+    "PerfectSemantic"
+  ],
+  "base_mu": 10.0,
+  "shock_mag": 2.0,
+  "scenario": "serial",
+  "num_periods": 30,
+  "event_start": 15,
+  "results_dir": "/Users/sanamimani/paper2_semantic_decision_benchmark/results/phase8_gym_replication",
+  "output_files": [
+    "regime_summary.csv",
+    "win_rates.csv",
+    "aggregate_sivr.csv",
+    "ambiguity_summary.csv",
+    "paired_comparisons.csv",
+    "operational_results.csv",
+    "belief_metrics.csv"
+  ],
+  "aggregate_sivr": {
+    "NoInfo": 0.0,
+    "RuleBased": 0.886929861020496,
+    "TFIDF_LogReg": 1.0,
+    "gpt-4o": 0.8744603063191212,
+    "PerfectSemantic": 1.0
+  }
+}

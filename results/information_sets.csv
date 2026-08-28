@@ -1,0 +1,8 @@
+condition,semantic_info,policy,optimization,known_future_demand,known_demand_distribution
+NoInfo,None,BaseStock,Heuristic,No,No (implicit in policy)
+PerfectSemantic,Perfect parameters,DisruptionAware,Heuristic,No,No (implicit in policy)
+LLM,Interpreted from text,DisruptionAware,Heuristic,No,No (implicit in policy)
+ActiveWrong,Wrong parameters,DisruptionAware,Heuristic,No,No (implicit in policy)
+ActiveWrongOver,Overestimated parameters,DisruptionAware,Heuristic,No,No (implicit in policy)
+CausalOptimizer,Perfect parameters,Receding-horizon LP,MPC optimization,No,Yes (Poisson lambda)
+HindsightOracle,Perfect parameters,MILP global optimizer,Full-horizon MILP,Yes,Yes (realized demand)

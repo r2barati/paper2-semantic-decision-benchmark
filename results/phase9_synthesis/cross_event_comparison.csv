@@ -1,0 +1,7 @@
+sensor,phase8b_sivr,phase8b_fill_rate,phase8b_bel_acc,phase8b_mean_reward,phase9a_sivr,phase9a_fill_rate,phase9a_bel_acc,phase9a_brier,phase9a_mean_reward,phase9b_sivr,phase9b_fill_rate,phase9b_mean_reward
+NoInfo,0.0,0.858,0.5,467.7,0.0,0.846,0.375,0.25,1333.6,0.0,0.845,1323.6
+RuleBased,1.198,0.947,0.792,568.7,0.823,0.895,0.938,0.1078,1484.0,0.383,0.894,1473.0
+TFIDF_LogReg_Raw,0.575,0.901,0.917,516.2,0.261,0.861,0.875,0.1793,1381.2,0.119,0.861,1371.2
+TFIDF_LogReg_Calibrated,0.841,0.911,0.958,538.6,0.434,0.871,0.812,0.0897,1412.9,0.205,0.87,1402.0
+gpt-4o,0.797,0.906,0.958,534.9,0.507,0.875,0.938,0.0494,1426.2,0.232,0.875,1416.0
+OracleSemantic,1.0,0.92,1.0,552.0,1.0,0.904,1.0,0.0,1516.3,1.0,0.971,1713.6

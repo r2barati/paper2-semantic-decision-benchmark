@@ -1,0 +1,12 @@
+template_id,ambiguity_level,lt_error,duration_error,sivr_llm,regret_llm
+clear_1,clear,0.0,0.0,1.0000,0.00
+clear_2,clear,0.0,0.0,1.0000,0.00
+clear_3,clear,0.0,0.0,1.0000,0.00
+moderate_1,moderate,1.0,2.0,0.6909,121.27
+moderate_2,moderate,1.0,2.0,0.6909,121.27
+moderate_3,moderate,2.0,4.0,0.0000,392.33
+moderate_4,moderate,0.0,2.0,0.0000,392.33
+vague_1,vague,2.0,2.0,0.0000,392.33
+vague_2,vague,2.0,4.0,0.0000,392.33
+vague_3,vague,2.0,4.0,0.0000,392.33
+vague_4,vague,1.0,4.0,0.0000,392.33

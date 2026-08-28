@@ -1,0 +1,14 @@
+condition,semantic_info,policy,optimization,known_future_demand
+NoInfo+Heuristic,NoInfo,Heuristic,Heuristic,No
+NoInfo+CausalOptimizer,NoInfo,CausalOptimizer,LP optimizer,No
+RuleBased+Heuristic,RuleBased,Heuristic,Heuristic,No
+RuleBased+CausalOptimizer,RuleBased,CausalOptimizer,LP optimizer,No
+PerfectSemantic+Heuristic,PerfectSemantic,Heuristic,Heuristic,No
+PerfectSemantic+CausalOptimizer,PerfectSemantic,CausalOptimizer,LP optimizer,No
+LLM:gpt-4o-mini+Heuristic,LLM:gpt-4o-mini,Heuristic,Heuristic,No
+LLM:gpt-4o-mini+CausalOptimizer,LLM:gpt-4o-mini,CausalOptimizer,LP optimizer,No
+LLM:gpt-4o+Heuristic,LLM:gpt-4o,Heuristic,Heuristic,No
+LLM:gpt-4o+CausalOptimizer,LLM:gpt-4o,CausalOptimizer,LP optimizer,No
+LLM:gpt-3.5-turbo+Heuristic,LLM:gpt-3.5-turbo,Heuristic,Heuristic,No
+LLM:gpt-3.5-turbo+CausalOptimizer,LLM:gpt-3.5-turbo,CausalOptimizer,LP optimizer,No
+HindsightOracle,Perfect,MILP global,Full MILP,Yes

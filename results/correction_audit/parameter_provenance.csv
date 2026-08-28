@@ -1,0 +1,8 @@
+Parameter,Value,Origin,Classification
+safety amplification,2.0,Fixed BUFFER_AMPLIFICATION in src/gym_adapter9.py,pilot-selected / fixed before Phase-9B robustness
+base safety factor,1.65,SupplyBeliefAdaptiveController default,pilot/design choice
+base demand rate,50.0,Phase-9A operational configuration,design choice fixed before confirmation
+normal factory capacity,90,Phase-9A operational configuration,design choice fixed before confirmation
+disrupted factory capacity,30,Phase-9A operational configuration,design choice fixed before confirmation
+disruption window,[10,25),Phase-9A operational configuration,design choice fixed before confirmation
+Paper-1 dependency commit,a745fd5,Paper-1 gym-invmgmt source, inherited frozen dependency

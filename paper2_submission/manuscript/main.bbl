@@ -1,0 +1,91 @@
+\begin{thebibliography}{11}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[DeGroot \& Fienberg(1983)DeGroot and Fienberg]{degroot1983comparison}
+Morris~H. DeGroot and Stephen~E. Fienberg.
+\newblock The comparison and evaluation of forecasters.
+\newblock \emph{The Statistician}, 32\penalty0 (1):\penalty0 12--22, 1983.
+\newblock \doi{10.2307/2987588}.
+
+\bibitem[Donti et~al.(2017)Donti, Amos, and Kolter]{donti2017task}
+Priya~L. Donti, Brandon Amos, and J.~Zico Kolter.
+\newblock Task-based end-to-end model learning in stochastic optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~30, 2017.
+\newblock URL
+  \url{https://papers.neurips.cc/paper/2017/hash/3fc2c60b5782f641f76bcefc39fb2392-Abstract.html}.
+
+\bibitem[Elmachtoub \& Grigas(2022)Elmachtoub and Grigas]{elmachtoub2022smart}
+Adam~N. Elmachtoub and Paul Grigas.
+\newblock Smart ``predict, then optimize''.
+\newblock \emph{Management Science}, 68\penalty0 (1):\penalty0 9--26, 2022.
+\newblock \doi{10.1287/mnsc.2020.3922}.
+
+\bibitem[Farahmand et~al.(2017)Farahmand, Barreto, and
+  Nikovski]{farahmand2017value}
+Amir-Massoud Farahmand, Andre Barreto, and Daniel Nikovski.
+\newblock Value-aware loss function for model-based reinforcement learning.
+\newblock In \emph{Proceedings of the 20th International Conference on
+  Artificial Intelligence and Statistics}, volume~54 of \emph{Proceedings of
+  Machine Learning Research}, pp.\  1486--1494. PMLR, 2017.
+\newblock URL \url{https://proceedings.mlr.press/v54/farahmand17a.html}.
+
+\bibitem[Guo et~al.(2017)Guo, Pleiss, Sun, and Weinberger]{guo2017calibration}
+Chuan Guo, Geoff Pleiss, Yu~Sun, and Kilian~Q. Weinberger.
+\newblock On calibration of modern neural networks.
+\newblock In \emph{Proceedings of the 34th International Conference on Machine
+  Learning}, volume~70 of \emph{Proceedings of Machine Learning Research}, pp.\
+   1321--1330. PMLR, 2017.
+\newblock URL \url{https://proceedings.mlr.press/v70/guo17a.html}.
+
+\bibitem[Hubbs et~al.(2020)Hubbs, Perez, Sarwar, Sahinidis, Grossmann, and
+  Wassick]{hubbs2020orgym}
+Christian~D. Hubbs, Hector~D. Perez, Owais Sarwar, Nikolaos~V. Sahinidis,
+  Ignacio~E. Grossmann, and John~M. Wassick.
+\newblock Or-gym: A reinforcement learning library for operations research
+  problems, 2020.
+\newblock URL \url{https://arxiv.org/abs/2008.06319}.
+
+\bibitem[Lambert et~al.(2020)Lambert, Amos, Yadan, and
+  Calandra]{lambert2020objective}
+Nathan Lambert, Brandon Amos, Omry Yadan, and Roberto Calandra.
+\newblock Objective mismatch in model-based reinforcement learning.
+\newblock In \emph{Proceedings of the 2nd Conference on Learning for Dynamics
+  and Control}, volume 120 of \emph{Proceedings of Machine Learning Research},
+  pp.\  761--770. PMLR, 2020.
+\newblock URL \url{https://proceedings.mlr.press/v120/lambert20a.html}.
+
+\bibitem[Li et~al.(2023)Li, Mellou, Zhang, Pathuri, and
+  Menache]{li2023optiguide}
+Beibin Li, Konstantina Mellou, Bo~Zhang, Jeevan Pathuri, and Ishai Menache.
+\newblock Large language models for supply chain optimization, 2023.
+\newblock URL \url{https://arxiv.org/abs/2307.03875}.
+
+\bibitem[Mandi et~al.(2022)Mandi, Bucarey, Tchomba, and Guns]{mandi2022rank}
+Jayanta Mandi, V{\'{i}}ctor Bucarey, Maxime Mulamba~Ke Tchomba, and Tias Guns.
+\newblock Decision-focused learning: Through the lens of learning to rank.
+\newblock In \emph{Proceedings of the 39th International Conference on Machine
+  Learning}, volume 162 of \emph{Proceedings of Machine Learning Research},
+  pp.\  14935--14947. PMLR, 2022.
+\newblock URL \url{https://proceedings.mlr.press/v162/mandi22a.html}.
+
+\bibitem[Puterman(1994)]{puterman1994markov}
+Martin~L. Puterman.
+\newblock \emph{Markov Decision Processes: Discrete Stochastic Dynamic
+  Programming}.
+\newblock John Wiley \& Sons, 1994.
+
+\bibitem[Zhao et~al.(2021)Zhao, Kim, Sahoo, Ma, and Ermon]{zhao2021decision}
+Shengjia Zhao, Michael Kim, Roshni Sahoo, Tengyu Ma, and Stefano Ermon.
+\newblock Calibrating predictions to decisions: A novel approach to multi-class
+  calibration.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~34, pp.\  22313--22324, 2021.
+\newblock URL
+  \url{https://proceedings.neurips.cc/paper_files/paper/2021/hash/bbc92a647199b832ec90d7cf57074e9e-Abstract.html}.
+
+\end{thebibliography}

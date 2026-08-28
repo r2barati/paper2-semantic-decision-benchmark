@@ -1,0 +1,12 @@
+template_id,ambiguity_level,semantic_regret,controller_gap,hindsight_advantage,total_gap
+clear_1,clear,0.00,1176.67,524.20,1700.87
+clear_2,clear,0.00,1176.67,524.20,1700.87
+clear_3,clear,0.00,1176.67,524.20,1700.87
+moderate_1,moderate,121.27,1176.67,524.20,1822.13
+moderate_2,moderate,121.27,1176.67,524.20,1822.13
+moderate_3,moderate,392.33,1176.67,524.20,2093.20
+moderate_4,moderate,392.33,1176.67,524.20,2093.20
+vague_1,vague,392.33,1176.67,524.20,2093.20
+vague_2,vague,392.33,1176.67,524.20,2093.20
+vague_3,vague,392.33,1176.67,524.20,2093.20
+vague_4,vague,392.33,1176.67,524.20,2093.20

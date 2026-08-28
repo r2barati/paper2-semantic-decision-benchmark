@@ -1,0 +1,2 @@
+num_sensors,num_text_sensors,num_llm_models,llm_models,num_templates,templates_per_regime,num_regimes,num_seeds,seed_base,controller,template_source,baselines_repeated_per_template,total_operational_episodes,unique_semantic_calls,unique_llm_api_calls,paired_comparisons
+6,4,3,"[""gpt-4o-mini"", ""gpt-4o"", ""gpt-3.5-turbo""]",36,12,3,20,2000,CausalOptimizer,confirmation,True,4320,144,108,300

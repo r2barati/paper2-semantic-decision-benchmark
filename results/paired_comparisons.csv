@@ -1,0 +1,13 @@
+comparison,mean_diff,ci_95_lower,ci_95_upper,n_pairs
+PerfectSemantic - NoInfo,392.33,376.62,408.05,165
+LLM - NoInfo,156.28,127.83,184.74,165
+ActiveWrong - NoInfo,22.09,14.66,29.52,165
+ActiveWrongOver - NoInfo,575.29,544.59,605.99,165
+LLM - PerfectSemantic,-236.05,-265.91,-206.19,165
+ActiveWrong - PerfectSemantic,-370.24,-383.81,-356.67,165
+ActiveWrongOver - PerfectSemantic,182.96,161.73,204.18,165
+LLM - HindsightOracle,-1936.92,-1985.40,-1888.43,165
+PerfectSemantic - HindsightOracle,-1700.87,-1735.04,-1666.69,165
+LLM - NoInfo (clear),392.33,361.36,423.30,45
+LLM - NoInfo (moderate),135.53,99.43,171.63,60
+LLM - NoInfo (vague),0.00,0.00,0.00,60

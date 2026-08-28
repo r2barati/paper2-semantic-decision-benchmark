@@ -1,0 +1,74 @@
+{
+  "phase": "7",
+  "frozen": true,
+  "leakage_audit": {
+    "train_templates": 18,
+    "test_templates": 36,
+    "template_id_overlap": [],
+    "no_template_leak": true,
+    "train_families": [
+      "delay",
+      "normal",
+      "surge"
+    ],
+    "test_families": [
+      "delay",
+      "normal",
+      "surge"
+    ],
+    "families_shared": [
+      "delay",
+      "normal",
+      "surge"
+    ],
+    "note": "Templates from same family appear in both splits (intentional). No template ID overlap ensures no exact-text leakage."
+  },
+  "dataset_manifest": {
+    "original_templates": 18,
+    "original_regime_distribution": {
+      "supplier_delay": 6,
+      "demand_surge": 6,
+      "normal": 6
+    },
+    "confirmation_templates": 36,
+    "confirmation_regime_distribution": {
+      "supplier_delay": 12,
+      "demand_surge": 12,
+      "normal": 12
+    },
+    "train_templates": 18,
+    "train_regime_distribution": {
+      "supplier_delay": 6,
+      "demand_surge": 6,
+      "normal": 6
+    },
+    "train_ambiguity_distribution": {
+      "clear": 6,
+      "moderate": 6,
+      "vague": 6
+    },
+    "train_template_families": [
+      "delay",
+      "normal",
+      "surge"
+    ],
+    "test_templates": 36,
+    "test_regime_distribution": {
+      "supplier_delay": 12,
+      "demand_surge": 12,
+      "normal": 12
+    },
+    "test_ambiguity_distribution": {
+      "clear": 12,
+      "moderate": 12,
+      "vague": 12
+    },
+    "test_template_families": [
+      "delay",
+      "normal",
+      "surge"
+    ],
+    "vectorizer_fitted_on_train_only": true,
+    "calibration_on_train_only": true
+  }
+}

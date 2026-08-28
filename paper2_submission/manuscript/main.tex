@@ -1,0 +1,171 @@
+\documentclass[10pt]{article}
+\usepackage{tmlr}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\title{When Does Semantic Information Improve Sequential Decisions?}
+\author{Anonymous Authors}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Semantic systems are commonly evaluated by classification or language-model metrics, while operational deployments are judged by the decisions and trajectories those beliefs induce. We study this gap in an executable sequential decision framework that separates warning text, probabilistic semantic interpretation, a fixed downstream controller, and operational utility. Across a controlled benchmark and a multi-echelon inventory transfer, we find that semantic accuracy alone does not rank operational value: a calibrated TF--IDF interpreter has lower classification accuracy than its raw counterpart but substantially higher downstream value. In the primary held-out transfer, all four non-reference interpreters produce positive paired reward effects relative to no information, including a classical rule-based interpreter and GPT-4o. A supply-side capacity-drop study provides a structurally different operational transfer, while boundary variants show that negative normalized values can reflect controller--environment mismatch rather than failed semantic sensing. The evidence supports consequence-aware evaluation of semantic information, not universal superiority of any interpreter or controller.
+\end{abstract}
+
+\section{Introduction}
+
+Natural-language signals are increasingly used as inputs to systems that must act under uncertainty. A warning about a supplier disruption, a maintenance notice, or a market event is not valuable merely because it is classified correctly: its value depends on the belief it produces, the controller that consumes that belief, and the sequential consequences of the resulting actions. This distinction connects to decision-focused prediction~\citep{donti2017task,elmachtoub2022smart}, probabilistic calibration~\citep{guo2017calibration,degroot1983comparison}, and sequential decision theory~\citep{puterman1994markov}, but is difficult to audit in an end-to-end operational setting because most semantic evaluations stop upstream, while most operational evaluations treat information as fixed.
+
+We study the following question: \emph{when does semantic interpretation quality translate into downstream sequential decision value?} Our framework makes the causal path explicit:
+
+\begin{equation}
+X \longrightarrow q(z\mid X) \longrightarrow \pi(a_t\mid s_t,q) \longrightarrow s_{t+1} \longrightarrow U.
+\end{equation}
+
+The scientific contribution is deliberately bounded. We do not introduce a new language model, claim that accuracy and value are universally ordered, or treat the operational simulator as a production supply chain. Instead, we provide an executable evaluation in which the semantic interpreter is varied while the downstream controller and environment are held fixed, then test whether the findings survive held-out wording and an operationally richer environment.
+
+Our main result is an accuracy--value dissociation. In the corrected Phase-7 analysis, raw TF--IDF has accuracy $0.889$ versus $0.861$ for calibrated TF--IDF, but calibrated TF--IDF has Brier score $0.240$ versus $0.552$, log-loss $0.397$ versus $0.932$, and SIVR $0.648$ versus $0.250$. The interpretation is not that calibration is universally superior; rather, the fixed controller converts probabilistic beliefs into actions, making probability quality operationally relevant.
+
+The primary confirmation is a held-out multi-echelon transfer. Phase 8B evaluates 30 seeds and 24 held-out templates (4,320 paired episodes). Reward differences relative to NoInfo are positive for RuleBased ($+101.0$, 95\% CI $[96.7,104.2]$), raw TF--IDF ($+48.5$, $[36.1,58.2]$), calibrated TF--IDF ($+70.8$, $[29.9,96.1]$), and GPT-4o ($+67.1$, $[33.9,84.5]$). Phase 9A changes the disruption mechanism to a supplier-capacity drop; this supports operational transfer, while its TF--IDF results are not presented as clean linguistic OOD because training templates are included in the all-template analysis.
+
+Our contributions are:
+\begin{enumerate}
+  \item an executable framework that separates semantic interpretation, probabilistic belief, fixed control, and sequential utility;
+  \item an empirical characterization showing that accuracy, calibration, controller capability, and dynamics jointly determine realized value; and
+  \item reproducible held-out and cross-event evidence, including explicit boundary cases in which controller mismatch invalidates naive information-value interpretation.
+\end{enumerate}
+
+\section{Problem formulation}
+
+Let $z$ denote a latent operational regime, $X$ its textual warning, and $s_t$ the operational state. An interpreter produces a belief $q(z\mid X)$. A fixed controller maps the state and belief to an action, $a_t=\pi(s_t,q)$. The environment evolves according to $P(s_{t+1}\mid s_t,a_t,z)$ and yields reward $r_t$. The realized sequential objective is
+
+\begin{equation}
+J(m;\pi)=\mathbb{E}\left[\sum_{t=0}^{T-1}\gamma^t r(s_t,a_t,z)\mid q_m(\cdot\mid X),\pi\right].
+\end{equation}
+
+The interpreter index $m$ changes the belief but not the controller in the primary comparisons. This isolates realized semantic value under a declared belief-to-control mapping. It does not estimate the value of an interpreter under every possible controller.
+
+For a no-information reference $n$ and a perfect-semantic reference $o$, the oracle information value is
+
+\begin{equation}
+\mathrm{OIV}=J(o;\pi)-J(n;\pi).
+\end{equation}
+
+The normalized diagnostic is
+
+\begin{equation}
+\mathrm{SIVR}(m)=\frac{\sum_i[J(m;\pi)_i-J(n;\pi)_i]}{\sum_i[J(o;\pi)_i-J(n;\pi)_i]},
+\end{equation}
+
+where $i$ indexes paired seed/template evaluations. SIVR is secondary: it is undefined for a near-zero denominator, is explicitly flagged when OIV is negative, and is not bounded by one. In particular, $o$ is perfect semantic belief passed through a fixed controller, not an optimal policy or reward upper bound. Raw reward effects and confidence intervals are therefore reported first.
+
+\section{Consequence-aware semantic evaluation}
+
+\subsection{Interpreter and controller separation}
+
+The framework contains NoInfo, RuleBased, raw TF--IDF logistic regression, calibrated TF--IDF, GPT-4o, and OracleSemantic interpreters. Only text is available to non-oracle interpreters. OracleSemantic supplies the latent regime belief only as a reference. The same downstream controller consumes all beliefs within each experiment. This design separates three questions: whether the text is interpreted correctly, whether the belief is probabilistically useful, and whether the controller converts that belief into a beneficial trajectory.
+
+\subsection{Why accuracy is insufficient}
+
+Classification accuracy treats all mistakes equally. The operational controller does not: an overestimate can trigger precautionary inventory before a disruption, while an underestimate can cause an expensive shortage. Thus two interpreters with similar labels can induce different actions, and an interpreter with lower accuracy can be more useful if its probabilities are better aligned with the controller's asymmetric costs. This is an empirical mechanism claim under the fixed design, not a new decision-theoretic principle.
+
+\subsection{Controller capability as a mediator}
+
+A historical controlled matrix compares the same semantic resources under a heuristic base-stock controller and a stronger receding-horizon CausalOptimizer. Semantic value is visible under the heuristic controller (SIVR range $0.709$--$1.049$) but collapses to approximately zero under the stronger controller. We use this result as a supporting diagnostic: downstream control quality can absorb or expose semantic value. It is not a claim that semantic information is irrelevant under strong controllers in general.
+
+\section{Experimental design}
+
+\subsection{Controlled benchmark}
+
+The primary benchmark is a finite-horizon inventory system with warning text describing an operational disruption. Experiment A varies interpreters under a controlled disruption and fixed downstream policies. Experiment B transfers the protocol into the Paper-1 multi-echelon Gymnasium environment, related to the operations-research RL benchmark lineage~\citep{hubbs2020orgym}. The benchmark is intentionally controlled: it enables paired counterfactual comparison, but does not represent all supply chains.
+
+\subsection{Frozen evaluations}
+
+The publication evidence uses the corrected frozen artifacts. Phase 7 compares raw and calibrated classical interpreters. Phase 8B is the primary held-out linguistic and operational-complexity confirmation: 30 seeds, 24 templates, six sensors, and 4,320 episodes. Phase 9A changes the event mechanism to a supplier-capacity drop with 30 disjoint confirmation seeds and 16 templates. Phase 9B is one-factor-at-a-time robustness/boundary analysis with 10 seeds per variant. Phase 8A and historical exploratory outputs are not used as primary clean confirmation.
+
+\subsection{Statistical protocol}
+
+The main comparisons use paired reward differences and a hierarchical bootstrap that resamples template clusters and then seeds within clusters. Phase 8B and 9A sensor comparisons use Holm adjustment. Phase 9B is descriptive boundary analysis. Percentile intervals with a small number of template clusters are reported as an acknowledged precision limitation. The primary estimand is the deliberately constructed balanced benchmark; declared deployment-prior estimates remain secondary.
+
+\section{Results}
+
+\subsection{Accuracy, calibration, and operational value}
+
+Table~\ref{tab:calibration} summarizes the central dissociation. Calibrated TF--IDF loses a small amount of accuracy but improves both proper probabilistic scores and realized value. The result supports evaluating the belief passed to a controller rather than selecting interpreters by labels alone.
+
+\begin{table}[t]
+\caption{Raw versus calibrated TF--IDF in the corrected Phase-7 analysis.}
+\label{tab:calibration}
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Interpreter & Accuracy & Brier & Log-loss & SIVR \\
+\midrule
+Raw TF--IDF & 0.889 & 0.552 & 0.932 & 0.250 \\
+Calibrated TF--IDF & 0.861 & 0.240 & 0.397 & 0.648 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Held-out multi-echelon transfer}
+
+The Phase-8B reward effects are positive for all four non-reference interpreters. RuleBased is strongest in this particular benchmark, while GPT-4o is positive but not dominant. This is not a leaderboard claim: the fixed controller, event space, and synthetic warning templates define the result. The important observation is that the operational effect survives held-out wording and a richer multi-echelon environment.
+
+\begin{table}[t]
+\caption{Phase-8B paired reward effects versus NoInfo. The intervals are the frozen hierarchical bootstrap intervals.}
+\label{tab:phase8b}
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Interpreter & $\Delta J$ & 95\% CI \\
+\midrule
+RuleBased & +101.0 & [96.7, 104.2] \\
+Raw TF--IDF & +48.5 & [36.1, 58.2] \\
+Calibrated TF--IDF & +70.8 & [29.9, 96.1] \\
+GPT-4o & +67.1 & [33.9, 84.5] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Supply-side transfer and boundaries}
+
+Under the supplier-capacity-drop event, RuleBased SIVR is $0.823$, raw TF--IDF is $0.261$, calibrated TF--IDF is $0.434$, and GPT-4o is $0.507$. The all-template TF--IDF analysis includes nine training templates and is therefore operational cross-event transfer, not clean linguistic generalization. The robustness study finds stable positive SIVR under low and high demand noise, but negative SIVR under doubled lead time and lost-sales dynamics. In both negative cases OracleSemantic itself is worse than NoInfo, so the correct interpretation is controller/environment mismatch and a negative reference value—not failed semantic recognition.
+
+\subsection{Imperfect beliefs can outperform the semantic reference}
+
+In the historical heuristic-controller matrix, GPT-4o-mini exceeds PerfectSemantic in realized reward (SIVR $1.049$). This does not mean the interpreter is semantically better. Its overestimation can induce precautionary ordering that is beneficial under the benchmark's asymmetric holding and shortage costs. The example is useful precisely because it demonstrates that semantic quality, belief calibration, controller response, and utility are distinct objects.
+
+\section{Discussion}
+
+The evidence supports three conclusions. First, semantic interpretation can have measurable operational value when the downstream controller is sensitive to the belief. Second, predictive metrics alone do not identify that value: calibration and asymmetric action consequences matter. Third, the value is conditional. A stronger controller can absorb information value, and a mismatched controller can make even perfect semantic belief harmful relative to NoInfo.
+
+These conclusions are compatible with decision-focused learning and value-of-information theory. Our contribution is an executable empirical separation of interpretation, belief, control, and sequential utility, with paired held-out evaluation and explicit boundary diagnostics. We do not claim a new universal metric: SIVR is a framework-specific normalization whose edge cases must be reported.
+
+\section{Related work}
+
+Decision-focused learning and predict-then-optimize methods optimize or evaluate predictions through downstream objectives~\citep{donti2017task,elmachtoub2022smart,mandi2022rank}. Value-aware model learning and objective-mismatch work make the analogous point for learned dynamics~\citep{farahmand2017value,lambert2020objective}; decision calibration further formalizes downstream decision-maker dependence~\citep{zhao2021decision}. Value-of-information theory formalizes when information changes decisions, while calibration work studies probabilistic reliability~\citep{guo2017calibration,degroot1983comparison}. Inventory and operational benchmarks provide the environment lineage~\citep{hubbs2020orgym}, and OptiGuide provides a nearby LLM-assisted supply-chain optimization interface~\citep{li2023optiguide}. Paper 2 differs in combining these elements in one auditable protocol: the same fixed controller and transition system receive beliefs from interpreters with different accuracy/calibration profiles, and the primary claim is about the observed dissociation and its transfer boundaries.
+
+The closest limitation is also clear. This is not a new policy-selection algorithm, not a new LLM, and not a controller-independent causal estimate. It is an empirical study of a consequential evaluation interface. That makes reproducibility and claim discipline central to the contribution.
+
+\section{Limitations}
+
+The warning text is synthetic and the operational systems are synthetic inventory environments. The study uses a single-SKU setting, finite regime spaces, fixed lead times in the Paper-1 transfer, and a fixed controller within each comparison. The controller is not optimized jointly with the interpreter. The LLM evidence covers a small set of cached model outputs and should not be generalized to all models or deployment economics. Phase 9A's TF--IDF results include training templates, and negative SIVR under long lead times/lost sales reflects reference/controller mismatch. The benchmark therefore supports controlled sequential evidence, not production supply-chain validation.
+
+\section{Conclusion}
+
+Semantic information should be evaluated by the decisions and trajectories it changes, not by upstream accuracy alone. In the frozen benchmark package, calibration, controller capability, event mechanism, and operational dynamics jointly mediate value. The strongest practical recommendation is methodological: report the full interpretation-to-utility path, paired counterfactual references, structural transfer, and boundary failures. Further science would require new evidence; it is not needed to support the claims of this paper.
+
+\bibliographystyle{tmlr}
+\bibliography{references}
+
+\appendix
+\input{appendix}
+
+\end{document}

@@ -524,3 +524,114 @@ class TestNoTextControls:
 
         hard = argmax_belief({"normal": 0.4, "demand_surge": 0.6}, Regime.DEMAND_SURGE)
         assert hard == {"normal": 0.0, "demand_surge": 1.0}
+
+
+# ---------------------------------------------------------------------------
+# Experiment R: the consumer-dependence statistics carry the paper's headline
+# ---------------------------------------------------------------------------
+
+class TestConsumerDependence:
+    """These statistics are the paper's central claim, so they are checked
+    against hand-constructed data with a known answer, not only against the
+    experiment's own output."""
+
+    @staticmethod
+    def _synthetic():
+        """Two consumers, opposite signs, one deliberate rank reversal."""
+        rows = []
+        spec = {
+            ("keep", "none"): (0.0, 100.0), ("keep", "a"): (0.2, 110.0),
+            ("keep", "b"): (0.6, 130.0),
+            ("flip", "none"): (0.0, 100.0), ("flip", "a"): (0.2, 95.0),
+            ("flip", "b"): (0.6, 80.0),
+        }
+        for (interp, system), (ndcg, reward) in spec.items():
+            for seed in range(5):
+                rows.append({
+                    "seed": str(seed), "regime": "normal", "system": system,
+                    "budget_k": "3", "interpreter": interp,
+                    "reward": str(reward), "ndcg_at_k": str(ndcg),
+                    "n_misleading_retrieved": "0" if system == "none" else "1",
+                    "n_retrieved": "0" if system == "none" else "2",
+                    "belief_correct": "True",
+                })
+        return rows
+
+    def test_interaction_detects_sign_flip(self):
+        from src.retrieval_analysis import interaction
+
+        out = {r["system"]: r
+               for r in interaction(self._synthetic(), 3, order=["keep", "flip"])}
+        assert set(out) == {"a", "b"}, "references must be excluded"
+        assert out["b"]["effect_keep"] == pytest.approx(+30.0)
+        assert out["b"]["effect_flip"] == pytest.approx(-20.0)
+        assert out["b"]["interaction"] == pytest.approx(+50.0)
+        assert out["b"]["interaction_magnitude"] == pytest.approx(50.0)
+        assert out["b"]["favours"] == "keep"
+        assert out["b"]["sign_flip"] is True
+
+    def test_interaction_sign_does_not_depend_on_consumer_names(self):
+        from src.retrieval_analysis import interaction
+
+        rows = self._synthetic()
+        fwd = {r["system"]: r for r in interaction(rows, 3, order=["keep", "flip"])}
+        rev = {r["system"]: r for r in interaction(rows, 3, order=["flip", "keep"])}
+        for system in ("a", "b"):
+            assert fwd[system]["interaction"] == pytest.approx(-rev[system]["interaction"])
+            assert fwd[system]["favours"] == rev[system]["favours"]
+            assert fwd[system]["interaction_magnitude"] == pytest.approx(
+                rev[system]["interaction_magnitude"])
+
+    def test_rank_reversal_rate_counts_the_reversal(self):
+        from src.retrieval_analysis import rank_reversal_rate
+
+        out = rank_reversal_rate(self._synthetic(), 3)
+        assert out["keep"]["reversal_rate"] == pytest.approx(0.0)
+        assert out["keep"]["kendall_tau_b"] == pytest.approx(1.0)
+        assert out["flip"]["reversal_rate"] == pytest.approx(1.0)
+        assert out["flip"]["kendall_tau_b"] == pytest.approx(-1.0)
+        assert out["flip"]["reversed_pairs"]
+
+    def test_correlation_is_computed_within_episodes(self):
+        from src.retrieval_analysis import relevance_reward_correlation
+
+        out = relevance_reward_correlation(self._synthetic(), 3)
+        assert out["keep"]["pearson"] > 0.9
+        assert out["flip"]["pearson"] < -0.9
+
+    def test_harmful_rate_is_a_rate_not_a_count(self):
+        from src.retrieval_analysis import harmful_retrieval_rate
+
+        out = harmful_retrieval_rate(self._synthetic(), 3)
+        assert out["none"]["harmful_rate"] == pytest.approx(0.0)
+        assert out["a"]["harmful_rate"] == pytest.approx(0.5), "1 of 2 retrieved"
+        assert out["a"]["mean_harmful_docs"] == pytest.approx(1.0)
+
+    def test_references_excluded_from_ranker_comparisons(self):
+        """`none` and `oracle` bracket the range; neither is a retrieval system,
+        so including them would manufacture agreement that says nothing about
+        how rankers compare to one another."""
+        from src.retrieval_analysis import REFERENCE_SYSTEMS, rank_reversal_rate
+
+        assert set(REFERENCE_SYSTEMS) == {"none", "oracle"}
+        assert rank_reversal_rate(self._synthetic(), 3)["keep"]["n_systems"] == 2
+
+    def test_published_headline_reproduces(self):
+        """The claims the abstract makes, recomputed from the stored episodes."""
+        from src.retrieval_analysis import (
+            read_episodes, interaction, rank_reversal_rate,
+        )
+
+        path = ROOT / "results" / "retrieval" / "retrieval_episodes.csv"
+        if not path.exists():
+            pytest.skip("retrieval episodes not generated")
+        rows = read_episodes(path)
+
+        inter = {r["system"]: r for r in interaction(rows, 3)}
+        assert all(r["sign_flip"] for r in inter.values()), (
+            "the paper claims every ranking system changes sign between "
+            f"consumers: {[(k, v['sign_flip']) for k, v in inter.items()]}"
+        )
+        rev = rank_reversal_rate(rows, 3)
+        assert rev["RuleBased"]["reversal_rate"] == pytest.approx(0.0)
+        assert rev["TFIDF_LogReg_Calibrated"]["reversal_rate"] > 0.0

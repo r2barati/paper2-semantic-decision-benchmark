@@ -608,7 +608,7 @@ def _compute_and_save(rows, seeds, templates):
         "fill_rate_formula": "sum(retail_sales_S[:,retail_link]) / sum(customer_demand_D)",
         "paper1_version": "0.1.0",
         "paper1_commit": "a745fd5186a73d177dd94d283a4f8f8e8d329977",
-        "paper1_source": "third_party/gym-invmgmt-paper (Paper-1 commit a745fd5)",
+        "simulator_package": "gym-invmgmt==0.2.1 (published release)",
         "tfidf_raw_model": "results/phase7_classical_baseline/tfidf_logreg_model.pkl",
         "tfidf_calibrated_model": "results/phase7_classical_baseline/tfidf_logreg_calibrated_model.pkl",
         "controller_mapping": "effective_mu = base_mu * (1 + P(surge) * (surge_multiplier - 1))",

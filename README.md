@@ -1,11 +1,14 @@
-# Consequence-Aware Evaluation of Evidence Selection
+# When Relevance Does Not Transfer
 
-An executable benchmark that scores information access by the sequential
-decisions it produces, not by upstream relevance alone.
+An executable benchmark showing that **retrieval utility is
+consumer-dependent**: the same ranking helps one downstream decision-maker and
+harms another, and relevance-based evaluation cannot tell the two cases apart.
 
 ## Research question
 
-When does retrieved text improve sequential decisions?
+When does retrieved text improve sequential decisions? The answer here is
+negative and specific: not reliably, and whether it does is a property of the
+pipeline rather than of the ranking.
 
 The benchmark makes the whole path executable and holds every stage after
 retrieval fixed, so differences in realised utility are attributable to which
@@ -42,7 +45,7 @@ that claim honestly:
 
 | Name | What it varies | Environment |
 |---|---|---|
-| **R** (retrieval) | the retrieval system, under matched evidence budgets | controlled inventory, 3 regimes |
+| **R** (retrieval) — *the contribution* | the retrieval system and the downstream consumer, under matched evidence budgets | controlled inventory, 3 regimes |
 | **C** (controlled) | the interpreter, with warning released at period 12 | controlled inventory, 3 regimes, 40 periods |
 | **M** (multi-echelon) | the interpreter, on held-out wording | multi-echelon demand surge |
 | **S** (supply-side) | the interpreter, on a different event mechanism | multi-echelon capacity drop |
@@ -67,21 +70,21 @@ generated from the saved episode files rather than written by hand.
 
 ## Key findings
 
-1. **Retrieval quality and decision utility can rank systems differently.** With
-   the calibrated interpreter every practical retrieval system is worse than
-   retrieving nothing, while the oracle evidence selector is clearly better;
-   Kendall's tau between the nDCG and reward orderings is +0.33 at k=3.
-2. **The gap has a mechanism.** Non-relevant documents are not interchangeable:
-   a current report about a different site moves the controller the wrong way,
-   an off-topic memo only wastes a slot.
-3. **Whether the dissociation appears depends on the consumer.** Under the
-   rule-based interpreter the two orderings agree exactly.
-4. **A text-free control is a demanding baseline.** A constant belief tuned only
-   on development seeds beats most interpreters in every transfer environment,
-   and in one of them the shuffled-text control matches the genuine interpreter.
-5. **Calibration is not an isolated intervention**, and probability quality is
-   not always the operative variable: the label-only ablation of the raw
-   classifier outperforms both calibrated arms.
+1. **Every ranking system helps one consumer and harms another.** At k=3 the
+   retriever × consumer interaction changes sign for all four rankers,
+   magnitude +49.9 to +89.2 reward units.
+2. **The evidence is there.** An oracle relevance selector improves *both*
+   consumers (+60.6 and +69.0). The failure is mismatch, not scarcity.
+3. **Relevance-based evaluation detects this for one consumer only.**
+   Rank-reversal rate 0.00 for the rule-based consumer, 0.33 for the calibrated
+   one, with no upstream signal separating them.
+4. **The gradient is shared; the level is not.** Episode-level correlation
+   between ranking quality and reward is near-identical for both consumers
+   (+0.372, +0.382) — which is why a relevance-only evaluation misses the gap.
+5. **Supporting diagnosis:** text-free, shuffled-text and label-only controls
+   show that belief accuracy and probabilistic sophistication do not imply
+   operational value, and a perfect-semantic belief reference is not an upper
+   bound on realised return.
 
 ## Quick Start
 

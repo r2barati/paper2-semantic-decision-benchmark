@@ -138,8 +138,12 @@ def main() -> int:
             f"## {name}",
             "",
             f"Reference: `{reference}` at {j[reference]:.2f}. "
-            f"Oracle-belief reference: `{oracle}` at {j.get(oracle, float('nan')):.2f}. "
-            f"Oracle information value: **{oiv:+.2f}**.",
+            f"Perfect-semantic reference: `{oracle}` at "
+            f"{j.get(oracle, float('nan')):.2f}. "
+            f"Difference: **{oiv:+.2f}**. Note this is a *reference*, not an "
+            f"upper bound: a constant belief that reads no text exceeds it in "
+            f"both transfer environments, so a ratio against it does not "
+            f"measure a recovered fraction of anything.",
             "",
             "| Information source | J_w | Δ vs reference | 95% CI | p | Holm p | SIVR | status |",
             "|---|---:|---:|---|---:|---:|---:|---|",

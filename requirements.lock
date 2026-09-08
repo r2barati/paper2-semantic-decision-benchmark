@@ -1,3 +1,11 @@
-# Generated from the verified benchmark environment on 2026-08-23.
 # Install with: python3 -m pip install -r requirements.lock
+#
+# This file exists so CI installs the SAME set every run. It defers to
+# requirements.txt, where every package is pinned to an exact version; the
+# simulator additionally records the SHA-256 of the release it was verified
+# against.
+#
+# Verified environment: Python 3.9.19 and 3.11 (CI matrix), macOS and
+# ubuntu-24.04. Regenerate the recorded environment with `pip freeze` only
+# after re-running the release verification.
 -r requirements.txt

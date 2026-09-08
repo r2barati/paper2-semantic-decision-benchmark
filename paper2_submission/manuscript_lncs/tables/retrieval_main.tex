@@ -1,26 +1,27 @@
 \begin{table}[t]
-\caption{Experiment~R at a matched evidence budget $k=3$, with the calibrated
-TF--IDF interpreter and the receding-horizon controller held fixed. Left:
-ranking quality. Right: what the interpreter actually receives and what the
-decisions are worth. `Misleading' counts retrieved documents that are
-non-relevant \emph{and} describe a regime other than the true one --- the errors
-that move the controller, as opposed to those that only waste a slot.
-$\Delta J$ is the paired effect against the no-retrieval control; intervals are
-crossed bootstrap percentile intervals with shared seed draws.}
+\caption{Experiment~R at a matched evidence budget $k=3$. The same rankings,
+read by two different downstream consumers. Ranking quality is a property of
+the retrieval alone; $\Delta J$ is the paired effect on realised return against
+a control that retrieves nothing, with crossed bootstrap intervals. Every
+ranking system helps the rule-based consumer and harms the calibrated one.
+`Harmful' is the fraction of retrieved documents that are non-relevant
+\emph{and} describe a regime other than the true one.}
 \label{tab:retrieval}
-\centering\small\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}l rrr rr r@{}}
+\centering\footnotesize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}l rr rl rl@{}}
 \toprule
- & \multicolumn{3}{c}{Ranking quality} & \multicolumn{3}{c}{Consequences} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-7}
-System & nDCG@3 & R@3 & MRR & Misleading & Belief acc. & $\Delta J$ (95\% CI) \\
+ & \multicolumn{2}{c}{Ranking quality} & \multicolumn{2}{c}{RuleBased} & \multicolumn{2}{c}{Calibrated TF--IDF} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+System & nDCG@3 & Harmful & $\Delta J$ & 95\% CI & $\Delta J$ & 95\% CI \\
 \midrule
-No retrieval & 0.000 & 0.000 & 0.000 & 0.00 & 0.333 & +0.0~[+0, +0] \\
-Random & 0.090 & 0.117 & 0.218 & 1.33 & 0.367 & -49.8~[-78, -19] \\
-BM25 & 0.274 & 0.294 & 0.444 & 1.28 & 0.433 & -74.3~[-99, -48] \\
-TF--IDF cosine & 0.336 & 0.356 & 0.517 & 0.97 & 0.456 & -61.1~[-88, -32] \\
-Dense (MiniLM) & 0.617 & 0.672 & 0.727 & 0.87 & 0.589 & -1.5~[-31, +29] \\
-Oracle selector & 1.000 & 1.000 & 1.000 & 0.67 & 0.756 & +69.0~[+40, +96] \\
+\textit{No retrieval} & 0.000 & 0.00 & +0.0 & [+0, +0] & +0.0 & [+0, +0] \\
+\midrule
+Random & 0.090 & 0.44 & +11.6 & [-11, +35] & -49.8 & [-78, -19] \\
+BM25 & 0.274 & 0.43 & +14.9 & [+5, +26] & -74.3 & [-99, -48] \\
+TF--IDF cosine & 0.336 & 0.32 & +25.8 & [+14, +39] & -61.1 & [-88, -32] \\
+Dense (MiniLM) & 0.617 & 0.29 & +48.4 & [+32, +65] & -1.5 & [-31, +29] \\
+\midrule
+\textit{Oracle relevance selector} & 1.000 & 0.22 & +60.6 & [+48, +73] & +69.0 & [+40, +96] \\
 \bottomrule
 \end{tabular}
 \end{table}

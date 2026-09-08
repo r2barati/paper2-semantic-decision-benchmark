@@ -89,7 +89,7 @@ its test suite runs from that clean export: **320 passed, 0 failed** (was 257
 passed / 16 failed at the audited commit), with `PAPER2_LLM_CACHE_DIR` and
 `PAPER2_PHASE5_RESULTS_DIR` pointed at empty directories and no API key set.
 
-### 8. No retrieval contribution — **added (Experiment R)**
+### 8. No retrieval contribution — **added, and now the paper's contribution**
 
 An entity-scoped operational report feed with wrong-entity, stale and off-topic
 distractors; a fixed operational query; BM25 (implemented in-repo), TF-IDF
@@ -97,11 +97,22 @@ cosine, dense sentence-embedding retrieval with frozen embeddings, random floor
 and oracle evidence selector; matched evidence budgets k ∈ {1,3,5}; the same
 fixed interpreter and controller downstream.
 
-The headline result is a dissociation: with the calibrated interpreter at k=3
-every practical retrieval system is worse than retrieving nothing while the
-oracle selector gains +69.0, and Kendall's τ between the nDCG and reward
-orderings is +0.33. With the rule-based interpreter the orderings agree exactly.
-Positioned against eRAG, CUE-R, GroGU and situational-relevance work.
+The paper was subsequently reframed around this experiment as a **negative
+evaluation result**: retrieval utility is consumer-dependent. Every ranking
+system helps one downstream consumer and harms the other; the
+retriever x consumer interaction changes sign for all four (+49.9 to +89.2).
+The evidence is extractable --- an oracle relevance selector improves both
+consumers (+60.6, +69.0) --- so this is mismatch, not scarcity. Ranking quality
+orders systems correctly for one consumer (rank-reversal rate 0.00) and not the
+other (0.33), with no upstream signal distinguishing them. Episode-level
+relevance-reward correlation is near-identical for both (+0.372, +0.382), so
+the consumer dependence is a level offset rather than a reversed gradient ---
+which is exactly why relevance-only evaluation misses it.
+
+Experiments C, M, S and B were demoted to supporting diagnosis. "Oracle belief"
+was renamed "perfect-semantic reference", since it is demonstrably not an upper
+bound on realised return. Positioned against eRAG, CUE-R, GroGU and
+situational-relevance work.
 
 ---
 
@@ -237,6 +248,37 @@ is needed are gone. Realised returns are defined separately from their
 expectation and the undiscounted finite-horizon convention is stated.
 
 ---
+
+---
+
+## Follow-up changes (8 September 2026)
+
+Made after the repairs above, in response to a reviewer judgment that the
+corrected work is publishable as a negative evaluation paper.
+
+**Reframing.** Title changed to *When Relevance Does Not Transfer:
+Consumer-Dependent Retrieval Utility in Sequential Decision Systems*.
+Experiment R is the centrepiece; the transfer and controlled experiments are
+supporting diagnosis. A generated figure shows the interaction directly.
+
+**New reported statistics** (`src/retrieval_analysis.py`, unit-tested against
+hand-constructed data with known answers): retriever x consumer interaction
+with an explicit sign convention, rank-reversal rate, episode-level
+relevance-reward correlations computed within episodes, paired confidence
+intervals, and harmful-retrieval rate.
+
+**Dependency.** The simulator is no longer a vendored fork. It is the published
+`gym-invmgmt==0.2.1`, pinned with its sdist SHA-256 and cited in third person.
+Equivalence was established rather than assumed: the published release differs
+substantially in source from the vendored 0.1.0, so **all 14,400 stored gym
+episodes** were replayed against it --- maximum reward error **0.0**. No
+published number depends on which the reader installs.
+
+This also closed the residual anonymity risk. The vendored fork carried a
+third-party LICENSE naming an author, which could not be removed without
+violating the licence; removing the fork itself removes the link without
+altering any copyright notice. The built artifact now contains no occurrence of
+the authors' name, email, institutional domain or home-directory paths.
 
 ## What this does not fix
 

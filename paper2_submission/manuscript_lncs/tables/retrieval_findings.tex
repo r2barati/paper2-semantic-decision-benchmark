@@ -1,24 +1,46 @@
 \begin{table}[t]
-\caption{Experiment~R. Do retrieval quality and decision utility rank the
-ranking systems the same way? Kendall's $\tau_b$ is computed between the
-nDCG@$k$ ordering and the $J_w$ ordering over \{random, BM25, TF--IDF,
-dense\}; the no-retrieval and oracle references are excluded because neither
-is a retrieval system. The last two columns track the strongest ranker
-across budgets: raising its nDCG does not raise its realised effect.}
-\label{tab:rankagreement}
-\centering\small\setlength{\tabcolsep}{4pt}
-\begin{tabular}{llrllrr}
+\caption{Experiment~R. How much of a ranking's value belongs to the ranking?
+Left: the retriever~$\times$~consumer interaction at $k=3$ --- the difference
+between the two consumers' paired effects for the same ranking. Every
+interaction changes sign, so no single number describes what a ranking is
+worth. Right: within each consumer, how often ranking quality orders two
+systems the way realised utility does, and how strongly the two correlate
+across episodes.}
+\label{tab:consumerdep}
+\centering\small
+\begin{tabular}{@{}l rrr c@{}}
 \toprule
- & & & \multicolumn{2}{c}{Best system by} & \multicolumn{2}{c}{Dense} \\
-\cmidrule(lr){4-5}\cmidrule(lr){6-7}
-Interpreter & $k$ & $\tau_b$ & nDCG & reward & nDCG@$k$ & $\Delta J$ \\
+System & RuleBased $\Delta J$ & Calibrated $\Delta J$ & Interaction & Sign flip \\
 \midrule
-RuleBased & 1 & +0.67 & Dense (MiniLM) & TF--IDF cosine & 0.556 & +21.3 \\
-RuleBased & 3 & +1.00 & Dense (MiniLM) & Dense (MiniLM) & 0.617 & +48.4 \\
-RuleBased & 5 & +1.00 & Dense (MiniLM) & Dense (MiniLM) & 0.691 & +46.0 \\
-TF--IDF calib. & 1 & +0.00 & Dense (MiniLM) & Random & 0.556 & -69.3 \\
-TF--IDF calib. & 3 & +0.33 & Dense (MiniLM) & Dense (MiniLM) & 0.617 & -1.5 \\
-TF--IDF calib. & 5 & +0.00 & Dense (MiniLM) & Dense (MiniLM) & 0.691 & -18.9 \\
+Random & +11.6 & -49.8 & +61.4 & \checkmark \\
+BM25 & +14.9 & -74.3 & +89.2 & \checkmark \\
+TF--IDF cosine & +25.8 & -61.1 & +86.9 & \checkmark \\
+Dense (MiniLM) & +48.4 & -1.5 & +49.9 & \checkmark \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+
+\centering\small
+\begin{tabular}{@{}l rrrr@{}}
+\toprule
+Consumer & Reversal rate & Kendall $\tau_b$ & Pearson $r$ & Spearman $\rho$ \\
+\midrule
+RuleBased & 0.00 (0/6) & +1.00 & +0.372 & +0.392 \\
+Calibrated TF--IDF & 0.33 (2/6) & +0.33 & +0.382 & +0.367 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+
+\centering\small
+\begin{tabular}{@{}l rrr@{}}
+\toprule
+Dense retrieval at budget $k$ & $k=1$ & $k=3$ & $k=5$ \\
+\midrule
+nDCG@$k$ & 0.556 & 0.617 & 0.691 \\
+RuleBased $\Delta J$ & +21.3 & +48.4 & +46.0 \\
+Calibrated TF--IDF $\Delta J$ & -69.3 & -1.5 & -18.9 \\
 \bottomrule
 \end{tabular}
 \end{table}

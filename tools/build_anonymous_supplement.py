@@ -2,7 +2,7 @@
 
 Double-blind review requires the supplement not to identify the authors. It
 does NOT permit stripping third-party copyright and license notices, and this
-tool never does: `third_party/` licenses are copied verbatim.
+tool never does: any third-party license present is copied verbatim.
 
 What is removed or rewritten:
 

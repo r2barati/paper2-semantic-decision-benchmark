@@ -143,7 +143,7 @@ LLM_BASE_URL=https://api.openai.com/v1
 
 - **Package:** `gym-invmgmt` v0.1.0
 - **Source commit:** `a745fd5186a73d177dd94d283a4f8f8e8d329977`
-- **Path:** `third_party/gym-invmgmt-paper/` (vendored at commit `a745fd5`)
+- **Package:** `gym-invmgmt==0.2.1`, installed from the published release (sdist sha256 `a2a286cd95d9967b...`). No longer vendored. Equivalence to the previously vendored 0.1.0 was verified by replaying all 14,400 stored gym episodes: maximum reward error 0.0.
 - **Environment:** `GymInvMgmt/Serial-v0`
 - **Topology:** RM(4) -> Factory(3, C=100) -> Dist(2) -> Retail(1) -> Market(0)
 - **Lead times:** L = [0, 4, 4]

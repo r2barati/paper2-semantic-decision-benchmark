@@ -49,15 +49,15 @@ PRETTY = {
     "TFIDF_LogReg_Calibrated_Shuffled": r"TF--IDF cal.\ (shuffled)",
     "TFIDF_LogReg_Calibrated_ShuffledText": r"TF--IDF cal.\ (shuffled)",
     "gpt-4o": r"GPT-4o",
-    "PerfectSemantic": r"Oracle belief",
-    "OracleSemantic": r"Oracle belief",
+    "PerfectSemantic": r"Perfect-semantic ref.",
+    "OracleSemantic": r"Perfect-semantic ref.",
     # retrieval systems
     "none": r"No retrieval",
     "random": r"Random",
     "bm25": r"BM25",
     "tfidf": r"TF--IDF cosine",
     "dense": r"Dense (MiniLM)",
-    "oracle": r"Oracle selector",
+    "oracle": r"Oracle relevance selector",
 }
 
 
@@ -162,111 +162,150 @@ def fmt_sivr(row) -> str:
 # ---------------------------------------------------------------------------
 
 def retrieval_tables() -> None:
+    """Experiment R: the paper's centrepiece.
+
+    Table 1 puts both consumers side by side, because the finding is that the
+    same ranking has opposite value depending on which one reads it. Table 2
+    quantifies that: interaction, rank-reversal rate, correlation and the rate
+    at which retrieved evidence actively misleads.
+    """
+    from src.retrieval_analysis import (
+        read_episodes, interaction, rank_reversal_rate,
+        relevance_reward_correlation, harmful_retrieval_rate,
+    )
+
     path = RESULTS / "retrieval" / "retrieval_summary.csv"
-    if not path.exists():
-        print("  [skip] retrieval_summary.csv not present")
+    ep_path = RESULTS / "retrieval" / "retrieval_episodes.csv"
+    if not path.exists() or not ep_path.exists():
+        print("  [skip] retrieval results not present")
         return
     rows = read(path)
+    episodes = read_episodes(ep_path)
     order = ["none", "random", "bm25", "tfidf", "dense", "oracle"]
+    RULE, CAL = "RuleBased", "TFIDF_LogReg_Calibrated"
 
-    interp = "TFIDF_LogReg_Calibrated"
-    sel = {r["system"]: r for r in rows
-           if r["interpreter"] == interp and int(r["budget_k"]) == 3}
+    # ---- Table 1: the same ranking, two consumers -----------------------
+    sel = {(r["interpreter"], r["system"]): r
+           for r in rows if int(r["budget_k"]) == 3}
+    harm = harmful_retrieval_rate(episodes, 3)
 
     lines = [
         r"\begin{table}[t]",
-        r"\caption{Experiment~R at a matched evidence budget $k=3$, with the calibrated",
-        r"TF--IDF interpreter and the receding-horizon controller held fixed. Left:",
-        r"ranking quality. Right: what the interpreter actually receives and what the",
-        r"decisions are worth. `Misleading' counts retrieved documents that are",
-        r"non-relevant \emph{and} describe a regime other than the true one --- the errors",
-        r"that move the controller, as opposed to those that only waste a slot.",
-        r"$\Delta J$ is the paired effect against the no-retrieval control; intervals are",
-        r"crossed bootstrap percentile intervals with shared seed draws.}",
+        r"\caption{Experiment~R at a matched evidence budget $k=3$. The same rankings,",
+        r"read by two different downstream consumers. Ranking quality is a property of",
+        r"the retrieval alone; $\Delta J$ is the paired effect on realised return against",
+        r"a control that retrieves nothing, with crossed bootstrap intervals. Every",
+        r"ranking system helps the rule-based consumer and harms the calibrated one.",
+        r"`Harmful' is the fraction of retrieved documents that are non-relevant",
+        r"\emph{and} describe a regime other than the true one.}",
         r"\label{tab:retrieval}",
-        r"\centering\small\setlength{\tabcolsep}{3pt}",
-        r"\begin{tabular}{@{}l rrr rr r@{}}",
+        r"\centering\footnotesize\setlength{\tabcolsep}{2.5pt}",
+        r"\begin{tabular}{@{}l rr rl rl@{}}",
         r"\toprule",
-        r" & \multicolumn{3}{c}{Ranking quality} & \multicolumn{3}{c}{Consequences} \\",
-        r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}",
-        r"System & nDCG@3 & R@3 & MRR & Misleading & Belief acc. & $\Delta J$ (95\% CI) \\",
+        r" & \multicolumn{2}{c}{Ranking quality} & \multicolumn{2}{c}{RuleBased}"
+        r" & \multicolumn{2}{c}{Calibrated TF--IDF} \\",
+        r"\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}",
+        r"System & nDCG@3 & Harmful & $\Delta J$ & 95\% CI"
+        r" & $\Delta J$ & 95\% CI \\",
         r"\midrule",
     ]
-
-    # Per-episode harm and belief accuracy, folded into the same table.
-    ep_path = RESULTS / "retrieval" / "retrieval_episodes.csv"
-    harm: dict = {}
-    if ep_path.exists():
-        by_sys = defaultdict(list)
-        for r in read(ep_path):
-            if r["interpreter"] == interp and int(r["budget_k"]) == 3:
-                by_sys[r["system"]].append(r)
-        for system, rs in by_sys.items():
-            harm[system] = (
-                float(np.mean([float(x["n_misleading_retrieved"]) for x in rs])),
-                float(np.mean([1.0 if x["belief_correct"] == "True" else 0.0 for x in rs])),
-            )
-
     for system in order:
-        r = sel.get(system)
-        if not r:
+        a, b = sel.get((RULE, system)), sel.get((CAL, system))
+        if not a or not b:
             continue
-        ci = ("--" if r["ci_lower"] in ("", None)
-              else f"[{float(r['ci_lower']):+.0f}, {float(r['ci_upper']):+.0f}]")
-        mis, acc = harm.get(system, (float("nan"), float("nan")))
-        mis = "--" if mis != mis else f"{mis:.2f}"
-        acc = "--" if acc != acc else f"{acc:.3f}"
+
+        def cell(r):
+            ci = ("--" if r["ci_lower"] in ("", None)
+                  else f"[{float(r['ci_lower']):+.0f}, {float(r['ci_upper']):+.0f}]")
+            return f"{float(r['delta_vs_no_retrieval']):+.1f} & {ci}"
+
+        h = harm.get(system, {}).get("harmful_rate", float("nan"))
+        h = "--" if h != h else f"{h:.2f}"
+        name = PRETTY.get(system, system)
+        if system in ("none", "oracle"):
+            name = rf"\textit{{{name}}}"
         lines.append(
-            f"{PRETTY.get(system, system)} & {float(r['ndcg_at_k']):.3f} & "
-            f"{float(r['recall_at_k']):.3f} & {float(r['mrr']):.3f} & "
-            f"{mis} & {acc} & "
-            f"{float(r['delta_vs_no_retrieval']):+.1f}~{ci} \\\\"
+            f"{name} & {float(a['ndcg_at_k']):.3f} & {h} & {cell(a)} & {cell(b)} \\\\"
         )
+        if system == "none":
+            lines.append(r"\midrule")
+        if system == "dense":
+            lines.append(r"\midrule")
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     write("retrieval_main.tex", "\n".join(lines))
 
-    # Budget sweep + rank agreement
-    agree_path = RESULTS / "retrieval" / "rank_agreement.csv"
-    agree = read(agree_path) if agree_path.exists() else []
-    # The strongest ranker's own quality and utility at each budget, so the
-    # budget sweep can be checked in the paper rather than only in the CSV.
-    dense = {(r["interpreter"], int(r["budget_k"])): r
-             for r in rows if r["system"] == "dense"}
-
+    # ---- Table 2: how strongly does the consumer matter? ----------------
+    inter = {r["system"]: r for r in interaction(episodes, 3)}
     lines = [
         r"\begin{table}[t]",
-        r"\caption{Experiment~R. Do retrieval quality and decision utility rank the",
-        r"ranking systems the same way? Kendall's $\tau_b$ is computed between the",
-        r"nDCG@$k$ ordering and the $J_w$ ordering over \{random, BM25, TF--IDF,",
-        r"dense\}; the no-retrieval and oracle references are excluded because neither",
-        r"is a retrieval system. The last two columns track the strongest ranker",
-        r"across budgets: raising its nDCG does not raise its realised effect.}",
-        r"\label{tab:rankagreement}",
-        r"\centering\small\setlength{\tabcolsep}{4pt}",
-        r"\begin{tabular}{llrllrr}",
+        r"\caption{Experiment~R. How much of a ranking's value belongs to the ranking?",
+        r"Left: the retriever~$\times$~consumer interaction at $k=3$ --- the difference",
+        r"between the two consumers' paired effects for the same ranking. Every",
+        r"interaction changes sign, so no single number describes what a ranking is",
+        r"worth. Right: within each consumer, how often ranking quality orders two",
+        r"systems the way realised utility does, and how strongly the two correlate",
+        r"across episodes.}",
+        r"\label{tab:consumerdep}",
+        r"\centering\small",
+        r"\begin{tabular}{@{}l rrr c@{}}",
         r"\toprule",
-        r" & & & \multicolumn{2}{c}{Best system by} & \multicolumn{2}{c}{Dense} \\",
-        r"\cmidrule(lr){4-5}\cmidrule(lr){6-7}",
-        r"Interpreter & $k$ & $\tau_b$ & nDCG & reward & nDCG@$k$ & $\Delta J$ \\",
+        r"System & RuleBased $\Delta J$ & Calibrated $\Delta J$ & Interaction & Sign flip \\",
         r"\midrule",
     ]
-    for r in agree:
-        tau = r["kendall_tau_b"]
-        tau = "--" if tau in ("", None) else f"{float(tau):+.2f}"
-        d = dense.get((r["interpreter"], int(r["budget_k"])))
-        dn = f"{float(d['ndcg_at_k']):.3f}" if d else "--"
-        dd = f"{float(d['delta_vs_no_retrieval']):+.1f}" if d else "--"
-        label = {
-            "RuleBased": "RuleBased",
-            "TFIDF_LogReg_Calibrated": r"TF--IDF calib.",
-        }.get(r["interpreter"], r["interpreter"].replace("_", " "))
+    for system in ("random", "bm25", "tfidf", "dense"):
+        r = inter.get(system)
+        if not r:
+            continue
         lines.append(
-            f"{label} & {r['budget_k']} & {tau} & "
-            f"{PRETTY.get(r['best_by_ndcg'], r['best_by_ndcg'])} & "
-            f"{PRETTY.get(r['best_by_reward'], r['best_by_reward'])} & {dn} & {dd} \\\\"
+            f"{PRETTY.get(system, system)} & {r['effect_RuleBased']:+.1f} & "
+            f"{r['effect_TFIDF_LogReg_Calibrated']:+.1f} & {r['interaction']:+.1f} & "
+            + (r"\checkmark" if r["sign_flip"] else "--") + r" \\"
         )
-    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    lines += [r"\bottomrule", r"\end{tabular}", "", r"\vspace{0.6em}", ""]
 
+    rev = rank_reversal_rate(episodes, 3)
+    corr = relevance_reward_correlation(episodes, 3)
+    lines += [
+        r"\centering\small",
+        r"\begin{tabular}{@{}l rrrr@{}}",
+        r"\toprule",
+        r"Consumer & Reversal rate & Kendall $\tau_b$ & Pearson $r$ & Spearman $\rho$ \\",
+        r"\midrule",
+    ]
+    for interp in (RULE, CAL):
+        rv, cr = rev.get(interp), corr.get(interp)
+        if not rv or not cr:
+            continue
+        label = {RULE: "RuleBased", CAL: r"Calibrated TF--IDF"}[interp]
+        lines.append(
+            f"{label} & {rv['reversal_rate']:.2f} ({rv['discordant']}/{rv['n_pairs']}) & "
+            f"{rv['kendall_tau_b']:+.2f} & {cr['pearson']:+.3f} & {cr['spearman']:+.3f} \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}", "", r"\vspace{0.6em}", ""]
+
+    # Budget sweep for the strongest ranker: raising its ranking quality does
+    # not raise what it is worth to the consumer that struggles with it.
+    dense = {(r["interpreter"], int(r["budget_k"])): r
+             for r in rows if r["system"] == "dense"}
+    budgets = sorted({int(r["budget_k"]) for r in rows})
+    lines += [
+        r"\centering\small",
+        r"\begin{tabular}{@{}l rrr@{}}",
+        r"\toprule",
+        r"Dense retrieval at budget $k$ & "
+        + " & ".join(f"$k={k}$" for k in budgets) + r" \\",
+        r"\midrule",
+    ]
+    row_q = [f"{float(dense[(RULE, k)]['ndcg_at_k']):.3f}"
+             if (RULE, k) in dense else "--" for k in budgets]
+    lines.append(r"nDCG@$k$ & " + " & ".join(row_q) + r" \\")
+    delta = "$\\Delta J$"
+    for interp, label in ((RULE, f"RuleBased {delta}"),
+                          (CAL, f"Calibrated TF--IDF {delta}")):
+        cells = [f"{float(dense[(interp, k)]['delta_vs_no_retrieval']):+.1f}"
+                 if (interp, k) in dense else "--" for k in budgets]
+        lines.append(f"{label} & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     write("retrieval_findings.tex", "\n".join(lines))
 
 

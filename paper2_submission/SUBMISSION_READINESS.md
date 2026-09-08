@@ -66,10 +66,20 @@ in `tests/test_repairs_2026.py`:
 
 ## Added
 
-- **Experiment R**, the retrieval / evidence-selection study: an entity-scoped
-  report feed with distractors, stale reports and routine traffic; BM25,
-  TF-IDF, dense, random and oracle selectors under matched evidence budgets;
-  the same fixed interpreter and controller downstream.
+- **Experiment R**, now the paper's contribution: an entity-scoped report feed
+  with distractors, stale reports and routine traffic; BM25, TF-IDF, dense,
+  random and oracle selectors under matched evidence budgets; **two** fixed
+  downstream consumers. Reported as a retriever x consumer interaction, a
+  rank-reversal rate, episode-level relevance-reward correlations, paired
+  intervals and a harmful-retrieval rate.
+- **Framing.** The paper is a negative evaluation result --- retrieval utility
+  is consumer-dependent --- not a claim that semantic interpretation improves
+  decisions. Experiments C/M/S/B are supporting diagnosis.
+- **Naming.** "Oracle belief" is renamed "perfect-semantic reference": it is
+  demonstrably not an upper bound on realised return.
+- **Dependency.** The simulator is the pinned published `gym-invmgmt==0.2.1`
+  cited in third person, not a vendored author-identifying fork. All 14,400
+  stored gym episodes replay under it with maximum reward error 0.0.
 - **Text-free and degraded-text controls** across the controlled and gym
   experiments: constant-belief endpoints, a development-tuned no-text operating
   point, shuffled-text and label-only ablations.
@@ -80,8 +90,9 @@ in `tests/test_repairs_2026.py`:
 
 - [ ] Final LNCS PDF compiled and page count verified at or under 12 content
       pages including appendices.
-- [ ] Anonymous supplement actually built and inspected (relative paths, no git
-      history, no credentials, no private planning files).
+- [x] Anonymous supplement built and inspected; the artifact now contains no
+      occurrence of the authors' name, email, institutional domain or
+      home-directory paths.
 - [ ] Author, conflict, concurrent-submission and AI-use declarations completed
       from actual author activity. These are human facts and cannot be
       certified from this repository.

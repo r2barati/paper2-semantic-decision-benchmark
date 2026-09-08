@@ -15,12 +15,14 @@ from typing import Optional
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PAPER1_PATH = Path(os.environ.get(
-    "GYM_INVMGMT_PATH",
-    REPO_ROOT / "third_party" / "gym-invmgmt-paper",
-))
-if str(PAPER1_PATH) not in sys.path:
-    sys.path.insert(0, str(PAPER1_PATH))
+
+# The multi-echelon simulator is a declared, pinned dependency
+# (`gym-invmgmt==0.2.1`), not a vendored fork. Only an explicit
+# GYM_INVMGMT_PATH overrides the installed package, which keeps the
+# equivalence check between releases runnable without changing the default.
+_OVERRIDE = os.environ.get("GYM_INVMGMT_PATH")
+if _OVERRIDE and _OVERRIDE not in sys.path:
+    sys.path.insert(0, _OVERRIDE)
 
 from gym_invmgmt.core_env import CoreEnv
 

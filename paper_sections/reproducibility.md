@@ -6,7 +6,8 @@
 pip install -r requirements.txt
 pip install gymnasium
 python3 -m pip install -r requirements.lock
-# Paper-1 gym-invmgmt is vendored at third_party/gym-invmgmt-paper (a745fd5).
+# The multi-echelon simulator is the published gym-invmgmt==0.2.1 package,
+# installed as a pinned dependency rather than vendored.
 ```
 
 ## Offline Reproduction

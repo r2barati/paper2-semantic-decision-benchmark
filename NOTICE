@@ -4,11 +4,18 @@ This project bundles and depends on third-party material whose own licenses
 continue to apply. Anonymising a submission does not remove the obligation to
 preserve these notices.
 
-## third_party/gym-invmgmt-paper
+## gym-invmgmt (multi-echelon simulator)
 
-Vendored multi-echelon inventory simulator. Licensed under the MIT License;
-see `third_party/gym-invmgmt-paper/LICENSE` for the full text and the
-copyright holder. It is retained verbatim.
+A declared, pinned dependency (`gym-invmgmt==0.2.1`), installed from its
+published release rather than vendored into this repository. It is MIT
+licensed; its own distribution carries its copyright notice and licence text,
+which are unmodified by this project.
+
+This project previously vendored a fork of that package. Distributing the fork
+placed a third-party LICENSE naming its copyright holder inside a double-blind
+submission artifact. Depending on the published release and citing it in third
+person removes that link without altering anyone's copyright notice, which
+would not have been a permissible way to achieve anonymity.
 
 ## Templates, corpora and original code
 

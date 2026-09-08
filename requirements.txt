@@ -2,11 +2,9 @@
 #
 # Supported Python: >=3.9, <3.13 (developed and verified on 3.9.19 and 3.11).
 #
-# The vendored simulator in third_party/gym-invmgmt-paper is inserted into
-# sys.path rather than pip-installed, so ITS dependencies are not resolved
-# automatically and must be listed here explicitly. Omitting networkx and
-# PyYAML made `import gym_invmgmt` fail on any machine that did not already
-# happen to have them.
+# The simulator's own transitive dependencies (networkx, PyYAML) are listed
+# explicitly below. They were previously omitted, which made
+# `import gym_invmgmt` fail on any machine that did not already have them.
 
 # --- core numerics -----------------------------------------------------
 numpy==1.26.4
@@ -16,8 +14,23 @@ scikit-learn==1.6.1
 matplotlib==3.9.0rc2
 
 # --- simulator ---------------------------------------------------------
-# NOTE: gymnasium is pinned to 0.29.1. The README previously claimed 1.0.0;
-# 0.29.1 is what the vendored environment is verified against.
+# The multi-echelon simulator is a PUBLISHED package pinned to an exact
+# version, not a vendored fork. Distributing a fork placed a third-party
+# LICENSE naming its copyright holder inside a double-blind submission
+# artifact; depending on the published release and citing it in third person
+# removes that without touching anyone's copyright notice.
+#
+# Equivalence to the previously vendored 0.1.0 was established empirically,
+# not assumed: all 14,400 stored gym episodes replay to their recorded reward
+# under 0.2.1 with a maximum error of 0.0
+# (`python3 -m tools.verify_release --replay`).
+#
+# Immutable identity of the pinned release:
+#   sdist gym_invmgmt-0.2.1.tar.gz         sha256:a2a286cd95d9967b27db5ed5301d262862dd98bfbe1b50358fc9944af1d60311
+#   wheel gym_invmgmt-0.2.1-py3-none-any.whl sha256:55947e88a5f8287a31f7fa320d57de548df85fb5c033697bb742888b3db3a302
+gym-invmgmt==0.2.1
+
+# NOTE: gymnasium is pinned to 0.29.1. The README previously claimed 1.0.0.
 gymnasium==0.29.1
 networkx==3.2.1            # required by gym_invmgmt.network_topology
 PyYAML==6.0.3              # required by gym_invmgmt.network_topology

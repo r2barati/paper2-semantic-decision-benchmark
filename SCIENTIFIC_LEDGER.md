@@ -11,7 +11,7 @@ Holm adjustment is applied within each experiment's interpreter family.
 
 ## Experiment C (controlled)
 
-Reference: `NoInfo` at 1635.47. Oracle-belief reference: `PerfectSemantic` at 1899.68. Oracle information value: **+264.22**.
+Reference: `NoInfo` at 1635.47. Perfect-semantic reference: `PerfectSemantic` at 1899.68. Difference: **+264.22**. Note this is a *reference*, not an upper bound: a constant belief that reads no text exceeds it in both transfer environments, so a ratio against it does not measure a recovered fraction of anything.
 
 | Information source | J_w | Δ vs reference | 95% CI | p | Holm p | SIVR | status |
 |---|---:|---:|---|---:|---:|---:|---|
@@ -30,7 +30,7 @@ Reference: `NoInfo` at 1635.47. Oracle-belief reference: `PerfectSemantic` at 18
 
 ## Experiment M (multi-echelon)
 
-Reference: `NoInfo` at 467.73. Oracle-belief reference: `OracleSemantic` at 551.99. Oracle information value: **+84.26**.
+Reference: `NoInfo` at 467.73. Perfect-semantic reference: `OracleSemantic` at 551.99. Difference: **+84.26**. Note this is a *reference*, not an upper bound: a constant belief that reads no text exceeds it in both transfer environments, so a ratio against it does not measure a recovered fraction of anything.
 
 | Information source | J_w | Δ vs reference | 95% CI | p | Holm p | SIVR | status |
 |---|---:|---:|---|---:|---:|---:|---|
@@ -49,7 +49,7 @@ Reference: `NoInfo` at 467.73. Oracle-belief reference: `OracleSemantic` at 551.
 
 ## Experiment S (supply-side)
 
-Reference: `NoInfo` at 1333.61. Oracle-belief reference: `OracleSemantic` at 1446.35. Oracle information value: **+112.74**.
+Reference: `NoInfo` at 1333.61. Perfect-semantic reference: `OracleSemantic` at 1446.35. Difference: **+112.74**. Note this is a *reference*, not an upper bound: a constant belief that reads no text exceeds it in both transfer environments, so a ratio against it does not measure a recovered fraction of anything.
 
 | Information source | J_w | Δ vs reference | 95% CI | p | Holm p | SIVR | status |
 |---|---:|---:|---|---:|---:|---:|---|

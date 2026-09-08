@@ -37,26 +37,27 @@ case-insensitive plain substring search over **all** files rather than the
 redaction regexes over text-suffixed files. An anonymity check must not share
 its matching logic with the transformation it is checking.
 
-## Residual risk requiring an author decision
+## Residual risk: resolved
 
-`third_party/gym-invmgmt-paper/LICENSE` is an MIT notice that names a copyright
-holder. It is retained verbatim: anonymity does not license removing a
-third-party copyright notice, and doing so would be a licence violation.
+An earlier build retained `third_party/gym-invmgmt-paper/LICENSE`, an MIT notice
+naming a copyright holder who is also an author. It was kept verbatim, because
+anonymity does not license removing a third-party copyright notice, and that
+left a residual link a determined reviewer could follow.
 
-That notice names one of the authors. A determined reviewer could follow it.
-The manuscript itself does not help them --- it cites the simulator by its
-published benchmark lineage rather than as "Paper-1" or by repository URL, and
-`NOTICE` records the dependency without linking it to this submission's
-authorship. But the residual link exists and **the authors must decide** how to
-handle it. Options, in decreasing order of preference:
+The link is now gone at its source rather than papered over. The simulator is a
+**declared, pinned dependency** installed from its published release
+(`gym-invmgmt==0.2.1`, sdist SHA-256 `a2a286cd95d9967b...`) and cited in third
+person, instead of a vendored fork distributed inside the artifact. No copyright
+notice was altered; the fork simply is not part of the submission.
 
-1. Depend on the upstream published package rather than a vendored copy of the
-   authors' own fork, so the notice names an external project.
-2. Disclose it in the submission's anonymity statement, if the venue permits.
-3. Accept the risk.
+The version change was not assumed to be safe. All 14,400 stored gym episodes
+were replayed against the published release and reproduced their recorded
+rewards with a maximum error of **0.0**, so no published number depends on which
+of the two the reader installs.
 
-This is a human decision about the authors' own prior work and cannot be made
-from this repository.
+The built artifact now contains no occurrence of the authors' name, email,
+institutional domain or home-directory paths, verified by case-insensitive
+substring scan over every file.
 
 ## Not certified here
 

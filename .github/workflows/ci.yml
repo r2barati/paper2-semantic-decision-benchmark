@@ -31,9 +31,10 @@ jobs:
       # the experimental tests.
       - run: python -m pip install -r requirements.lock
 
-      # The vendored simulator must import from a bare declared environment.
+      # The simulator is a declared, pinned dependency rather than a vendored
+      # fork, so this asserts it resolves from the installed environment.
       - name: Simulator imports from declared dependencies alone
-        run: python -c "import sys; sys.path.insert(0,'third_party/gym-invmgmt-paper'); import gym_invmgmt.network_topology; print('simulator import ok')"
+        run: python -c "import gym_invmgmt.network_topology as m; print('simulator import ok from', m.__file__)"
 
       # Reconstruct the offline artifacts the release does not track.
       - name: Rebuild offline artifacts
@@ -46,8 +47,9 @@ jobs:
       - name: Full offline test suite
         run: python -m pytest -q tests/
 
-      # At least one stored-belief simulation replay and one publication
-      # regeneration, so a table that no longer reproduces fails CI.
+      # Stored beliefs must replay to their recorded rewards under the pinned
+      # simulator release, and every table and figure in the paper must
+      # regenerate byte-identically from the stored episodes. Either failing
+      # means the paper and its data have drifted apart.
       - name: Stored-belief replay and publication regeneration
-        run: |
-          python -m tools.verify_release --replay --regenerate
+        run: python -m tools.verify_release --replay --regenerate

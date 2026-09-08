@@ -118,11 +118,28 @@ def check_regenerate() -> bool:
         print("  FAILED: no committed tables to compare against")
         return False
 
-    cmd = [sys.executable, "-m", "results.publication.generate_lncs_tables"]
-    result = subprocess.run(cmd, cwd=str(ROOT))
-    if result.returncode != 0:
-        print(f"  FAILED: {' '.join(cmd)}")
+    figures = ROOT / "paper2_submission" / "manuscript_lncs" / "figures"
+    fig_before = {p.name: p.read_bytes() for p in sorted(figures.glob("*.png"))}
+
+    for cmd in (
+        [sys.executable, "-m", "results.publication.generate_lncs_tables"],
+        [sys.executable, "-m", "results.publication.generate_lncs_figures"],
+    ):
+        result = subprocess.run(cmd, cwd=str(ROOT))
+        if result.returncode != 0:
+            print(f"  FAILED: {' '.join(cmd)}")
+            return False
+
+    # Figures are compared on the PNG rather than the PDF: the PDF embeds a
+    # creation timestamp, so it differs on every run regardless of content.
+    fig_after = {p.name: p.read_bytes() for p in sorted(figures.glob("*.png"))}
+    fig_drift = sorted(n for n in fig_before if fig_before[n] != fig_after.get(n))
+    if fig_drift:
+        for name in fig_drift:
+            print(f"  DRIFT: figure {name} differs from the committed version")
         return False
+    if fig_before:
+        print(f"  ok: {len(fig_before)} figure(s) regenerate identically")
 
     after = {p.name: p.read_text() for p in sorted(tables.glob("*.tex"))}
     drifted = sorted(n for n in before if before[n] != after.get(n))

@@ -1,78 +1,78 @@
 # Headline results
 
-Regenerated 7 September 2026 from the corrected pipeline. Every number here is
-in `SCIENTIFIC_LEDGER.md` or a table under
-`paper2_submission/manuscript_lncs/tables/`, both generated from the frozen
-episode files. The previous version of this file is superseded; it described a
-pipeline with an information leak in the historical controller matrix, an
-incorrect optimiser LP, off-by-one arrival timing, and no text-free controls.
+Regenerated 8 September 2026. Every number is in `SCIENTIFIC_LEDGER.md` or a
+generated table under `paper2_submission/manuscript_lncs/tables/`, all produced
+from the frozen episode files. The paper is framed as a **negative evaluation
+result**: retrieval utility is consumer-dependent, and relevance-based
+evaluation does not detect it.
 
-## Main-text results
+## The central finding (Experiment R)
 
-1. **Retrieval quality and decision utility can order systems differently
-   (Experiment R).** At a matched budget k=3 with the calibrated interpreter,
-   every practical retrieval system is worse than retrieving nothing --- BM25
-   -74.3 [-98.9, -47.9], TF-IDF cosine -61.1, dense -1.5 [-31.1, +29.2] ---
-   while the oracle evidence selector gains +69.0 [+40.2, +96.1]. Kendall's
-   tau_b between the nDCG@3 and reward orderings over the four ranking systems
-   is +0.33 at k=3 and 0.00 at k=1 and k=5.
+At a matched evidence budget k=3, with the interpreter and controller held
+fixed:
 
-2. **The dissociation has a mechanism.** Non-relevant documents differ in how
-   they mislead. Random retrieval surfaces 1.33 actively misleading documents
-   per episode, BM25 1.28, dense 0.87, oracle 0.67. BM25 raises nDCG by
-   preferring operationally-worded reports, many of which concern a different
-   node.
+| System | nDCG@3 | Harmful rate | RuleBased ΔJ | Calibrated TF-IDF ΔJ | Interaction |
+|---|---:|---:|---:|---:|---:|
+| Random | 0.090 | 0.44 | +11.6 [-11, +35] | -49.8 [-78, -19] | +61.4 |
+| BM25 | 0.274 | 0.43 | +14.9 [+5, +26] | -74.3 [-99, -48] | +89.2 |
+| TF-IDF cosine | 0.336 | 0.32 | +25.8 [+14, +39] | -61.1 [-88, -32] | +86.9 |
+| Dense (MiniLM) | 0.617 | 0.29 | +48.4 [+32, +65] | -1.5 [-31, +29] | +49.9 |
+| Oracle relevance selector | 1.000 | 0.22 | +60.6 [+48, +73] | +69.0 [+40, +96] | — |
 
-3. **It is consumer-dependent.** With the rule-based interpreter the two
-   orderings agree exactly (tau_b = 1.0 at k=3 and k=5) and every retrieval
-   system beats the no-retrieval control.
+1. **Every ranking system helps one consumer and harms the other.** The
+   retriever × consumer interaction changes sign for all four, magnitude +49.9
+   to +89.2.
 
-4. **A text-free control is a demanding baseline.** In Experiment M the
-   development-tuned constant belief returns 560.4, above raw TF-IDF (516.2),
-   calibrated TF-IDF (530.2), GPT-4o (534.9) and the oracle-belief reference
-   (552.0); only RuleBased (568.7) exceeds it. In Experiment S it returns
-   1725.4 against 1484.0 for the best interpreter.
+2. **The information is present and extractable.** The oracle relevance
+   selector improves *both* consumers. This is a mismatch between retrieval and
+   its consumer, not an absence of useful evidence.
 
-5. **The shuffled-text control separates the two transfers.** In Experiment M
-   shuffling text drops the calibrated interpreter from 530.2 to 451.1, below
-   the uninformed prior, so reading the correct text matters there. In
-   Experiment S the shuffled control returns 1415.2, above the genuine
-   interpreter's 1372.9, despite roughly half the belief accuracy; that
-   transfer does not support a reading-the-warning claim.
+3. **Relevance-based evaluation detects this for one consumer and not the
+   other.** Rank-reversal rate 0.00 (τ_b = +1.00) for RuleBased; 0.33
+   (τ_b = +0.33) for calibrated TF-IDF. Nothing upstream distinguishes the two
+   situations.
 
-   All Experiment S values use the declared balanced estimand. Experiment S has
-   six normal and ten capacity-drop templates, so a flat mean over episodes is
-   a different quantity and gives visibly different numbers; mixing the two is
-   what produced the pre-correction inconsistency.
+4. **The gradient is shared; the level is not.** Episode-level correlation
+   between ranking quality and reward is nearly identical for both consumers
+   (r = +0.372 and +0.382). Within a consumer, better evidence does produce
+   better decisions. The calibrated consumer is simply below zero across the
+   whole practical range. Consumer dependence here is an offset, not a reversed
+   gradient — which is exactly why a relevance-only evaluation misses it.
 
-6. **Calibration is confounded with ensembling (Experiment C).** Fold
-   ensembling alone lowers SIVR from 0.245 to 0.154; the calibration map then
-   raises it to 0.338. The naive raw-versus-calibrated difference is not
-   attributable to calibration. Accuracy cost is 3 of 36 held-out texts once
-   the fold vocabulary leak is fixed.
+5. **More evidence is not better.** k=3 → k=5 raises dense nDCG (0.617 → 0.691)
+   and lowers its effect on the calibrated consumer (-1.5 → -18.9).
 
-7. **Probability quality is not always the operative variable.** The label-only
-   ablation of the raw classifier reaches SIVR 0.773, above both calibrated
-   arms. Brier (0.222 versus 0.552) and log-loss (2.558 versus 0.932) disagree
-   about it, and neither predicts its operational advantage.
+## Supporting diagnosis (Experiments C, M, S, B)
 
-8. **Boundaries (Experiment B).** In three of six one-factor variants the
-   oracle-belief reference underperforms the uninformed prior, so no normalised
-   information-value statement is meaningful there; these are marked rather
-   than given a ratio. Under short lead times the calibrated interpreter loses
-   150 reward and GPT-4o 185 against the uninformed prior.
+These locate the mismatch; they are not the contribution.
+
+- **A text-free control is demanding.** A constant belief tuned only on
+  development seeds returns 560.4 in Experiment M against 516.2 / 530.2 / 534.9
+  for the TF-IDF and GPT-4o interpreters; only RuleBased (568.7) exceeds it. In
+  Experiment S it returns 1725.1 against 1447.0 for the best interpreter.
+- **Belief accuracy does not imply operational value.** In Experiment S the
+  shuffled-text control returns 1415.2, *above* the genuine interpreter's
+  1372.9, at roughly half the belief accuracy. In Experiment M shuffling does
+  destroy the effect (530.2 → 451.1).
+- **Probabilistic sophistication does not either.** The label-only ablation of
+  the raw classifier reaches normalised value 0.773 against 0.245 for its own
+  probabilities; Brier and log-loss disagree about it and neither predicts its
+  advantage.
+- **Calibration is confounded with ensembling.** Fold ensembling alone lowers
+  normalised value 0.245 → 0.154; the calibration map then recovers to 0.338.
+- **The perfect-semantic reference is not an upper bound.** It is beaten by a
+  constant belief that reads nothing, in both transfer environments. Renamed
+  from "oracle belief" accordingly.
 
 ## Claims explicitly withdrawn
 
 - **"A stronger controller absorbs semantic information value."** The
-  historical sensor-by-controller matrix that supported this passed the
-  environment's true disruption to the NoInfo controller's planner, which is
-  why NoInfo and PerfectSemantic had identical rewards. The result is removed
-  from the submission.
-- **"Calibrated TF-IDF has higher downstream value than raw TF-IDF because of
-  calibration."** True in direction, but the magnitude was confounded with fold
-  ensembling; the isolated contrast is reported instead.
-- **"All four non-reference interpreters produce positive paired reward
-  effects, therefore semantic information has value."** The effects against the
-  uninformed prior remain positive, but three of four interpreters do not beat
-  a text-free control that was tuned on development seeds.
+  historical matrix supporting this passed the environment's true disruption to
+  the uninformed controller's planner. Removed.
+- **"Calibration raises downstream value by X."** True in direction; the
+  magnitude was confounded with fold ensembling.
+- **"Positive paired effects against NoInfo show semantic information has
+  value."** Arithmetically true, but three of four interpreters do not beat a
+  text-free control tuned on development seeds.
+- **"Semantic interpretation generally improves decisions."** Not supported.
+  The paper does not claim it.

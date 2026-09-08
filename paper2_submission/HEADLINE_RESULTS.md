@@ -36,9 +36,14 @@ incorrect optimiser LP, off-by-one arrival timing, and no text-free controls.
 5. **The shuffled-text control separates the two transfers.** In Experiment M
    shuffling text drops the calibrated interpreter from 530.2 to 451.1, below
    the uninformed prior, so reading the correct text matters there. In
-   Experiment S the shuffled control returns 1421.8 against 1422.0 for the
-   genuine interpreter despite belief accuracy halving from 0.875 to 0.500;
-   that transfer does not support a reading-the-warning claim.
+   Experiment S the shuffled control returns 1415.2, above the genuine
+   interpreter's 1372.9, despite roughly half the belief accuracy; that
+   transfer does not support a reading-the-warning claim.
+
+   All Experiment S values use the declared balanced estimand. Experiment S has
+   six normal and ten capacity-drop templates, so a flat mean over episodes is
+   a different quantity and gives visibly different numbers; mixing the two is
+   what produced the pre-correction inconsistency.
 
 6. **Calibration is confounded with ensembling (Experiment C).** Fold
    ensembling alone lowers SIVR from 0.245 to 0.154; the calibration map then

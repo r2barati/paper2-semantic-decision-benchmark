@@ -18,16 +18,19 @@ copied 577 files, 5 redacted, 1174 skipped
 ANONYMITY AUDIT PASSED
 ```
 
-Independently verified: `grep -ril` over the built tree finds the author's name
-only in `third_party/gym-invmgmt-paper/LICENSE`, and finds no `/Users/` paths.
+Independently verified: a case-insensitive `grep -ril` over the built tree finds
+the author's name only in `third_party/gym-invmgmt-paper/LICENSE`, and finds no
+author home-directory paths.
 
 ## A bug this audit previously had
 
 The audit used the same word-boundary regexes as the redaction step, and
 reported a **false pass** while shipping the author's name and address inside
-the builder's own `REDACTIONS` table. The pattern `\bReza Barati\b` does not
-match its own escaped source text, because the character preceding `Reza` there
-is the word character `b` from the `\b` escape, so no word boundary exists.
+the builder's own `REDACTIONS` table. A pattern of the form
+`\b<Given> <Family>\b` does not match its own escaped source text: the
+character immediately preceding the name there is the word character `b` from
+the `\b` escape, so there is no word boundary at that position and the pattern
+skips over its own literal.
 
 Two fixes: the builder excludes itself from the artifact, and the audit now uses
 case-insensitive plain substring search over **all** files rather than the
@@ -90,3 +93,11 @@ affiliation, email, personal URL, absolute path, or repository identity.
 Official TMLR template sample names/URLs are excluded from the proposed
 supplement and are not Paper-2 identities. Current machine issue count:
 **0 detected; human PDF/supplement confirmation remains required**.
+
+## This file is checked too
+
+The audit scans every file in the built artifact, including this one. An earlier
+draft of this document spelled the author's name out while explaining the bug
+above, and the audit failed the build for it --- correctly. The names are
+described rather than written here, and the builder excludes itself from the
+artifact.

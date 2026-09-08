@@ -13,10 +13,13 @@
 
 \begin{document}
 
-\title{When Does Retrieved Text Improve Sequential Decisions?}
+% Manual break for a balanced two-line title; without it LNCS wraps after
+% "Sequential", leaving a one-word second line.
+\title{When Does Retrieved Text\\Improve Sequential Decisions?}
 \subtitle{Consequence-Aware Evaluation of Evidence Selection}
 
 \author{Anonymous Author(s)}
+\titlerunning{When Does Retrieved Text Improve Sequential Decisions?}
 \authorrunning{Anonymous}
 \institute{Anonymous Institution}
 
@@ -42,9 +45,9 @@ whereas an off-topic memo only wastes an evidence slot --- so utility is a
 property of the pipeline rather than of the ranking. We also show that text-free
 controls are a demanding baseline: a constant belief tuned only on development
 seeds matches or exceeds most text interpreters, and in one transfer a
-shuffled-text ablation matches the genuine interpreter, so positive effects
-against an uninformed prior do not by themselves establish the value of reading
-text. The benchmark, its frozen artifacts and its controls are released
+shuffled-text ablation is no worse than the genuine interpreter, so positive
+effects against an uninformed prior do not by themselves establish the value of
+reading text. The benchmark, its frozen artifacts and its controls are released
 to support consequence-aware evaluation of information access.
 \keywords{Evaluation \and Evidence selection \and Downstream utility \and
 Retrieval-augmented decision making \and Calibration.}
@@ -87,22 +90,18 @@ stage after retrieval is held constant, differences in $U$ are attributable to
 evidence selection.
 
 \paragraph{Contributions.}
-\begin{enumerate}
-  \item \textbf{A consequence-aware evaluation of evidence selection.} We
-    measure retrieval by the sequential decision utility it induces, and report
-    it alongside conventional retrieval metrics on the same episodes
-    (Section~\ref{sec:retrieval}).
-  \item \textbf{Evidence that the two orderings diverge}, together with a
-    mechanism: non-relevant documents differ in how they mislead, so equal nDCG
-    does not imply equal utility.
-  \item \textbf{Demanding text-free controls.} Constant-belief and
-    development-tuned no-text operating points, shuffled-text and label-only
-    ablations, which we show are strong enough to overturn naive readings of
-    positive effects against an uninformed prior (Section~\ref{sec:controls}).
-  \item \textbf{A reproducible artifact}: frozen corpora, embeddings, model
-    checkpoints and semantic outputs, reconstructible offline without
-    credentials, with the estimand, weighting and uncertainty declared.
-\end{enumerate}
+(i) A consequence-aware evaluation of evidence selection: retrieval is scored by
+the sequential decision utility it induces, reported alongside conventional
+retrieval metrics on the same episodes (Section~\ref{sec:retrieval}).
+(ii) Evidence that the two orderings diverge, with a mechanism: non-relevant
+documents differ in how they mislead, so equal nDCG does not imply equal utility.
+(iii) Demanding text-free controls --- constant-belief and development-tuned
+no-text operating points, shuffled-text and label-only ablations --- strong
+enough to overturn naive readings of positive effects against an uninformed
+prior (Section~\ref{sec:controls}).
+(iv) A reproducible artifact: frozen corpora, embeddings, checkpoints and
+semantic outputs, reconstructible offline without credentials, with the
+estimand, weighting and uncertainty declared.
 
 \paragraph{Scope.} The environments and report text are synthetic. We do not
 introduce a retrieval model, and we do not claim that any interpreter or
@@ -116,18 +115,17 @@ stronger than those typically reported.
 
 \paragraph{Downstream-aware retrieval evaluation.}
 eRAG evaluates retrieval by the downstream performance of the language model that
-consumes it, and shows that upstream relevance can be a poor proxy for end-task
+consumes it, showing that upstream relevance can be a poor proxy for end-task
 utility~\cite{salemi2024erag}. CUE-R estimates per-evidence utility by
 intervention and includes no-retrieval controls, and GroGU makes grounding
 utility explicit as a consumer-specific quantity; both are recent preprints and
-we treat them as such~\cite{cuer2026,grogu2026}. Our downstream consumer is not a
-generator but a control policy acting in a stochastic environment, so the
-quantity being estimated is the realised return of a trajectory, not the quality
-of a text output; the error asymmetry we exploit comes from the cost structure of
-the environment rather than from a judge. The observation that relevance is
-situational and task-dependent long predates this work~\cite{borlund2003concept};
-our contribution is an executable instrument for a specific consequential task,
-not the observation that consequences matter.
+we treat them as such~\cite{cuer2026,grogu2026}. Our downstream consumer is a
+control policy in a stochastic environment rather than a generator, so the
+estimated quantity is a trajectory's realised return, not text quality, and the
+error asymmetry comes from the environment's cost structure rather than a judge.
+That relevance is situational and task-dependent long predates this
+work~\cite{borlund2003concept}; our contribution is an executable instrument for
+one consequential task, not the observation that consequences matter.
 
 \paragraph{Decision-focused prediction and calibration.}
 Predict-then-optimize and decision-focused learning train or evaluate predictions
@@ -205,15 +203,14 @@ question, answered by the interval.
 
 The design crosses worlds (seeds) with language (templates): every template
 within a regime is evaluated on the same seeds, so seeds are not independent
-draws nested under templates. We therefore resample the two axes independently:
-one \emph{shared} seed sample per regime, reused by every family and variant, and
+draws nested under templates. We resample the two axes independently --- one
+\emph{shared} seed sample per regime, reused by every family and variant, plus
 families and variants with replacement. Intervals are percentile intervals from
 $B$ replicates; $p$-values are centred bootstrap test inversions,
-$(1+\#\{|b^\ast-\hat\theta|\ge|\hat\theta|\})/(B+1)$, which are bounded below by
-$1/(B+1)$ and are never reported as exactly zero. With three designed ambiguity
-families per regime, the family axis is small; we report intervals as conditional
-on the fixed template set and treat generalisation to new language as an open
-question rather than an established one.
+$(1+\#\{|b^\ast-\hat\theta|\ge|\hat\theta|\})/(B+1)$, bounded below by $1/(B+1)$
+and never reported as exactly zero. With three designed ambiguity families per
+regime the family axis is small, so intervals are conditional on the fixed
+template set and generalisation to new language remains open.
 
 \section{Experiment R: retrieval quality versus decision utility}
 \label{sec:retrieval}
@@ -248,20 +245,18 @@ calibrated TF--IDF classifier; the controller is the receding-horizon optimiser.
 \subsection{Findings}
 
 \paragraph{The retrieval task is solvable, and the systems separate on it.}
-Ranking quality orders the systems as random $<$ BM25 $<$ TF--IDF cosine $<$
-dense $<$ oracle, with a wide spread in nDCG@3 (Table~\ref{tab:retrieval}).
-Belief accuracy --- whether the interpreter identifies the true regime from the
-retrieved evidence --- rises monotonically with nDCG for both interpreters, so
-the upstream half of the pipeline behaves as intended: better evidence does
-produce better beliefs.
+Ranking quality orders the systems random $<$ BM25 $<$ TF--IDF cosine $<$ dense
+$<$ oracle, with a wide spread in nDCG@3 (Table~\ref{tab:retrieval}). Belief
+accuracy rises monotonically with nDCG for both interpreters, so the upstream
+half of the pipeline behaves as intended: better evidence does produce better
+beliefs.
 
 \paragraph{Better beliefs do not imply better decisions.}
 The downstream half does not follow. With the calibrated TF--IDF interpreter at
 $k=3$, \emph{every} practical retrieval system is worse than retrieving nothing:
-BM25 loses $74.3$ reward against the no-retrieval control (95\% CI
-$[-98.9,-47.9]$) despite tripling random's nDCG, TF--IDF cosine loses $61.1$, and
-only dense retrieval reaches parity ($-1.5$, $[-31.1,+29.2]$). The oracle
-selector, by contrast, gains $69.0$ ($[+40.2,+96.1]$). Ranking quality and
+BM25 loses $74.3$ reward against the no-retrieval control (95\% CI $[-99,-48]$) despite tripling random's nDCG, TF--IDF cosine loses $61.1$, and
+only dense retrieval reaches parity ($-1.5$, $[-31,+29]$). The oracle
+selector, by contrast, gains $69.0$ ($[+40,+96]$). Ranking quality and
 decision utility therefore agree only weakly: Kendall's $\tau_b$ between the two
 orderings over the four ranking systems is $+0.33$ at $k=3$ and $0.00$ at $k=1$
 and $k=5$ (Table~\ref{tab:rankagreement}). An evaluation that stopped at nDCG
@@ -269,10 +264,9 @@ would report steady progress across a region in which realised utility is flat
 or negative.
 
 \paragraph{The gap has a mechanism, and it is not noise.}
-Non-relevant documents are not interchangeable. Table~\ref{tab:harm} decomposes
-what each system actually puts in front of the interpreter: the number of
-retrieved documents that are non-relevant \emph{and} describe a regime other
-than the true one. Random retrieval surfaces $1.33$ such documents per episode
+Non-relevant documents are not interchangeable. The right half of Table~\ref{tab:retrieval} counts what each system
+actually puts in front of the interpreter: retrieved documents that are
+non-relevant \emph{and} describe a regime other than the true one. Random retrieval surfaces $1.33$ such documents per episode
 and BM25 $1.28$ --- BM25 raises nDCG by preferring operationally-worded reports,
 but many of those reports are current reports about a \emph{different} node,
 which is precisely the error that moves the controller. Dense retrieval improves
@@ -292,10 +286,11 @@ ranking alone, which is the concern GroGU raises for grounding
 utility~\cite{grogu2026} and which we can here measure end to end.
 
 \paragraph{More evidence is not better.}
-Moving from $k=3$ to $k=5$ lowers dense retrieval's realised reward under the
-calibrated interpreter ($-1.5$ to $-18.9$) while raising its nDCG ($0.617$ to
-$0.691$). The additional documents are mostly non-relevant, and the interpreter
-has no mechanism for discounting them.
+The last two columns of Table~\ref{tab:rankagreement} follow the strongest
+ranker across budgets. Moving from $k=3$ to $k=5$ raises dense retrieval's nDCG
+($0.617 \to 0.691$) while lowering its realised effect under the calibrated
+interpreter ($-1.5 \to -18.9$). The additional documents are mostly
+non-relevant, and the interpreter has no mechanism for discounting them.
 
 \input{tables/retrieval_findings}
 
@@ -318,11 +313,12 @@ In Experiment~M the development-tuned no-text control selects
 $p_{\mathrm{event}}=1$ and returns $560.4$, beating single TF--IDF ($516.2$),
 calibrated TF--IDF ($530.2$) and GPT-4o ($534.9$), and exceeding the
 oracle-belief reference itself ($552.0$). Only the rule-based interpreter
-($568.7$) is above it. In Experiment~S the same control returns $1725.4$ against
-$1484.0$ for the best interpreter and $1516.3$ for the oracle-belief reference.
-Every interpreter's effect against the uninformed prior is positive and
-statistically clear in both experiments; none of that establishes value over
-competitive text-free operation. The mechanism is visible in the tuning grid:
+($568.7$) is above it. In Experiment~S the same control returns $1725.1$ against
+$1447.0$ for the best interpreter and $1446.3$ for the oracle-belief reference
+--- more than three times the oracle information value, without reading anything. Every interpreter's effect against the uninformed
+prior is positive in both experiments; in Experiment~S only RuleBased's interval
+excludes zero, and none of them establishes value over competitive text-free
+operation. The mechanism is visible in the tuning grid:
 reward increases monotonically in $p_{\mathrm{event}}$, so the base-stock
 controller is systematically under-positioned under the benchmark prior, and any
 belief that raises the order-up-to level captures part of that gap without
@@ -332,19 +328,21 @@ reading anything.
 In Experiment~M, shuffling text destroys the effect: the calibrated interpreter
 falls from $530.2$ to $451.1$, below the uninformed prior. Reading the
 \emph{right} text is doing real work there. In Experiment~S it does not: the
-shuffled control returns $1421.8$ against $1422.0$ for the genuine interpreter,
-even though belief accuracy halves from $0.875$ to $0.500$. Whatever gain the
+shuffled control returns $1415.2$, \emph{above} the genuine interpreter's
+$1372.9$, even though its belief accuracy is roughly half. Whatever gain the
 calibrated interpreter shows in Experiment~S comes from the shape of its belief
 distribution moving the controller toward higher stock, not from identifying the
 regime. We report this as a negative result: the capacity-drop transfer does not
-support a claim that reading the warning is what produced the improvement.
+support a claim that reading the warning is what produced the improvement. Its
+wide interval ($[-64,+258]$) also shows how little the frozen template set
+constrains that arm.
 
 \paragraph{Label-only beliefs.}
 Collapsing the calibrated interpreter to its argmax costs little in
 Experiment~M ($530.2 \to 523.5$) and helps in Experiment~S
-($1422.0 \to 1446.3$). Probability quality, as measured by proper scores, is
-therefore not the operative variable in these transfers, which is the reverse of
-what the controlled benchmark suggests (Section~\ref{sec:calibration}).
+($1372.9 \to 1392.0$). Probability quality, as measured by proper scores, is
+therefore not the operative variable in these transfers, matching what the
+controlled benchmark shows (Section~\ref{sec:calibration}).
 
 \section{Calibration is not an isolated intervention}
 \label{sec:calibration}
@@ -416,9 +414,9 @@ the diagnostic and of the fixed-controller design, and it is the reason raw
 paired effects are primary throughout this paper.
 
 \paragraph{Interpreters can still lose badly.}
-Under the short-lead variant the calibrated TF--IDF interpreter returns $2248$
-and GPT-4o $2213$ against $2398$ for the uninformed prior --- losses of $150$ and
-$185$. Halving the lead time leaves the controller with little time to act on a
+Under the short-lead variant of Table~\ref{tab:boundary} the calibrated TF--IDF
+interpreter returns $2248$ and GPT-4o $2213$ against the uninformed prior's
+$2398$, so both lose well over a hundred reward. Halving the lead time leaves the controller with little time to act on a
 warning, so a belief that shifts stock upward mostly buys holding cost. An
 earlier version of this work omitted the short-lead variant and misreported the
 sign of the lost-sales case; both are now in the table, with every other variant.
@@ -443,19 +441,18 @@ determines what the interpreters have shown.
 \section{Limitations}
 \label{sec:limitations}
 
-The report feed and the environments are synthetic, single-SKU and finite-regime;
-the pools are generated rather than authored, so there is one template family per
-regime in Experiment~R and the language axis carries no variance there. The query
-is fixed, and relevance is defined by construction rather than by assessors. The
-dense retriever is a single general-purpose sentence encoder with frozen
-embeddings, not a trained or tuned dense retrieval system, and we make no claim
-about the ceiling of dense retrieval on this task. The controller is fixed and
-not jointly optimised with the interpreter, so results describe value under a
-declared belief-to-action mapping and not the value of an interpreter under every
-controller. Cached LLM outputs cover a small set of models and are labelled with
-reconstructed rather than certified provider provenance. Finally, the evidence is
-consumed by concatenation; belief-level pooling over separately interpreted
-documents is a natural variant we do not evaluate.
+The report feed and the environments are synthetic, single-SKU and
+finite-regime. Experiment~R's pools are generated rather than authored, so it
+carries no language-axis variance; its query is fixed and its relevance is
+defined by construction rather than by assessors. The dense retriever is one
+general-purpose sentence encoder with frozen embeddings, not a trained dense
+retrieval system, so we make no claim about the ceiling of dense retrieval here.
+The controller is fixed and not jointly optimised with the interpreter, so
+results describe value under a declared belief-to-action mapping rather than
+under every controller. Cached LLM outputs cover a small set of models with
+reconstructed rather than certified provenance. Evidence is consumed by
+concatenation; belief-level pooling over separately interpreted documents is a
+natural variant we do not evaluate.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -498,38 +495,36 @@ under the benchmark prior. From publication the interpreted belief replaces the
 prior while on-hand stock and the in-transit pipeline carry over unchanged.
 
 \paragraph{Belief to action.}
-The controlled experiments use a receding-horizon linear program solved each
-period, executing only its first order. Expected lead time and demand for each
-future period are the belief-weighted averages over regimes. The multi-echelon
-experiments use a belief-adaptive base-stock policy whose effective demand rate
-is $\mathbb{E}_b[\mu]$ and whose order-up-to target is
-$\mathbb{E}_b[\mu]\bar{L} + 1.65\sqrt{\bar{L}\,\mathbb{E}_b[\mu]}$. The
-controller is identical across information sources within an experiment.
+The controlled experiments solve a receding-horizon linear program each period
+and execute only its first order, with belief-weighted expected lead time and
+demand per future period. The multi-echelon experiments use a belief-adaptive
+base-stock policy with effective rate $\mathbb{E}_b[\mu]$ and order-up-to target
+$\mathbb{E}_b[\mu]\bar{L} + 1.65\sqrt{\bar{L}\,\mathbb{E}_b[\mu]}$. The controller
+is identical across information sources within an experiment.
 
 \paragraph{Interpreters, information and retrieval.}
 No non-oracle interpreter receives the regime, future demand, future state or
 environment internals; the oracle-belief reference receives the true regime and
 is a reference, not a deployable system. The TF--IDF classifiers are fitted only
-on training templates and evaluated on disjoint held-out templates. LLM beliefs
-are replayed from frozen canonical responses, with model labels reconstructed by
+on training templates and evaluated on disjoint held-out ones. LLM beliefs are
+replayed from frozen canonical responses, with model labels reconstructed by
 re-deriving each cache key from every known (model, text) pair and unmatched
-entries labelled \texttt{unknown} rather than defaulted. BM25 uses the Okapi form
-with $k_1=1.5$, $b=0.75$ and idf floored at zero; dense retrieval is cosine
-similarity over frozen \texttt{all-MiniLM-L6-v2} embeddings, shipped so the
-published numbers reproduce without downloading weights. Ties break by document id.
+entries labelled \texttt{unknown}. BM25 uses the Okapi form with $k_1=1.5$,
+$b=0.75$ and idf floored at zero; dense retrieval is cosine similarity over
+frozen \texttt{all-MiniLM-L6-v2} embeddings, shipped so the published numbers
+reproduce without model weights. Ties break by document id.
 
 \paragraph{Reproduction and impact.}
-The release reconstructs its own offline inputs: cached semantic responses are
-rematerialised from a tracked, checksum-verified manifest and classifier
-checkpoints are retrained from tracked templates with fixed seeds, neither step
-needing credentials or network access. A verification entry point then replays
-stored beliefs through the simulator and regenerates every table in this paper
-from the frozen episode files; continuous integration installs from the lock file
-alone into a clean environment on two Python versions and runs the full offline
-suite. On impact: this paper shows that an operational decision-support component
-can look better on upstream metrics while being worse to act on, so deployment
-should retain human oversight, domain validation and conservative fallbacks. The
-synthetic study here does not establish deployment safety.
+The release reconstructs its own offline inputs: cached semantic responses come
+from a tracked, checksum-verified manifest, and classifier checkpoints are
+retrained from tracked templates with fixed seeds; neither step needs
+credentials or network access. A verification entry point replays stored beliefs
+through the simulator and regenerates every table here from the frozen episodes.
+This paper shows that a decision-support component can look better on upstream
+metrics while being worse to act on, so deployment needs human oversight and
+conservative fallbacks; a synthetic study does not establish deployment safety.
+
+\label{endofcontent}
 
 \bibliographystyle{splncs04}
 \bibliography{references}

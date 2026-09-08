@@ -408,6 +408,47 @@ class TestEstimandAndDesign:
         )
         assert out["ci_lower"] < out["mean"] < out["ci_upper"]
 
+    def test_bootstrap_is_independent_of_string_hash_order(self):
+        """Reproducibility must not depend on PYTHONHASHSEED.
+
+        The bootstrap draws one variant sample per distinct sampled family. If
+        that iterates a `set` of family names, CPython's per-process string
+        hash randomisation changes the order in which draws are consumed, and
+        the interval changes between runs of the same command. The
+        implementation iterates `sorted(set(...))`; this test runs the same
+        computation in a subprocess under three different hash seeds.
+        """
+        import subprocess
+        import sys as _sys
+
+        script = (
+            "import sys; sys.path.insert(0, %r)\n"
+            "from src.metrics import crossed_bootstrap_ci\n"
+            "import numpy as np\n"
+            "rng = np.random.default_rng(7)\n"
+            "d = {'r': {\n"
+            "  'famA': {'v1': {s: float(rng.normal(3)) for s in range(15)},\n"
+            "           'v2': {s: float(rng.normal(3)) for s in range(15)}},\n"
+            "  'famB': {'v1': {s: float(rng.normal(2)) for s in range(15)}},\n"
+            "  'famC': {'v1': {s: float(rng.normal(4)) for s in range(15)}}}}\n"
+            "r = crossed_bootstrap_ci(d, n_boot=200, seed=42)\n"
+            "print('%%.12f %%.12f' %% (r['ci_lower'], r['ci_upper']))\n"
+        ) % str(ROOT)
+
+        outputs = set()
+        for hashseed in ("0", "3", "7"):
+            env = {"PYTHONHASHSEED": hashseed, "PATH": "/usr/bin:/bin"}
+            result = subprocess.run(
+                [_sys.executable, "-c", script],
+                capture_output=True, text=True, env=env, cwd=str(ROOT),
+            )
+            assert result.returncode == 0, result.stderr
+            outputs.add(result.stdout.strip())
+
+        assert len(outputs) == 1, (
+            f"bootstrap interval depends on PYTHONHASHSEED: {outputs}"
+        )
+
     def test_calibration_and_ensembling_are_separable(self):
         from src.classical_baseline import (
             TFIDFLogReg, VARIANT_SINGLE, VARIANT_FOLD_ENSEMBLE, VARIANT_CALIBRATED,

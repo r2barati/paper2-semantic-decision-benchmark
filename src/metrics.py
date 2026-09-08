@@ -363,9 +363,9 @@ def crossed_bootstrap_ci(
             variant_means = []
             for variant in variant_choice[family]:
                 values = info["cells"][(family, variant)][seed_pos]
-                values = values[~np.isnan(values)]
-                if values.size:
-                    variant_means.append(float(values.mean()))
+                mask = ~np.isnan(values)
+                if mask.any():
+                    variant_means.append(float(values[mask].mean()))
             if variant_means:
                 family_means.append(float(np.mean(variant_means)))
         if not family_means:
@@ -392,11 +392,16 @@ def crossed_bootstrap_ci(
             # ONE shared world resample, reused by every family and variant.
             seed_pos = rng.integers(0, n_seeds, size=n_seeds)
             families = list(rng.choice(info["families"], size=len(info["families"]), replace=True))
+            # `sorted(set(...))`, not `set(...)`: CPython randomises string
+            # hashing per process, so iterating a set of family names consumes
+            # random draws in an order that varies between runs. That would make
+            # the interval depend on PYTHONHASHSEED. Every RNG consumer here is
+            # in a deterministic order.
             variant_choice = {
                 family: list(rng.choice(
                     info["variants"][family], size=len(info["variants"][family]), replace=True,
                 ))
-                for family in set(families)
+                for family in sorted(set(families))
             }
             total_stat += weights[regime] * regime_mean(regime, seed_pos, families, variant_choice)
         boot[b] = total_stat

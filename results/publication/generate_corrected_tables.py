@@ -2,11 +2,18 @@
 
 No experimental values are embedded here: every numeric cell is read from the
 authoritative frozen-data recomputation outputs.
+
+Those inputs are DERIVED, not tracked. `raw_reward_effects.csv` in particular
+matches the `results/**/raw_*` ignore rule, so a clean export of the release
+does not contain it and this script used to fail on a missing file. It now
+reconstructs whatever it needs, in dependency order, before reading anything.
 """
 
 from __future__ import annotations
 
 import csv
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -14,9 +21,33 @@ ROOT = Path(__file__).resolve().parents[2]
 AUDIT = ROOT / "results" / "correction_audit"
 OUT = ROOT / "results" / "publication"
 
+# Inputs this script reads, and the script that produces them.
+REQUIRED_INPUTS = ("sivr_recomputed.csv", "raw_reward_effects.csv",
+                   "belief_quality_recomputed.csv", "phase9b_boundary_analysis.csv")
+RECOMPUTE = AUDIT / "recompute_corrections.py"
+
+
+def ensure_inputs() -> None:
+    """Reconstruct derived inputs if a clean export is missing them."""
+    missing = [name for name in REQUIRED_INPUTS if not (AUDIT / name).exists()]
+    if not missing:
+        return
+    if not RECOMPUTE.exists():
+        raise SystemExit(
+            f"Missing derived inputs {missing} and no {RECOMPUTE.name} to rebuild them."
+        )
+    print(f"Reconstructing {len(missing)} derived input(s): {', '.join(missing)}")
+    subprocess.run([sys.executable, str(RECOMPUTE)], cwd=str(ROOT), check=True)
+    still = [name for name in REQUIRED_INPUTS if not (AUDIT / name).exists()]
+    if still:
+        raise SystemExit(f"Could not reconstruct: {still}")
+
 
 def read(name):
-    with (AUDIT / name).open(newline="") as handle:
+    path = AUDIT / name
+    if not path.exists():
+        ensure_inputs()
+    with path.open(newline="") as handle:
         return list(csv.DictReader(handle))
 
 
@@ -139,4 +170,5 @@ def main():
 
 
 if __name__ == "__main__":
+    ensure_inputs()
     main()

@@ -100,8 +100,14 @@ def paired_diffs(idx, sensor, reference):
     return out
 
 
-def effect_rows(rows, reward_key, reference, oracle, order=None):
-    """Weighted reward, paired effect with interval, and SIVR for each sensor."""
+def effect_rows(rows, reward_key, reference, oracle, order=None, intervals=True):
+    """Weighted reward, paired effect with interval, and SIVR for each sensor.
+
+    ``intervals=False`` skips the bootstrap entirely. The boundary table shows
+    only point values, and running 5,000 replicates per sensor per variant to
+    then discard them made regeneration -- and therefore CI -- far slower than
+    the analysis warrants.
+    """
     idx = build_index(rows, reward_key)
     sensors = order or sorted(idx)
     j = {s: weighted_benchmark_return(idx[s])["value"] for s in sensors if s in idx}
@@ -111,7 +117,7 @@ def effect_rows(rows, reward_key, reference, oracle, order=None):
     for sensor in sensors:
         if sensor not in idx:
             continue
-        diffs = paired_diffs(idx, sensor, reference)
+        diffs = paired_diffs(idx, sensor, reference) if intervals else None
         ci = crossed_bootstrap_ci(diffs, n_boot=N_BOOT, seed=42) if diffs else None
         sivr = signed_sivr(j[sensor], j[reference], j.get(oracle, j[reference]))
         out.append({
@@ -163,33 +169,58 @@ def retrieval_tables() -> None:
     rows = read(path)
     order = ["none", "random", "bm25", "tfidf", "dense", "oracle"]
 
-    lines = [
-        r"\begin{table}[t]",
-        r"\caption{Experiment~R. Retrieval quality and downstream decision utility on the",
-        r"same episodes, at a matched evidence budget $k=3$, with the calibrated TF--IDF",
-        r"interpreter and the receding-horizon controller held fixed. $\Delta J$ is the",
-        r"paired effect against the no-retrieval control; intervals are crossed bootstrap",
-        r"percentile intervals with shared seed draws.}",
-        r"\label{tab:retrieval}",
-        r"\centering\small",
-        r"\begin{tabular}{lrrrrr}",
-        r"\toprule",
-        r"System & nDCG@3 & R@3 & MRR & $J_w$ & $\Delta J$ (95\% CI) \\",
-        r"\midrule",
-    ]
     interp = "TFIDF_LogReg_Calibrated"
     sel = {r["system"]: r for r in rows
            if r["interpreter"] == interp and int(r["budget_k"]) == 3}
+
+    lines = [
+        r"\begin{table}[t]",
+        r"\caption{Experiment~R at a matched evidence budget $k=3$, with the calibrated",
+        r"TF--IDF interpreter and the receding-horizon controller held fixed. Left:",
+        r"ranking quality. Right: what the interpreter actually receives and what the",
+        r"decisions are worth. `Misleading' counts retrieved documents that are",
+        r"non-relevant \emph{and} describe a regime other than the true one --- the errors",
+        r"that move the controller, as opposed to those that only waste a slot.",
+        r"$\Delta J$ is the paired effect against the no-retrieval control; intervals are",
+        r"crossed bootstrap percentile intervals with shared seed draws.}",
+        r"\label{tab:retrieval}",
+        r"\centering\small\setlength{\tabcolsep}{3pt}",
+        r"\begin{tabular}{@{}l rrr rr r@{}}",
+        r"\toprule",
+        r" & \multicolumn{3}{c}{Ranking quality} & \multicolumn{3}{c}{Consequences} \\",
+        r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}",
+        r"System & nDCG@3 & R@3 & MRR & Misleading & Belief acc. & $\Delta J$ (95\% CI) \\",
+        r"\midrule",
+    ]
+
+    # Per-episode harm and belief accuracy, folded into the same table.
+    ep_path = RESULTS / "retrieval" / "retrieval_episodes.csv"
+    harm: dict = {}
+    if ep_path.exists():
+        by_sys = defaultdict(list)
+        for r in read(ep_path):
+            if r["interpreter"] == interp and int(r["budget_k"]) == 3:
+                by_sys[r["system"]].append(r)
+        for system, rs in by_sys.items():
+            harm[system] = (
+                float(np.mean([float(x["n_misleading_retrieved"]) for x in rs])),
+                float(np.mean([1.0 if x["belief_correct"] == "True" else 0.0 for x in rs])),
+            )
+
     for system in order:
         r = sel.get(system)
         if not r:
             continue
         ci = ("--" if r["ci_lower"] in ("", None)
-              else f"[{float(r['ci_lower']):+.1f}, {float(r['ci_upper']):+.1f}]")
+              else f"[{float(r['ci_lower']):+.0f}, {float(r['ci_upper']):+.0f}]")
+        mis, acc = harm.get(system, (float("nan"), float("nan")))
+        mis = "--" if mis != mis else f"{mis:.2f}"
+        acc = "--" if acc != acc else f"{acc:.3f}"
         lines.append(
             f"{PRETTY.get(system, system)} & {float(r['ndcg_at_k']):.3f} & "
             f"{float(r['recall_at_k']):.3f} & {float(r['mrr']):.3f} & "
-            f"{float(r['reward']):.1f} & {float(r['delta_vs_no_retrieval']):+.1f}~{ci} \\\\"
+            f"{mis} & {acc} & "
+            f"{float(r['delta_vs_no_retrieval']):+.1f}~{ci} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     write("retrieval_main.tex", "\n".join(lines))
@@ -197,61 +228,45 @@ def retrieval_tables() -> None:
     # Budget sweep + rank agreement
     agree_path = RESULTS / "retrieval" / "rank_agreement.csv"
     agree = read(agree_path) if agree_path.exists() else []
+    # The strongest ranker's own quality and utility at each budget, so the
+    # budget sweep can be checked in the paper rather than only in the CSV.
+    dense = {(r["interpreter"], int(r["budget_k"])): r
+             for r in rows if r["system"] == "dense"}
+
     lines = [
         r"\begin{table}[t]",
         r"\caption{Experiment~R. Do retrieval quality and decision utility rank the",
-        r"ranking systems the same way? Kendall's $\tau_b$ between the nDCG@$k$ ordering",
-        r"and the $J_w$ ordering over \{random, BM25, TF--IDF, dense\}; the no-retrieval",
-        r"and oracle references are excluded because neither is a retrieval system.}",
+        r"ranking systems the same way? Kendall's $\tau_b$ is computed between the",
+        r"nDCG@$k$ ordering and the $J_w$ ordering over \{random, BM25, TF--IDF,",
+        r"dense\}; the no-retrieval and oracle references are excluded because neither",
+        r"is a retrieval system. The last two columns track the strongest ranker",
+        r"across budgets: raising its nDCG does not raise its realised effect.}",
         r"\label{tab:rankagreement}",
-        r"\centering\small",
-        r"\begin{tabular}{llrll}",
+        r"\centering\small\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{llrllrr}",
         r"\toprule",
-        r"Interpreter & $k$ & $\tau_b$ & Best by nDCG & Best by reward \\",
+        r" & & & \multicolumn{2}{c}{Best system by} & \multicolumn{2}{c}{Dense} \\",
+        r"\cmidrule(lr){4-5}\cmidrule(lr){6-7}",
+        r"Interpreter & $k$ & $\tau_b$ & nDCG & reward & nDCG@$k$ & $\Delta J$ \\",
         r"\midrule",
     ]
     for r in agree:
         tau = r["kendall_tau_b"]
         tau = "--" if tau in ("", None) else f"{float(tau):+.2f}"
+        d = dense.get((r["interpreter"], int(r["budget_k"])))
+        dn = f"{float(d['ndcg_at_k']):.3f}" if d else "--"
+        dd = f"{float(d['delta_vs_no_retrieval']):+.1f}" if d else "--"
+        label = {
+            "RuleBased": "RuleBased",
+            "TFIDF_LogReg_Calibrated": r"TF--IDF calib.",
+        }.get(r["interpreter"], r["interpreter"].replace("_", " "))
         lines.append(
-            f"{r['interpreter'].replace('_', ' ')} & {r['budget_k']} & {tau} & "
+            f"{label} & {r['budget_k']} & {tau} & "
             f"{PRETTY.get(r['best_by_ndcg'], r['best_by_ndcg'])} & "
-            f"{PRETTY.get(r['best_by_reward'], r['best_by_reward'])} \\\\"
+            f"{PRETTY.get(r['best_by_reward'], r['best_by_reward'])} & {dn} & {dd} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
 
-    # Harm decomposition
-    ep_path = RESULTS / "retrieval" / "retrieval_episodes.csv"
-    if ep_path.exists():
-        eps = [r for r in read(ep_path)
-               if r["interpreter"] == interp and int(r["budget_k"]) == 3]
-        by_sys = defaultdict(list)
-        for r in eps:
-            by_sys[r["system"]].append(r)
-        lines += [
-            "",
-            r"\begin{table}[t]",
-            r"\caption{Experiment~R. Why equal ranking quality need not mean equal",
-            r"utility: how many of the $k=3$ retrieved documents actively mislead, that is,",
-            r"are non-relevant \emph{and} describe a regime other than the true one.}",
-            r"\label{tab:harm}",
-            r"\centering\small",
-            r"\begin{tabular}{lrrr}",
-            r"\toprule",
-            r"System & nDCG@3 & Misleading docs retrieved & Belief accuracy \\",
-            r"\midrule",
-        ]
-        for system in order:
-            rs = by_sys.get(system)
-            if not rs:
-                continue
-            lines.append(
-                f"{PRETTY.get(system, system)} & "
-                f"{np.mean([float(x['ndcg_at_k']) for x in rs]):.3f} & "
-                f"{np.mean([float(x['n_misleading_retrieved']) for x in rs]):.2f} & "
-                f"{np.mean([1.0 if x['belief_correct'] == 'True' else 0.0 for x in rs]):.3f} \\\\"
-            )
-        lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     write("retrieval_findings.tex", "\n".join(lines))
 
 
@@ -267,59 +282,63 @@ GYM_ORDER = [
 ]
 
 
-def _gym_table(rows, label, caption, brier=None) -> list:
-    eff = effect_rows(rows, "total_reward", "NoInfo", "OracleSemantic", order=GYM_ORDER)
+def controls_tables() -> None:
+    """Experiments M and S side by side.
+
+    One table rather than two: the comparison a reader needs is between the two
+    transfers, and the 12-page limit is real.
+    """
+    paths = [
+        ("M", RESULTS / "phase8b_gym_confirmation" / "operational_results.csv"),
+        ("S", RESULTS / "phase9a_capacity_confirmation" / "operational_results.csv"),
+    ]
+    eff = {}
+    for label, path in paths:
+        if path.exists():
+            eff[label] = {
+                e["sensor"]: e
+                for e in effect_rows(read(path), "total_reward", "NoInfo",
+                                     "OracleSemantic", order=GYM_ORDER)
+            }
+    if not eff:
+        print("  [skip] no gym results present")
+        return
+
     lines = [
         r"\begin{table}[t]",
-        rf"\caption{{{caption}}}",
-        rf"\label{{{label}}}",
-        r"\centering\small",
-        r"\begin{tabular}{lrrlrr}",
+        r"\caption{Experiments~M (held-out multi-echelon transfer, demand surge) and~S",
+        r"(supply-side capacity drop). Rows are grouped as text-free controls, text",
+        r"interpreters, degraded-text controls, and the oracle-belief reference. $J_w$ is",
+        r"the balanced weighted return and $\Delta J$ the paired effect against NoInfo,",
+        r"with crossed bootstrap intervals. The dev-tuned no-text row is the one every",
+        r"interpreter must beat, and in both experiments most do not.}",
+        r"\label{tab:transfers}",
+        r"\centering\footnotesize\setlength{\tabcolsep}{2.5pt}",
+        r"\begin{tabular}{@{}l rrl rrl@{}}",
         r"\toprule",
-        r"Information source & $J_w$ & $\Delta J$ & 95\% CI & $p$ & SIVR \\",
+        r" & \multicolumn{3}{c}{Experiment~M} & \multicolumn{3}{c}{Experiment~S} \\",
+        r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}",
+        r"Information source & $J_w$ & $\Delta J$ & 95\% CI & $J_w$ & $\Delta J$ & 95\% CI \\",
         r"\midrule",
     ]
-    for row in eff:
-        name = PRETTY.get(row["sensor"], row["sensor"])
-        if row["sensor"] in ("RuleBased", "TFIDF_LogReg_Raw",
-                             "TFIDF_LogReg_Calibrated", "gpt-4o"):
-            pass
-        lines.append(
-            f"{name} & {row['reward']:.1f} & {row['delta']:+.1f} & "
-            f"{fmt_ci(row)} & {fmt_p(row)} & {fmt_sivr(row)} \\\\"
-        )
-        if row["sensor"] == "NoText_Tuned":
-            lines.append(r"\midrule")
-        if row["sensor"] == "gpt-4o":
+
+    def cells(label, sensor):
+        row = eff.get(label, {}).get(sensor)
+        if row is None:
+            return "-- & -- & --"
+        ci = ("--" if row["ci_lower"] is None
+              else f"[{row['ci_lower']:+.0f}, {row['ci_upper']:+.0f}]")
+        return f"{row['reward']:.1f} & {row['delta']:+.1f} & {ci}"
+
+    for sensor in GYM_ORDER:
+        if not any(sensor in eff.get(l, {}) for l in eff):
+            continue
+        name = PRETTY.get(sensor, sensor)
+        lines.append(f"{name} & {cells('M', sensor)} & {cells('S', sensor)} " + r"\\")
+        if sensor in ("NoText_Tuned", "gpt-4o"):
             lines.append(r"\midrule")
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    return lines
-
-
-def controls_tables() -> None:
-    lines = []
-    m_path = RESULTS / "phase8b_gym_confirmation" / "operational_results.csv"
-    if m_path.exists():
-        lines += _gym_table(
-            read(m_path), "tab:expM",
-            r"Experiment~M (held-out multi-echelon transfer, demand surge). "
-            r"Rows are grouped as text-free controls, text interpreters, "
-            r"degraded-text controls, and the oracle-belief reference. "
-            r"$J_w$ is the balanced weighted return; $\Delta J$ is the paired "
-            r"effect against NoInfo. A dev-tuned constant belief that reads no "
-            r"text is the row every interpreter must beat.",
-        )
-    s_path = RESULTS / "phase9a_capacity_confirmation" / "operational_results.csv"
-    if s_path.exists():
-        lines += [""] + _gym_table(
-            read(s_path), "tab:expS",
-            r"Experiment~S (supply-side capacity-drop transfer). Same protocol, "
-            r"a structurally different event mechanism.",
-        )
-    if lines:
-        write("controls_main.tex", "\n".join(lines))
-    else:
-        print("  [skip] no gym results present")
+    write("controls_main.tex", "\n".join(lines))
 
 
 # ---------------------------------------------------------------------------
@@ -439,7 +458,7 @@ def boundary_tables() -> None:
         vrows = [r for r in rows if r["variant"] == variant]
         eff = {e["sensor"]: e
                for e in effect_rows(vrows, "total_reward", "NoInfo",
-                                    "OracleSemantic", order=cols)}
+                                    "OracleSemantic", order=cols, intervals=False)}
         if not eff:
             continue
         oiv = next(iter(eff.values()))["oiv"]
@@ -462,11 +481,16 @@ def appendix_tables() -> None:
         if not path.exists():
             return None
         rows = read(path)
+        # Experiment R draws a generated candidate pool per seed rather than
+        # from an authored template set, so it has no template axis. Reporting
+        # "1" there would invent a design feature it does not have.
+        has_templates = any(r.get("template_id") for r in rows)
         return {
             "episodes": len(rows),
             "sensors": len({r[sensor_col] for r in rows}),
             "seeds": len({r["seed"] for r in rows}),
-            "templates": len({r.get("template_id", "") for r in rows}),
+            "templates": (len({r["template_id"] for r in rows})
+                          if has_templates else None),
         }
 
     entries = [
@@ -480,7 +504,9 @@ def appendix_tables() -> None:
         r"\begin{table}[!ht]",
         r"\caption{Experiment accounting, generated from the saved episode files rather",
         r"than from design intent. `Episodes' counts rows across all information sources;",
-        r"the number of \emph{paired worlds} is seeds $\times$ templates.}",
+        r"the number of \emph{paired worlds} is seeds $\times$ templates, which is not the",
+        r"episode count. Experiment~R draws a generated candidate pool per seed and so has",
+        r"no template axis.}",
         r"\label{tab:accounting}",
         r"\centering\small",
         r"\begin{tabular}{lrrrr}",
@@ -492,25 +518,32 @@ def appendix_tables() -> None:
         c = count(path, col)
         if c is None:
             continue
-        lines.append(f"{name} & {c['seeds']} & {c['templates']} & "
+        tmpl = "n/a" if c["templates"] is None else f"{c['templates']}"
+        lines.append(f"{name} & {c['seeds']} & {tmpl} & "
                      f"{c['sensors']} & {c['episodes']:,} \\\\")
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
 
-    # No-text tuning provenance
+    # No-text tuning provenance, in one paragraph rather than one per experiment.
+    tuned = []
     for label, path in (
         ("M", RESULTS / "phase8b_gym_confirmation" / "notext_tuning.json"),
         ("S", RESULTS / "phase9a_capacity_confirmation" / "notext_tuning.json"),
     ):
-        if not path.exists():
-            continue
-        d = json.loads(path.read_text())
+        if path.exists():
+            d = json.loads(path.read_text())
+            tuned.append((label, d))
+    if tuned:
+        parts = ", ".join(
+            rf"Experiment~{label} selected $p_{{\mathrm{{event}}}}={d['p_event']}$ on "
+            rf"seeds {d['dev_seeds'][0]}--{d['dev_seeds'][-1]}"
+            for label, d in tuned
+        )
         lines += [
             "",
-            rf"\paragraph{{No-text operating point (Experiment~{label}).}}",
-            rf"Selected $p_{{\mathrm{{event}}}}={d['p_event']}$ on development seeds "
-            rf"{d['dev_seeds'][0]}--{d['dev_seeds'][-1]}, which are disjoint from every "
-            rf"confirmation seed range. Selection used the {d['selection_estimand']} "
-            rf"estimand. The arm is tuned, but never on its own evaluation data.",
+            r"\paragraph{No-text operating point.}",
+            parts + ". Both development seed ranges are disjoint from every "
+            "confirmation seed range, and selection used the balanced estimand. "
+            "The arm is tuned, but never on its own evaluation data.",
         ]
     write("appendix.tex", "\n".join(lines))
 

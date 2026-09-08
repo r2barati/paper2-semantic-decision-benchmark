@@ -1,21 +1,26 @@
 \begin{table}[t]
-\caption{Experiment~R. Retrieval quality and downstream decision utility on the
-same episodes, at a matched evidence budget $k=3$, with the calibrated TF--IDF
-interpreter and the receding-horizon controller held fixed. $\Delta J$ is the
-paired effect against the no-retrieval control; intervals are crossed bootstrap
-percentile intervals with shared seed draws.}
+\caption{Experiment~R at a matched evidence budget $k=3$, with the calibrated
+TF--IDF interpreter and the receding-horizon controller held fixed. Left:
+ranking quality. Right: what the interpreter actually receives and what the
+decisions are worth. `Misleading' counts retrieved documents that are
+non-relevant \emph{and} describe a regime other than the true one --- the errors
+that move the controller, as opposed to those that only waste a slot.
+$\Delta J$ is the paired effect against the no-retrieval control; intervals are
+crossed bootstrap percentile intervals with shared seed draws.}
 \label{tab:retrieval}
-\centering\small
-\begin{tabular}{lrrrrr}
+\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}l rrr rr r@{}}
 \toprule
-System & nDCG@3 & R@3 & MRR & $J_w$ & $\Delta J$ (95\% CI) \\
+ & \multicolumn{3}{c}{Ranking quality} & \multicolumn{3}{c}{Consequences} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+System & nDCG@3 & R@3 & MRR & Misleading & Belief acc. & $\Delta J$ (95\% CI) \\
 \midrule
-No retrieval & 0.000 & 0.000 & 0.000 & 1657.2 & +0.0~[+0.0, +0.0] \\
-Random & 0.090 & 0.117 & 0.218 & 1607.4 & -49.8~[-78.0, -18.8] \\
-BM25 & 0.274 & 0.294 & 0.444 & 1583.0 & -74.3~[-98.9, -47.9] \\
-TF--IDF cosine & 0.336 & 0.356 & 0.517 & 1596.1 & -61.1~[-88.4, -31.6] \\
-Dense (MiniLM) & 0.617 & 0.672 & 0.727 & 1655.7 & -1.5~[-31.1, +29.2] \\
-Oracle selector & 1.000 & 1.000 & 1.000 & 1726.2 & +69.0~[+40.2, +96.1] \\
+No retrieval & 0.000 & 0.000 & 0.000 & 0.00 & 0.333 & +0.0~[+0, +0] \\
+Random & 0.090 & 0.117 & 0.218 & 1.33 & 0.367 & -49.8~[-78, -19] \\
+BM25 & 0.274 & 0.294 & 0.444 & 1.28 & 0.433 & -74.3~[-99, -48] \\
+TF--IDF cosine & 0.336 & 0.356 & 0.517 & 0.97 & 0.456 & -61.1~[-88, -32] \\
+Dense (MiniLM) & 0.617 & 0.672 & 0.727 & 0.87 & 0.589 & -1.5~[-31, +29] \\
+Oracle selector & 1.000 & 1.000 & 1.000 & 0.67 & 0.756 & +69.0~[+40, +96] \\
 \bottomrule
 \end{tabular}
 \end{table}

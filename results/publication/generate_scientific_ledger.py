@@ -1,43 +1,207 @@
-"""Generate the scientific ledger from authoritative corrected CSVs."""
+"""Generate the authoritative ledger of published numbers.
+
+Every value is read from the frozen episode files and recomputed with the
+DECLARED estimand (`src.metrics.weighted_benchmark_return`) and the DECLARED
+uncertainty procedure (`src.metrics.crossed_bootstrap_ci`). Nothing is
+hardcoded, and nothing is carried over from an earlier analysis.
+
+Two things changed in September 2026 and both are visible in the output:
+
+* p-values are centred bootstrap test inversions bounded below by 1/(B+1).
+  The previous ledger reported `0.0`, which no finite Monte Carlo procedure
+  can support; every p-value here is either an exact value or a `< floor`.
+* Seeds are resampled once per regime and shared across templates, because the
+  design crosses worlds with language. Resampling seeds independently inside
+  each template understated the world-level variance.
+
+    python3 -m results.publication.generate_scientific_ledger
+"""
 
 from __future__ import annotations
 
 import csv
+import sys
+from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-AUDIT = ROOT / "results" / "correction_audit"
-OUT = ROOT / "results" / "publication" / "SCIENTIFIC_LEDGER_CORRECTED.md"
-CANONICAL_OUT = ROOT / "SCIENTIFIC_LEDGER.md"
+sys.path.insert(0, str(ROOT))
+
+from src.metrics import (
+    signed_sivr, crossed_bootstrap_ci, weighted_benchmark_return,
+)
+
+RESULTS = ROOT / "results"
+OUT = ROOT / "SCIENTIFIC_LEDGER.md"
+N_BOOT = 5000
+
+EXPERIMENTS = [
+    ("Experiment C (controlled)",
+     RESULTS / "phase7_classical_baseline" / "operational_results.csv",
+     "total_profit", "NoInfo", "PerfectSemantic"),
+    ("Experiment M (multi-echelon)",
+     RESULTS / "phase8b_gym_confirmation" / "operational_results.csv",
+     "total_reward", "NoInfo", "OracleSemantic"),
+    ("Experiment S (supply-side)",
+     RESULTS / "phase9a_capacity_confirmation" / "operational_results.csv",
+     "total_reward", "NoInfo", "OracleSemantic"),
+]
 
 
-def read(name):
-    with (AUDIT / name).open(newline="") as handle:
+def read(path: Path) -> list:
+    with path.open(newline="") as handle:
         return list(csv.DictReader(handle))
 
 
-def main():
-    quality = [r for r in read("belief_quality_recomputed.csv")
-               if r["aggregation_estimand"] == "balanced_benchmark"]
-    effects = [r for r in read("raw_reward_effects.csv")
-               if r["aggregation_estimand"] == "balanced_benchmark"]
+def family_variant(template_id: str):
+    parts = str(template_id).split("_")
+    if len(parts) >= 3:
+        return "_".join(parts[:2]), "_".join(parts[2:])
+    return str(template_id), "1"
+
+
+def index(rows, key):
+    out = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
+    for row in rows:
+        fam, var = family_variant(row["template_id"])
+        out[row["sensor"]][row["regime"]][fam][var][row["seed"]] = float(row[key])
+    return out
+
+
+def paired(idx, sensor, reference):
+    out = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    for regime in idx[sensor]:
+        for fam in idx[sensor][regime]:
+            for var in idx[sensor][regime][fam]:
+                a = idx[sensor][regime][fam][var]
+                b = idx[reference].get(regime, {}).get(fam, {}).get(var, {})
+                for seed in sorted(set(a) & set(b)):
+                    out[regime][fam][var][seed] = a[seed] - b[seed]
+    return out
+
+
+def holm(records):
+    """Holm-Bonferroni over the interpreter family, on bounded p-values."""
+    ordered = sorted(records, key=lambda r: r["p_value"])
+    previous, n = 0.0, len(ordered)
+    for i, rec in enumerate(ordered):
+        adj = min(1.0, max(previous, (n - i) * rec["p_value"]))
+        rec["holm_p"] = adj
+        rec["significant_holm_05"] = adj < 0.05
+        previous = adj
+
+
+def main() -> int:
     lines = [
-        "# Scientific Ledger (corrected, generated)", "",
-        "Every value below is read from `results/correction_audit`; no experimental value is hardcoded.", "",
-        "## Phase 7 belief quality", "",
-        "| Sensor | Accuracy | Standard Brier | Log-loss |", "|---|---:|---:|---:|"]
-    for r in quality:
-        if r["phase"] == "Phase 7":
-            lines.append(f"| {r['sensor']} | {float(r['accuracy']):.6f} | {float(r['brier_standard']):.6f} | {float(r['log_loss']):.6f} |")
-    lines += ["", "## Primary paired reward effects", "",
-              "| Phase | Sensor | Δ vs NoInfo | 95% CI | Holm p |", "|---|---|---:|---|---:|"]
-    for r in effects:
-        if r["phase"] in {"Phase 8B", "Phase 9A"}:
-            lines.append(f"| {r['phase']} | {r['sensor']} | {float(r['mean_delta_vs_noinfo']):.6f} | [{float(r['ci_lower']):.6f}, {float(r['ci_upper']):.6f}] | {r.get('holm_p_value', '')} |")
-    text = "\n".join(lines) + "\n"
-    OUT.write_text(text)
-    CANONICAL_OUT.write_text(text)
+        "# Scientific ledger (regenerated)",
+        "",
+        "Generated by `python3 -m results.publication.generate_scientific_ledger`.",
+        "Every value is recomputed from the frozen episode files using the declared",
+        "balanced weighted estimand and the crossed bootstrap with shared seed draws.",
+        "No value is hardcoded.",
+        "",
+        f"Bootstrap replicates: **B = {N_BOOT:,}**, so the smallest reportable p-value is",
+        f"**1/(B+1) = {1/(N_BOOT+1):.6f}**. A p-value is never reported as exactly zero.",
+        "Holm adjustment is applied within each experiment's interpreter family.",
+        "",
+    ]
+
+    for name, path, key, reference, oracle in EXPERIMENTS:
+        if not path.exists():
+            lines += [f"## {name}", "", "_Not generated._", ""]
+            continue
+        rows = read(path)
+        idx = index(rows, key)
+        sensors = sorted(idx)
+        j = {s: weighted_benchmark_return(idx[s])["value"] for s in sensors}
+
+        records = []
+        for sensor in sensors:
+            if sensor == reference:
+                continue
+            diffs = paired(idx, sensor, reference)
+            if not diffs:
+                continue
+            ci = crossed_bootstrap_ci(diffs, n_boot=N_BOOT, seed=42)
+            sivr = signed_sivr(j[sensor], j[reference], j.get(oracle, j[reference]))
+            records.append({
+                "sensor": sensor, "reward": j[sensor],
+                "delta": j[sensor] - j[reference],
+                "ci_lower": ci["ci_lower"], "ci_upper": ci["ci_upper"],
+                "p_value": ci["p_value"], "p_floor": ci["p_value_floor"],
+                "sivr": sivr.value, "status": sivr.status,
+            })
+        holm(records)
+
+        oiv = j.get(oracle, 0.0) - j[reference]
+        lines += [
+            f"## {name}",
+            "",
+            f"Reference: `{reference}` at {j[reference]:.2f}. "
+            f"Oracle-belief reference: `{oracle}` at {j.get(oracle, float('nan')):.2f}. "
+            f"Oracle information value: **{oiv:+.2f}**.",
+            "",
+            "| Information source | J_w | Δ vs reference | 95% CI | p | Holm p | SIVR | status |",
+            "|---|---:|---:|---|---:|---:|---:|---|",
+            f"| {reference} | {j[reference]:.2f} | 0.00 | — | — | — | 0.000 | reference |",
+        ]
+        for r in sorted(records, key=lambda x: -x["delta"]):
+            p = (f"<{r['p_floor']:.6f}" if r["p_value"] <= r["p_floor"] + 1e-12
+                 else f"{r['p_value']:.5f}")
+            hp = (f"<{r['p_floor']:.6f}" if r["holm_p"] <= r["p_floor"] + 1e-12
+                  else f"{r['holm_p']:.5f}")
+            sivr = "n/a" if r["sivr"] != r["sivr"] else f"{r['sivr']:.4f}"
+            lines.append(
+                f"| {r['sensor']} | {r['reward']:.2f} | {r['delta']:+.2f} | "
+                f"[{r['ci_lower']:+.2f}, {r['ci_upper']:+.2f}] | {p} | {hp} | "
+                f"{sivr} | {r['status']} |"
+            )
+        lines.append("")
+
+    # Retrieval experiment
+    rpath = RESULTS / "retrieval" / "retrieval_summary.csv"
+    if rpath.exists():
+        lines += [
+            "## Experiment R (retrieval / evidence selection)",
+            "",
+            "Effects are paired against the no-retrieval control at a matched budget.",
+            "",
+            "| Interpreter | k | System | nDCG@k | J_w | Δ vs no retrieval | 95% CI | p |",
+            "|---|---:|---|---:|---:|---:|---|---:|",
+        ]
+        for row in read(rpath):
+            if row["system"] == "none":
+                continue
+            ci = ("—" if row["ci_lower"] in ("", None)
+                  else f"[{float(row['ci_lower']):+.2f}, {float(row['ci_upper']):+.2f}]")
+            pv = row.get("p_value") or ""
+            floor = float(row["p_value_floor"]) if row.get("p_value_floor") else 0.0
+            pv = (f"<{floor:.6f}" if pv and float(pv) <= floor + 1e-12
+                  else (f"{float(pv):.5f}" if pv else "—"))
+            lines.append(
+                f"| {row['interpreter']} | {row['budget_k']} | {row['system']} | "
+                f"{float(row['ndcg_at_k']):.4f} | {float(row['reward']):.2f} | "
+                f"{float(row['delta_vs_no_retrieval']):+.2f} | {ci} | {pv} |"
+            )
+        lines.append("")
+
+    lines += [
+        "## What the previous ledger got wrong",
+        "",
+        "- Reported Holm-adjusted p-values of exactly `0.0`, from an uncentred",
+        "  bootstrap sign proportion over 1,000 draws. No finite Monte Carlo",
+        "  procedure supports an exact zero.",
+        "- Resampled seeds independently within each template, although every",
+        "  template within a regime is evaluated on the same seeds.",
+        "- Mixed an all-template aggregate into a paper that declared a balanced",
+        "  estimand, which reversed the raw/calibrated ordering in Experiment S.",
+        "",
+    ]
+
+    OUT.write_text("\n".join(lines) + "\n")
+    print(f"wrote {OUT}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

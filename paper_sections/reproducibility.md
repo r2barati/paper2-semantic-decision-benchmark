@@ -40,5 +40,5 @@ python3 -m src.experiment_phase8b --seeds 30 --seed-start 3100 --llm-models gpt-
 - `.llm_cache/` — 197 cached LLM API responses
 - `results/phase7_classical_baseline/tfidf_logreg_model.pkl` — raw TF-IDF model
 - `results/phase7_classical_baseline/tfidf_logreg_calibrated_model.pkl` — calibrated model
-- `results/phase8b_gym_confirmation/operational_results.csv` — 4320 episodes
+- `results/phase8b_gym_confirmation/operational_results.csv` — episode count in `docs/ACCOUNTING.md` (720 paired seed/template worlds per sensor)
 - All seed/template manifests in `results/*/manifest*.json`

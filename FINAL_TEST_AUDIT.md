@@ -1,3 +1,8 @@
+> **SUPERSEDED (7 September 2026).** The 268/268 count below is from
+> 23 August 2026 and does not describe the current release. See
+> `paper2_submission/SUBMISSION_READINESS.md` for current status.
+> Retained as history; do not cite as current evidence.
+
 # Final Test Audit
 
 **Date:** 2026-08-23 (post-fix)

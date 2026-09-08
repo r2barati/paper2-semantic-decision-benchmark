@@ -1,0 +1,21 @@
+\begin{table}[t]
+\caption{Experiment~R. Retrieval quality and downstream decision utility on the
+same episodes, at a matched evidence budget $k=3$, with the calibrated TF--IDF
+interpreter and the receding-horizon controller held fixed. $\Delta J$ is the
+paired effect against the no-retrieval control; intervals are crossed bootstrap
+percentile intervals with shared seed draws.}
+\label{tab:retrieval}
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+System & nDCG@3 & R@3 & MRR & $J_w$ & $\Delta J$ (95\% CI) \\
+\midrule
+No retrieval & 0.000 & 0.000 & 0.000 & 1657.2 & +0.0~[+0.0, +0.0] \\
+Random & 0.090 & 0.117 & 0.218 & 1607.4 & -49.8~[-78.0, -18.8] \\
+BM25 & 0.274 & 0.294 & 0.444 & 1583.0 & -74.3~[-98.9, -47.9] \\
+TF--IDF cosine & 0.336 & 0.356 & 0.517 & 1596.1 & -61.1~[-88.4, -31.6] \\
+Dense (MiniLM) & 0.617 & 0.672 & 0.727 & 1655.7 & -1.5~[-31.1, +29.2] \\
+Oracle selector & 1.000 & 1.000 & 1.000 & 1726.2 & +69.0~[+40.2, +96.1] \\
+\bottomrule
+\end{tabular}
+\end{table}

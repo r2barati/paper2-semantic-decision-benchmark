@@ -1,0 +1,29 @@
+# Third-party components
+
+This project bundles and depends on third-party material whose own licenses
+continue to apply. Anonymising a submission does not remove the obligation to
+preserve these notices.
+
+## third_party/gym-invmgmt-paper
+
+Vendored multi-echelon inventory simulator. Licensed under the MIT License;
+see `third_party/gym-invmgmt-paper/LICENSE` for the full text and the
+copyright holder. It is retained verbatim.
+
+## Templates, corpora and original code
+
+Everything outside `third_party/` -- the simulator wrappers, interpreters,
+retrieval implementation, warning and report templates, experiment runners,
+metrics and analysis code -- is original to this project and released under the
+MIT License in `LICENSE`.
+
+## Model artifacts
+
+`results/retrieval/frozen_embeddings.json` contains sentence embeddings
+produced by `sentence-transformers/all-MiniLM-L6-v2` (Apache-2.0). The model
+weights themselves are not redistributed here; only derived vectors for this
+project's own texts are included.
+
+`results/frozen_llm_outputs/` contains canonical parsed JSON responses from
+commercial language-model APIs, retained for offline reproduction of the
+published results. Provider terms govern their reuse.

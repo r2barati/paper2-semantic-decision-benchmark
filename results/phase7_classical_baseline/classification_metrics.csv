@@ -1,4 +1,4 @@
 sensor,accuracy,confusion_matrix,labels,n_samples
 TFIDF_LogReg,0.8888888888888888,"[[200, 40, 0], [0, 240, 0], [40, 0, 200]]","[""normal"", ""supplier_delay"", ""demand_surge""]",720
-TFIDF_LogReg_Calibrated,0.8611111111111112,"[[200, 40, 0], [0, 200, 40], [20, 0, 220]]","[""normal"", ""supplier_delay"", ""demand_surge""]",720
+TFIDF_LogReg_Calibrated,0.8055555555555556,"[[200, 40, 0], [0, 240, 0], [20, 80, 140]]","[""normal"", ""supplier_delay"", ""demand_surge""]",720
 RuleBased,0.8333333333333334,"[[140, 80, 20], [20, 220, 0], [0, 0, 240]]","[""normal"", ""supplier_delay"", ""demand_surge""]",720

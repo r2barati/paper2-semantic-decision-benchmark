@@ -1610,20 +1610,29 @@ def test_44_phase5_5_frozen_benchmark_manifest_exists():
 
 
 def test_45_phase5_5_llm_cache_complete():
-    """All 54 LLM cache files exist (3 models × 18 templates)."""
+    """All 54 semantic responses resolve (3 models x 18 templates).
+
+    Resolution goes through `src.offline_artifacts.find_cached_response`, which
+    checks the runtime cache and then the tracked frozen export. The previous
+    version looked only in `.llm_cache/`, which is untracked, so this test
+    failed on every clean export of the release for the absence of a directory
+    the release deliberately does not ship.
+    """
     import hashlib
-    from src.interpreter import REGIME_EXTRACTION_PROMPT
-    cache_dir = Path(".llm_cache")
+    from src.offline_artifacts import find_cached_response
+
     models = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"]
     missing = []
     for model in models:
         for tmpl in REGIME_WARNING_TEMPLATES:
-            cache_key = f"regime_{model}||{tmpl['text']}"
-            h = hashlib.sha256(cache_key.encode()).hexdigest()[:16]
-            cache_file = cache_dir / f"{h}.json"
-            if not cache_file.exists():
+            h = hashlib.sha256(f"regime_{model}||{tmpl['text']}".encode()).hexdigest()[:16]
+            if find_cached_response(f"{h}.json") is None:
                 missing.append(f"{model}/{tmpl['template_id']}")
-    assert len(missing) == 0, f"Missing {len(missing)} cache files: {missing[:5]}"
+    assert not missing, (
+        f"Missing {len(missing)} of 54 semantic responses: {missing[:5]}. "
+        "Run `python3 -m tools.rebuild_offline_artifacts` to reconstruct them "
+        "from the tracked manifest."
+    )
 
 
 def test_46_phase5_5_sivr_no_info_is_zero():

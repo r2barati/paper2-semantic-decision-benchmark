@@ -1,3 +1,12 @@
+> **Counts in this document are design intent and were repeatedly wrong.**
+> The authoritative accounting is `docs/ACCOUNTING.md`, generated from the
+> saved episode files by `python3 -m tools.generate_accounting --write`.
+> Corrections applied September 2026: the controlled horizon is **40** periods
+> (`P5_HORIZON`), not 30; the Phase-6 primary file holds **20** seeds, not 50;
+> and Phase 7 ran **5** sensors over **3,600** episodes before the 2026 control
+> arms were added, not 6 over 4,320. Where this document and `ACCOUNTING.md`
+> disagree, `ACCOUNTING.md` is correct.
+
 # Benchmark Design
 
 ## Overview
@@ -11,7 +20,7 @@ Isolate the causal relationship between semantic belief quality and sequential o
 
 ### Environment
 - **Type:** Synthetic single-SKU inventory environment
-- **Horizon:** 30 periods
+- **Horizon:** 40 periods (`P5_HORIZON`)
 - **States:** Inventory level, demand history, lead time status
 - **Actions:** Order quantity
 - **Disruptions:** SupplierLeadTimeIncrease (lead time 2→5 at t=18, duration 8)
@@ -51,7 +60,7 @@ Isolate the causal relationship between semantic belief quality and sequential o
 
 ### Sample Size
 - 15 seeds x 18 templates x 6 sensors = 1,620 episodes (Phase 5.5)
-- 50 seeds x 36 templates x 6 sensors = 10,800 episodes (Phase 6 confirmation)
+- Phase 6 confirmation: see `docs/ACCOUNTING.md`. The saved primary file holds 20 seeds, not the 50 this line previously claimed.
 
 ---
 
@@ -66,7 +75,7 @@ Test whether the semantic-value phenomenon survives transfer to a richer multi-e
 - **Topology:** RM(4) → Factory(3, C=100) → Dist(2) → Retail(1) → Market(0)
 - **Lead times:** L = [0, 4, 4]
 - **Capacity:** Factory C = 100
-- **Horizon:** 30 periods
+- **Horizon:** 40 periods (`P5_HORIZON`)
 - **DemandSurge:** base_mu=10.0, shock_mag=2.0, shock_time=15
 
 ### Regime Space (2-class)
@@ -112,7 +121,7 @@ bound on reward.
 - Frozen operational config (no retuning based on Phase-8B results)
 
 ### Sample Size
-- 30 seeds x 24 templates x 6 sensors = 4,320 episodes
+- 30 seeds x 24 templates x N sensors; 720 paired seed/template worlds per sensor. The episode total depends on the sensor list and is counted in `docs/ACCOUNTING.md`. 4,320 episodes across sensors is NOT 4,320 independent paired worlds.
 
 ### Relationship to Experiment A
 - **Not a direct replication** — different environment, regime space, controller, and task

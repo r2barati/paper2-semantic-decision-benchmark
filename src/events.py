@@ -45,6 +45,13 @@ DEFAULT_DISRUPTION = SupplierDisruption(
 )
 
 
+# Protocol constant: the period at which the warning text is released to the
+# semantic sensors in the historical single-disruption experiments.  This is a
+# property of the evaluation protocol and is public to every controller; the
+# event's true start (18) is NOT.
+P4_WARNING_TIME = 15
+
+
 # True semantic parameters of the default disruption (used for interpretation targets)
 TRUE_LT_INCREASE = DEFAULT_DISRUPTION.disrupted_lead_time - DEFAULT_DISRUPTION.normal_lead_time  # 3
 TRUE_DURATION = DEFAULT_DISRUPTION.duration  # 8

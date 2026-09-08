@@ -30,12 +30,37 @@ SIVR(M) = [V(M) - V(NoInfo)] / [V(OracleSemantic) - V(NoInfo)]
 
 where V(·) denotes the expected operational value (profit/reward) of a given sensor/interpreter M.
 
-**Aggregate SIVR:**
+**Aggregate SIVR (the declared estimand):**
 ```
-AggregateSIVR(M) = [E[V(M)] - E[V(NoInfo)]] / [E[V(OracleSemantic)] - E[V(NoInfo)]]
+AggregateSIVR(M) = [J_w(M) - J_w(NoInfo)] / [J_w(OracleSemantic) - J_w(NoInfo)]
+
+J_w(m) = Σ_r w_r · mean_f mean_v mean_s  V(m)[r][f][v][s]
 ```
 
-Computed over paired seeds. E[·] is the mean over operational seeds and templates.
+`J_w` is the **weighted** benchmark return implemented by
+`src.metrics.weighted_benchmark_return`: seeds are averaged within a template
+variant, variants within an ambiguity family, families within a regime, and
+regimes are combined with explicit weights `w_r`.
+
+* **Balanced** (primary): uniform `w_r` over the regimes present.
+* **Deployment prior** (secondary): `w_r` from the declared regime prior.
+
+This is *not* an equal-row mean over all episodes. Group sizes are unequal —
+Phase 9A has six `normal` and ten `supplier_capacity_drop` templates — so the
+two estimands differ numerically, and reporting one equation while computing
+the other is what produced the pre-September-2026 inconsistency between the
+manuscript's §5.3 numbers and the corrected tables.
+
+**Numerator and denominator must use identical weights.** Mixing an
+all-template numerator with a balanced denominator (or vice versa) does not
+estimate any well-defined quantity.
+
+**`epsilon` is numerical, not statistical.** The `1e-9` guard in
+`signed_sivr` only detects a denominator that is *numerically* indistinguishable
+from zero. It says nothing about whether OIV is *statistically* distinguishable
+from zero; that requires the interval from
+`src.metrics.crossed_bootstrap_ci`. Every sign interpretation of SIVR is
+conditional on OIV being positive **and** its interval excluding zero.
 
 **Interpretation:** When OIV is positive, what fraction of the Oracle-Belief Reference's incremental operational value does sensor M recover? It is a secondary normalization; raw reward and regime-specific deltas are primary.
 
@@ -125,7 +150,7 @@ Brier(M) = E[ Σ_k (p_k - y_k)^2 ]
 
 where `y` is the one-hot regime vector. A true-class-only squared error is not reported as standard Brier.
 
-**Interpretation:** Mean squared error of probabilistic predictions. Lower is better. Ranges from 0 (perfect) to 1 (worst for binary, 2 for 3-class).
+**Interpretation:** Mean squared error of probabilistic predictions. Lower is better. In this sum-of-squares (multiclass) form the score ranges from 0 (perfect) to **2** for any number of classes K >= 2: a confident prediction on the wrong class contributes `(1-0)^2 + (0-1)^2 = 2`. The frequently quoted maximum of 1 belongs to the *half*-sum (mean-per-class) binary convention, which is not what `standard_brier_score` implements.
 
 **Canonical path:** `src.metrics.standard_brier_score`, used by the phase runners and corrected audit.
 

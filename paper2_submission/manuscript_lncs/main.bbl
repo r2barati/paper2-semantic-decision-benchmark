@@ -1,0 +1,104 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{borlund2003concept}
+Borlund, P.: The concept of relevance in {IR}. Journal of the American Society
+  for Information Science and Technology  \textbf{54}(10),  913--925 (2003).
+  \doi{10.1002/asi.10286}
+
+\bibitem{cuer2026}
+{CUE-R authors}: {CUE-R}: Intervention-based per-evidence utility estimation
+  for retrieval-augmented generation. \url{https://arxiv.org/abs/2604.05467}
+  (2026), arXiv preprint arXiv:2604.05467; preprint, not peer reviewed
+
+\bibitem{degroot1983comparison}
+DeGroot, M.H., Fienberg, S.E.: The comparison and evaluation of forecasters.
+  The Statistician  \textbf{32}(1),  12--22 (1983). \doi{10.2307/2987588}
+
+\bibitem{donti2017task}
+Donti, P.L., Amos, B., Kolter, J.Z.: Task-based end-to-end model learning in
+  stochastic optimization. In: Advances in Neural Information Processing
+  Systems. vol.~30 (2017),
+  \url{https://papers.neurips.cc/paper/2017/hash/3fc2c60b5782f641f76bcefc39fb2392-Abstract.html}
+
+\bibitem{elmachtoub2022smart}
+Elmachtoub, A.N., Grigas, P.: Smart ``predict, then optimize''. Management
+  Science  \textbf{68}(1),  9--26 (2022). \doi{10.1287/mnsc.2020.3922}
+
+\bibitem{farahmand2017value}
+Farahmand, A.M., Barreto, A., Nikovski, D.: Value-aware loss function for
+  model-based reinforcement learning. In: Proceedings of the 20th International
+  Conference on Artificial Intelligence and Statistics. Proceedings of Machine
+  Learning Research, vol.~54, pp. 1486--1494. PMLR (2017),
+  \url{https://proceedings.mlr.press/v54/farahmand17a.html}
+
+\bibitem{grogu2026}
+{GroGU authors}: {GroGU}: Model-specific grounding utility for retrieval.
+  \url{https://arxiv.org/abs/2601.23129} (2026), arXiv preprint
+  arXiv:2601.23129; preprint, not peer reviewed
+
+\bibitem{guo2017calibration}
+Guo, C., Pleiss, G., Sun, Y., Weinberger, K.Q.: On calibration of modern neural
+  networks. In: Proceedings of the 34th International Conference on Machine
+  Learning. Proceedings of Machine Learning Research, vol.~70, pp. 1321--1330.
+  PMLR (2017), \url{https://proceedings.mlr.press/v70/guo17a.html}
+
+\bibitem{howard1966information}
+Howard, R.A.: Information value theory. IEEE Transactions on Systems Science
+  and Cybernetics  \textbf{2}(1),  22--26 (1966)
+
+\bibitem{hubbs2020orgym}
+Hubbs, C.D., Perez, H.D., Sarwar, O., Sahinidis, N.V., Grossmann, I.E.,
+  Wassick, J.M.: Or-gym: A reinforcement learning library for operations
+  research problems (2020), \url{https://arxiv.org/abs/2008.06319}
+
+\bibitem{jarvelin2002cumulated}
+J{\"a}rvelin, K., Kek{\"a}l{\"a}inen, J.: Cumulated gain-based evaluation of
+  {IR} techniques. ACM Transactions on Information Systems  \textbf{20}(4),
+  422--446 (2002)
+
+\bibitem{lambert2020objective}
+Lambert, N., Amos, B., Yadan, O., Calandra, R.: Objective mismatch in
+  model-based reinforcement learning. In: Proceedings of the 2nd Conference on
+  Learning for Dynamics and Control. Proceedings of Machine Learning Research,
+  vol.~120, pp. 761--770. PMLR (2020),
+  \url{https://proceedings.mlr.press/v120/lambert20a.html}
+
+\bibitem{mandi2022rank}
+Mandi, J., Bucarey, V., Tchomba, M.M.K., Guns, T.: Decision-focused learning:
+  Through the lens of learning to rank. In: Proceedings of the 39th
+  International Conference on Machine Learning. Proceedings of Machine Learning
+  Research, vol.~162, pp. 14935--14947. PMLR (2022),
+  \url{https://proceedings.mlr.press/v162/mandi22a.html}
+
+\bibitem{niculescu2005predicting}
+Niculescu-Mizil, A., Caruana, R.: Predicting good probabilities with supervised
+  learning. In: Proceedings of the 22nd International Conference on Machine
+  Learning. pp. 625--632 (2005)
+
+\bibitem{reimers2019sentencebert}
+Reimers, N., Gurevych, I.: {Sentence-BERT}: Sentence embeddings using {S}iamese
+  {BERT}-networks. In: Proceedings of the 2019 Conference on Empirical Methods
+  in Natural Language Processing. pp. 3982--3992 (2019)
+
+\bibitem{robertson1994okapi}
+Robertson, S.E., Walker, S.: Some simple effective approximations to the
+  2-{P}oisson model for probabilistic weighted retrieval. In: Proceedings of
+  the 17th Annual International ACM SIGIR Conference on Research and
+  Development in Information Retrieval. pp. 232--241 (1994)
+
+\bibitem{salemi2024erag}
+Salemi, A., Zamani, H.: Evaluating retrieval quality in retrieval-augmented
+  generation. In: Proceedings of the 47th International ACM SIGIR Conference on
+  Research and Development in Information Retrieval. pp. 2395--2400. ACM
+  (2024). \doi{10.1145/3626772.3657957}
+
+\bibitem{zhao2021decision}
+Zhao, S., Kim, M., Sahoo, R., Ma, T., Ermon, S.: Calibrating predictions to
+  decisions: A novel approach to multi-class calibration. In: Advances in
+  Neural Information Processing Systems. vol.~34, pp. 22313--22324 (2021),
+  \url{https://proceedings.neurips.cc/paper_files/paper/2021/hash/bbc92a647199b832ec90d7cf57074e9e-Abstract.html}
+
+\end{thebibliography}

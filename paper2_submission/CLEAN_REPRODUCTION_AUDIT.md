@@ -1,3 +1,10 @@
+> **SUPERSEDED (7 September 2026).** This audit refers to commit `856a176`
+> and depended on cache material that is no longer tracked at HEAD. A clean
+> export at commit `25c04c1` failed 16 tests, all from missing artifacts.
+> The current contract is in `REPRODUCIBILITY.md` and requires
+> `python3 -m tools.rebuild_offline_artifacts` before the suite is run.
+> Retained as history; do not cite as current evidence.
+
 # Clean offline reproduction audit
 
 ## Contract

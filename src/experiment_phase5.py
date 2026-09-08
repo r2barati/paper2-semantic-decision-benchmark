@@ -111,10 +111,22 @@ def _run_p5_episode(
     belief = regime_interp.normalized()
     regime_probs = belief.regime_probabilities
 
+    # Warning-release protocol.  The text is published at `warning_time`, so
+    # before that period NO sensor has read anything and every controller must
+    # plan under the benchmark prior.  From `warning_time` onward the
+    # interpreted belief replaces the prior while the operational state and
+    # in-transit pipeline carry over unchanged.
+    #
+    # Until September 2026 this parameter was accepted and then ignored: the
+    # interpreted belief was applied from t=0, which granted every semantic
+    # sensor eight periods of advance notice the protocol did not give it.
+    prior_probs = no_info_regime_belief().normalized().regime_probabilities
+    warning_released = warning_time <= 0
+
     if controller == CONTROLLER_OPTIMIZER:
         optimizer = CausalOptimizer(
             seed=seed,
-            regime_probabilities=regime_probs,
+            regime_probabilities=regime_probs if warning_released else prior_probs,
             horizon=P5_HORIZON,
             initial_inventory=INITIAL_INVENTORY,
             demand_mean=P5_DEMAND_MEAN,
@@ -126,6 +138,11 @@ def _run_p5_episode(
 
     for t in range(P5_HORIZON):
         state = env._state
+
+        if not warning_released and t >= warning_time:
+            warning_released = True
+            if optimizer is not None:
+                optimizer.set_regime_probabilities(regime_probs)
 
         if controller == CONTROLLER_OPTIMIZER and optimizer is not None:
             order_qty = optimizer.decide(state)

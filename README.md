@@ -1,18 +1,36 @@
-# Semantic Decision Value Benchmark
+# Consequence-Aware Evaluation of Evidence Selection
 
-A framework for evaluating the decision value of probabilistic semantic sensing in executable sequential operational systems.
+An executable benchmark that scores information access by the sequential
+decisions it produces, not by upstream relevance alone.
 
-## Research Question
+## Research question
 
-How much operational value can imperfect semantic interpretation of textual warning signals recover in sequential decision-making under uncertainty?
+When does retrieved text improve sequential decisions?
 
-## Benchmark Architecture
+The benchmark makes the whole path executable and holds every stage after
+retrieval fixed, so differences in realised utility are attributable to which
+evidence was selected:
 
 ```
-Warning Text → Semantic Interpreter → Probabilistic Belief → Operational Controller → Action → Simulator → Value
+query + report feed -> retrieval -> evidence -> interpreter -> belief
+                    -> controller -> action -> simulator -> realised return
 ```
 
-The framework separates perception (interpreting text) from control (making decisions), enabling principled measurement of how information quality affects downstream performance.
+## Why controls are the point
+
+Positive effects against an uninformed prior are easy to obtain and do not
+establish that reading text helps. This release ships the controls that test
+that claim honestly:
+
+| Control | What it rules out |
+|---|---|
+| Constant-belief endpoints | the effect is just a better controller operating point |
+| No-text operating point tuned on **development** seeds | the same, with tuning allowed |
+| Shuffled text | the effect comes from the belief distribution's shape, not the content |
+| Label-only (argmax) | the effect is attributable to probability quality |
+| No-retrieval | retrieving anything at all beats retrieving nothing |
+| Oracle evidence selector | how much headroom evidence selection actually has |
+| Fold-ensemble (uncalibrated) | "calibration" is not confounded with ensembling |
 
 ## Key Metrics
 
@@ -20,13 +38,18 @@ The framework separates perception (interpreting text) from control (making deci
 - **SIVR (Semantic Information Value Recovery):** Signed secondary normalization of raw reward delta; undefined near zero OIV and diagnostic-only when OIV is negative
 - **Semantic Regret:** Operational value lost due to imperfect interpretation
 
-## Environments
+## Experiments
 
-### Experiment A: Controlled Benchmark
-Single-SKU inventory system with supplier lead-time disruption. 3 regimes, 30-period horizon.
+| Name | What it varies | Environment |
+|---|---|---|
+| **R** (retrieval) | the retrieval system, under matched evidence budgets | controlled inventory, 3 regimes |
+| **C** (controlled) | the interpreter, with warning released at period 12 | controlled inventory, 3 regimes, 40 periods |
+| **M** (multi-echelon) | the interpreter, on held-out wording | multi-echelon demand surge |
+| **S** (supply-side) | the interpreter, on a different event mechanism | multi-echelon capacity drop |
+| **B** (boundary) | one environment factor at a time | multi-echelon, 6 variants |
 
-### Experiment B: Paper-1 Gymnasium Transfer
-Multi-echelon supply chain (`gym-invmgmt` v0.1.0). 2 regimes (Normal, DemandSurge), 30-period horizon.
+Exact seed, template, source and episode counts are in `docs/ACCOUNTING.md`,
+generated from the saved episode files rather than written by hand.
 
 ## Interpreters
 
@@ -42,30 +65,56 @@ Multi-echelon supply chain (`gym-invmgmt` v0.1.0). 2 regimes (Normal, DemandSurg
 
 *LLM predictions are cached; reproduction is possible without API access.
 
-## Key Findings
+## Key findings
 
-1. Semantic beliefs can alter downstream reward, but realized value depends on calibration, the fixed controller, and system dynamics
-2. Classification accuracy does not determine operational value; the corrected Phase-7 calibration and Phase-8B reward tables report this directly
-3. Probability calibration materially changes downstream value
-4. The phenomenon survives transfer to a richer multi-echelon supply chain
+1. **Retrieval quality and decision utility can rank systems differently.** With
+   the calibrated interpreter every practical retrieval system is worse than
+   retrieving nothing, while the oracle evidence selector is clearly better;
+   Kendall's tau between the nDCG and reward orderings is +0.33 at k=3.
+2. **The gap has a mechanism.** Non-relevant documents are not interchangeable:
+   a current report about a different site moves the controller the wrong way,
+   an off-topic memo only wastes a slot.
+3. **Whether the dissociation appears depends on the consumer.** Under the
+   rule-based interpreter the two orderings agree exactly.
+4. **A text-free control is a demanding baseline.** A constant belief tuned only
+   on development seeds beats most interpreters in every transfer environment,
+   and in one of them the shuffled-text control matches the genuine interpreter.
+5. **Calibration is not an isolated intervention**, and probability quality is
+   not always the operative variable: the label-only ablation of the raw
+   classifier outperforms both calibrated arms.
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# 1. Install. requirements.txt includes the vendored simulator's own
+#    dependencies (networkx, PyYAML), which it needs but does not resolve.
+pip install -r requirements.lock
 
-# Run all tests (offline, ~5 minutes)
-python3 -m pytest tests/ -v
+# 2. Reconstruct the offline artifacts that are not tracked: cached semantic
+#    responses (from a tracked manifest, checksum-verified) and classifier
+#    checkpoints (retrained deterministically). No API key, no network.
+python3 -m tools.rebuild_offline_artifacts
+python3 -m tools.rebuild_offline_artifacts --verify
 
-# Run benchmark (offline, uses cached predictions)
-python3 -m benchmark.run --experiment controlled --sensor tfidf_calibrated
-python3 -m benchmark.run --experiment gym --sensor oracle_semantic
+# 3. Tests (offline)
+python3 -m pytest tests/ -q
 
-# Run with live LLM (requires API key)
-echo "OPENAI_API_KEY=<optional-key>" > .env
+# 4. Verify the release end to end: artifacts, stored-belief simulation replay,
+#    and regeneration of every table in the paper.
+python3 -m tools.verify_release --all
+
+# 5. Replay published results, or run an experiment
+python3 -m benchmark.run --experiment gym --sensor tfidf_raw
+python3 -m benchmark.run --experiment retrieval --sensor bm25
+python3 -m src.experiment_retrieval
+
+# 6. Live LLM (optional; everything above works without it)
+echo "OPENAI_API_KEY=<key>" > .env
 python3 -m benchmark.run --experiment controlled --sensor gpt4o --live
 ```
+
+Regenerating the dense-retrieval embeddings is optional; they are frozen in the
+repository. To rebuild them: `pip install -r requirements-retrieval.txt && python3 -m tools.build_retrieval_embeddings`.
 
 ## Project Structure
 
@@ -91,30 +140,43 @@ python3 -m benchmark.run --experiment controlled --sensor gpt4o --live
 ├── docs/                         # Formal definitions, design docs
 ├── paper_sections/               # Manuscript source material
 ├── benchmark/                    # Reproducible runner
-├── .llm_cache/                   # 197 cached LLM responses
+│   ├── retrieval/                # Experiment R + frozen dense embeddings
+│   └── frozen_llm_outputs/       # canonical LLM responses + provenance manifest
+├── tools/                        # artifact rebuild, release verification, accounting
+├── .llm_cache/                   # runtime LLM cache (not tracked)
 ├── BENCHMARK_VERSION             # Version freeze
 ├── SCIENTIFIC_LEDGER.md          # Authoritative numbers
 ├── REPRODUCIBILITY.md            # Reproduction guide
-└── FINAL_TEST_AUDIT.md           # Test suite audit
+├── LICENSE / NOTICE              # MIT; third-party notices preserved
+└── docs/ACCOUNTING.md            # generated experiment counts
 ```
 
 ## Limitations
 
-- Synthetic warning text (not real supplier emails)
-- Synthetic inventory environments (not production systems)
-- Single SKU, fixed lead times
-- 2-3 regime types (not continuous severity)
-- Limited LLM coverage (gpt-3.5/4o-mini/4o only)
-- Fixed controller (not co-optimized with interpreter)
+- Synthetic report feed and synthetic inventory environments
+- Relevance is defined by construction (entity and recency), not by assessors
+- Experiment R's pools are generated per seed, so it has no language axis
+- Dense retrieval is one general-purpose sentence encoder with frozen
+  embeddings, not a trained dense retrieval system
+- Single SKU, finite regime space
+- Limited LLM coverage; provenance labels are reconstructed, not certified
+- Fixed controller (not co-optimised with the interpreter)
+- Evidence is consumed by concatenation; belief-level pooling is not evaluated
 
 ## Citation
 
 ```
-@article{semantic_decision_value_2026,
-  title={A Framework for Evaluating the Decision Value of Probabilistic Semantic Sensing},
-  year={2026}
+@inproceedings{consequence_aware_evidence_2027,
+  title  = {When Does Retrieved Text Improve Sequential Decisions?
+            Consequence-Aware Evaluation of Evidence Selection},
+  year   = {2027},
+  note   = {Under review}
 }
 ```
+
+## License
+
+MIT (`LICENSE`). Third-party components keep their own licenses; see `NOTICE`.
 
 ## Reproducibility and external artifacts
 

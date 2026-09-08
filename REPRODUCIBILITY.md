@@ -3,9 +3,16 @@
 ## Benchmark Version
 
 ```
-paper2-benchmark-v1.0
-Frozen: 2026-08-22
+paper2-benchmark-v2.0
+Frozen: 2026-09-07 (post-correction)
 ```
+
+Version 2.0 supersedes 1.0. Version 1.0's results were produced with an
+information leak in the historical controller matrix, an optimiser LP that
+could not sell existing stock, arrival timing one period longer than declared,
+an ignored warning-release parameter, and no text-free controls. Do not mix
+v1.0 and v2.0 numbers. The v1.0 outputs are archived under
+`results/pre_correction_archive_2026/`.
 
 ## Environment
 
@@ -19,9 +26,14 @@ Frozen: 2026-08-22
 | scikit-learn | 1.6.1 |
 | openai | 2.48.0 |
 | gym-invmgmt | 0.1.0 (editable install, commit `a745fd5`) |
-| gymnasium | 1.0.0 |
-| python-dotenv | installed (version unpinned) |
+| gymnasium | 0.29.1 (pinned in `requirements.txt`; an earlier draft of this table said 1.0.0) |
+| networkx | 3.2.1 (required by the vendored simulator) |
+| PyYAML | 6.0.3 (required by the vendored simulator) |
+| python-dotenv | 1.2.1 |
 | pandas | 2.3.3 |
+
+Supported Python: >=3.9, <3.13. CI verifies 3.9 and 3.11 in a clean
+environment installed **only** from `requirements.lock`.
 
 ## Quick Start: Reproduce Main Results
 
@@ -29,8 +41,19 @@ Frozen: 2026-08-22
 
 ```bash
 python3 -m pip install -r requirements.lock
-# The importable Paper-1 gym package is vendored at the exact recorded commit.
+# The importable multi-echelon gym package is vendored at the exact recorded
+# commit. It is added to sys.path rather than pip-installed, so ITS
+# dependencies (networkx, PyYAML) are declared in requirements.txt directly.
+
+# Reconstruct the offline artifacts that are not tracked (semantic caches and
+# fitted model checkpoints). Deterministic; no API key and no network needed.
+python3 -m tools.rebuild_offline_artifacts
+python3 -m tools.rebuild_offline_artifacts --verify
 ```
+
+Without the rebuild step a clean export of the tracked files is missing the
+cached interpretations and the TF-IDF checkpoints, and part of the test suite
+fails with missing-artifact errors rather than genuine failures.
 
 ### Run All Tests (offline, no API key needed)
 

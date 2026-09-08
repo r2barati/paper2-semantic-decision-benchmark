@@ -66,13 +66,29 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 PHASE9_SEEDS = list(range(4000, 4030))
 
 SENSORS = [
-    "NoInfo",
+    # --- text-free references and controls ------------------------------
+    # Reading text is only valuable if it beats competitive text-free
+    # operation, not merely the benchmark prior. The September 2026 audit
+    # found a constant "assume the event" belief outperforming every
+    # interpreter here, so these arms are now part of the experiment.
+    "NoInfo",                       # the declared benchmark prior
+    "Constant_p0.0",                # never assume the event
+    "Constant_p0.5",                # uninformative midpoint
+    "Constant_p1.0",                # always assume the event
+    "NoText_Tuned",                 # constant belief tuned on development seeds
+    # --- text interpreters ----------------------------------------------
     "RuleBased",
     "TFIDF_LogReg_Raw",
     "TFIDF_LogReg_Calibrated",
     "gpt-4o",
+    # --- degraded-text controls -----------------------------------------
+    "TFIDF_LogReg_Calibrated_Argmax",
+    "TFIDF_LogReg_Calibrated_Shuffled",
+    # --- reference ------------------------------------------------------
     "OracleSemantic",
 ]
+
+EVENT_REGIME = Regime.SUPPLIER_CAPACITY_DROP
 
 BASE_MU = DEFAULT_BASE_MU
 NUM_PERIODS = DEFAULT_NUM_PERIODS
@@ -134,20 +150,41 @@ def _get_sensor_belief(
     tfidf_raw=None,
     tfidf_cal=None,
     llm_model: str = "gpt-4o",
+    tuned_p_event=None,
+    shuffled_text=None,
 ) -> dict[str, float]:
+    from src.notext_controls import constant_belief, argmax_belief
+
     if sensor == "NoInfo":
         return get_no_info_probs_9()
-    elif sensor == "OracleSemantic":
+    if sensor.startswith("Constant_p"):
+        return constant_belief(float(sensor.split("_p")[1]), EVENT_REGIME)
+    if sensor == "NoText_Tuned":
+        if tuned_p_event is None:
+            raise ValueError(
+                "NoText_Tuned requires an operating point selected on development "
+                "seeds; run the tuning step before the confirmation episodes"
+            )
+        return constant_belief(tuned_p_event, EVENT_REGIME)
+    if sensor == "OracleSemantic":
         return get_perfect_semantic_probs_9(true_regime)
-    elif sensor == "RuleBased":
+    if sensor == "RuleBased":
         return _rulebased_probs_9(text)
-    elif sensor == "TFIDF_LogReg_Raw" and tfidf_raw is not None:
+    if sensor == "TFIDF_LogReg_Raw" and tfidf_raw is not None:
         return _tfidf_probs_9(text, tfidf_raw)
-    elif sensor == "TFIDF_LogReg_Calibrated" and tfidf_cal is not None:
+    if sensor == "TFIDF_LogReg_Calibrated" and tfidf_cal is not None:
         return _tfidf_probs_9(text, tfidf_cal)
-    elif sensor == "gpt-4o":
+    if sensor == "TFIDF_LogReg_Calibrated_Argmax" and tfidf_cal is not None:
+        return argmax_belief(_tfidf_probs_9(text, tfidf_cal), EVENT_REGIME)
+    if sensor == "TFIDF_LogReg_Calibrated_Shuffled" and tfidf_cal is not None:
+        if shuffled_text is None:
+            raise ValueError("the shuffled-text control needs a substituted text")
+        return _tfidf_probs_9(shuffled_text, tfidf_cal)
+    if sensor == "gpt-4o":
         return _llm_probs_9(text, model=llm_model)
-    return get_no_info_probs_9()
+    # Never fall through to the prior: that records a control's result under
+    # another sensor's name.
+    raise ValueError(f"unknown sensor {sensor!r} (or its model was not supplied)")
 
 
 def _rulebased_probs_9(text: str) -> dict[str, float]:
@@ -212,16 +249,19 @@ def _llm_probs_9(text: str, model: str = "gpt-4o") -> dict[str, float]:
     )
     import openai
     import hashlib
+    from src.offline_artifacts import find_cached_response, require_cached_response
+
+    # Cache FIRST: an offline replay must not depend on credentials, and a
+    # missing entry must never be replaced by a silent 50/50 prior recorded
+    # under the model's own name.
+    h = hashlib.sha256(f"{model}||{text}".encode()).hexdigest()[:16]
+    cache_path = find_cached_response(f"phase9_{h}.json")
     api_key = os.environ.get("LLM_API_KEY", "")
     base_url = os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1")
-    if not api_key:
-        return {"normal": 0.5, "supplier_capacity_drop": 0.5}
-
-    h = hashlib.sha256(f"{model}||{text}".encode()).hexdigest()[:16]
-    cache_path = ROOT / ".llm_cache" / f"phase9_{h}.json"
-    if cache_path.exists():
-        data = json.loads(cache_path.read_text())
-        return data
+    if cache_path is None and not api_key:
+        require_cached_response(f"phase9_{h}.json", model=model, text=text)
+    if cache_path is not None:
+        return json.loads(cache_path.read_text())
 
     import time
     client = openai.OpenAI(api_key=api_key, base_url=base_url, timeout=15.0, max_retries=2)
@@ -244,10 +284,19 @@ def _llm_probs_9(text: str, model: str = "gpt-4o") -> dict[str, float]:
             result = {"normal": p_normal / total, "supplier_capacity_drop": p_cd / total}
         else:
             result = {"normal": 0.5, "supplier_capacity_drop": 0.5}
-        cache_path.write_text(json.dumps(result))
+        from src.offline_artifacts import runtime_cache_dir
+        target = runtime_cache_dir() / f"phase9_{h}.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(result))
         return result
-    except Exception:
-        return {"normal": 0.5, "supplier_capacity_drop": 0.5}
+    except Exception as exc:
+        # Never degrade to an uninformative prior recorded under the model's
+        # name: that produced episodes labelled `gpt-4o` containing no model
+        # output at all.  Fail loudly instead.
+        raise RuntimeError(
+            f"Live interpretation failed for model={model!r} and no frozen "
+            f"cache entry exists (phase9_{h}.json): {exc}"
+        ) from exc
 
 
 def hierarchical_paired_bootstrap(
@@ -313,7 +362,28 @@ def run_phase9a(seeds=None, llm_models=None):
     tfidf_cal = TFIDFLogReg(calibrate=True, seed=42)
     tfidf_cal.fit(train_texts, train_labels)
     tfidf_cal.save(RESULTS_DIR / "tfidf_capacity_logreg_calibrated.pkl")
-    print(f"  Trained TF-IDF calibrated model")
+    print(f"  Trained TF-IDF calibrated model "
+          f"(fold sizes {tfidf_cal.fold_sizes_})")
+
+    # --- controls -------------------------------------------------------
+    from src.notext_controls import (
+        DEV_SEEDS_9A, shuffled_text_assignment, tune_notext_control,
+    )
+
+    shuffle_map = shuffled_text_assignment([t["template_id"] for t in all_templates])
+    text_by_id = {t["template_id"]: t["text"] for t in all_templates}
+
+    print(f"  Tuning the no-text control on development seeds "
+          f"{DEV_SEEDS_9A[0]}-{DEV_SEEDS_9A[-1]} (disjoint from confirmation seeds)...")
+    tuned = tune_notext_control(
+        episode_runner=run_phase9_episode,
+        event_regime=EVENT_REGIME,
+        dev_seeds=DEV_SEEDS_9A,
+    )
+    print(f"    selected p(event)={tuned.p_event} "
+          f"(dev balanced reward {tuned.dev_grid[tuned.p_event]:.1f})")
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    (RESULTS_DIR / "notext_tuning.json").write_text(json.dumps(tuned.as_dict(), indent=2))
 
     for model in llm_models:
         print(f"  Pre-caching LLM responses for {model}...")
@@ -345,6 +415,8 @@ def run_phase9a(seeds=None, llm_models=None):
                         sensor, text, regime,
                         tfidf_raw=tfidf_raw, tfidf_cal=tfidf_cal,
                         llm_model=llm_models[0] if llm_models else "gpt-4o",
+                        tuned_p_event=tuned.p_event,
+                        shuffled_text=text_by_id[shuffle_map[tid]],
                     )
 
                     result, trajectory = run_phase9_episode(
@@ -738,7 +810,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Phase 9A: CapacityDrop cross-dynamics")
     parser.add_argument("--seeds", type=int, default=30)
-    parser.add_argument("--seed-start", type=int, default=4000)
+    # Defaults must match PHASE9_SEEDS (see the Phase-8B note).
+    parser.add_argument("--seed-start", type=int, default=PHASE9_SEEDS[0])
     parser.add_argument("--llm-models", nargs="*", default=["gpt-4o"])
     parser.add_argument("--no-llm", action="store_true")
     args = parser.parse_args()

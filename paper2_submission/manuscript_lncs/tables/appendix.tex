@@ -1,0 +1,23 @@
+\begin{table}[!ht]
+\caption{Experiment accounting, generated from the saved episode files rather
+than from design intent. `Episodes' counts rows across all information sources;
+the number of \emph{paired worlds} is seeds $\times$ templates.}
+\label{tab:accounting}
+\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+Experiment & Seeds & Templates & Sources & Episodes \\
+\midrule
+R (retrieval) & 30 & 1 & 6 & 3,240 \\
+C (controlled) & 20 & 36 & 12 & 8,640 \\
+M (multi-echelon) & 30 & 24 & 12 & 8,640 \\
+S (supply-side) & 30 & 16 & 12 & 5,760 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{No-text operating point (Experiment~M).}
+Selected $p_{\mathrm{event}}=1.0$ on development seeds 3200--3229, which are disjoint from every confirmation seed range. Selection used the balanced estimand. The arm is tuned, but never on its own evaluation data.
+
+\paragraph{No-text operating point (Experiment~S).}
+Selected $p_{\mathrm{event}}=1.0$ on development seeds 4200--4229, which are disjoint from every confirmation seed range. Selection used the balanced estimand. The arm is tuned, but never on its own evaluation data.

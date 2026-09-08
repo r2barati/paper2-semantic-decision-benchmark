@@ -22,6 +22,7 @@ from typing import Optional
 from src.events import (
     SupplierDisruption, Regime, REGIME_PARAMS,
     P5_NORMAL_LEAD_TIME, P5_DEMAND_MEAN, P5_EVENT_START, P5_EVENT_DURATION,
+    P4_WARNING_TIME,
 )
 
 
@@ -35,6 +36,69 @@ STOCKOUT_COST_PER_UNIT = 8.0     # penalty per unit of unmet demand (lost sale)
 INITIAL_INVENTORY = 30           # starting on-hand
 HORIZON = 40                     # number of periods
 DEMAND_MEAN = 8.0                # Poisson lambda (also used for base-stock calc)
+
+# Forward-planning fallbacks for a controller acting on a warning whose text
+# does not state when the event begins or how long it lasts.  Both are derived
+# from the evaluation protocol (warning release time, planning horizon) and
+# never from the environment's hidden disruption parameters.
+DEFAULT_ASSUMED_START = P4_WARNING_TIME
+DEFAULT_ASSUMED_DURATION = HORIZON
+
+# Below this quantity a solver value is numerical residue rather than an order.
+ORDER_ZERO_TOL = 1e-9
+
+
+class PipelineSchedule:
+    """Absolute-time order pipeline shared by the simulator and the planners.
+
+    This is the single source of truth for arrival timing.  The declared
+    semantics are:
+
+    * An order placed in period ``t`` under lead time ``L`` arrives at the
+      start of period ``t + L`` and can serve demand in that same period.
+      A declared lead time of two therefore means an order placed at ``t=0``
+      is on hand for period ``t=2``.
+    * Orders already in transit keep the arrival period fixed at the moment
+      they were placed.  A lead-time change -- disruption onset or recovery --
+      applies only to orders placed from that period onward.
+
+    The previous FIFO-list implementation padded the queue to ``L`` slots
+    *before* appending, which delivered orders after ``L + 1`` periods and
+    also pushed in-transit orders back whenever the lead time grew.  Both
+    behaviours contradicted the declared experiment, so the queue is now keyed
+    by absolute arrival period instead.
+    """
+
+    __slots__ = ("_schedule",)
+
+    def __init__(self, schedule: Optional[dict] = None):
+        self._schedule: dict[int, float] = dict(schedule) if schedule else {}
+
+    def copy(self) -> "PipelineSchedule":
+        return PipelineSchedule(self._schedule)
+
+    def receive(self, t: int) -> float:
+        """Remove and return the quantity arriving in period ``t``."""
+        return self._schedule.pop(t, 0.0)
+
+    def place(self, t: int, lead_time: float, qty: float) -> int:
+        """Schedule ``qty`` placed in period ``t``; return its arrival period."""
+        arrival = t + max(1, int(round(lead_time)))
+        if qty:
+            self._schedule[arrival] = self._schedule.get(arrival, 0.0) + float(qty)
+        return arrival
+
+    def outstanding(self) -> float:
+        """Total units still in transit."""
+        return float(sum(self._schedule.values()))
+
+    def prune_before(self, t: int) -> None:
+        """Drop stale entries scheduled before ``t`` (already received)."""
+        for key in [k for k in self._schedule if k < t]:
+            del self._schedule[key]
+
+    def as_dict(self) -> dict:
+        return dict(self._schedule)
 
 
 @dataclass
@@ -64,9 +128,23 @@ class HindsightOracle:
     solves for the cost-minimizing order quantity at each period using
     a MILP with exact fixed ordering cost.
 
-    This is the true decision upper bound (non-causal, non-deployable reference).
-    It is strictly better than PerfectSemantic (which uses perfect interpretation
-    but still applies a causal controller).
+    Scope of the guarantee.  With continuous order quantities and binary setup
+    indicators the MILP is an exact optimum *of the modelled problem*, i.e. the
+    best achievable clairvoyant return under this simulator's dynamics, cost
+    structure and order-quantity domain.  It is a non-causal, non-deployable
+    reference, not a bound on any richer policy class, and it is only an upper
+    bound once :meth:`verify_against_simulator` confirms the LP objective and
+    the simulated return agree.
+
+    Corrections applied September 2026 (previously invalidating the bound):
+      * the empty initial pipeline was encoded with real decision-variable
+        indices ``range(normal_lt)``, which let ``order[0..L-1]`` arrive before
+        it was placed;
+      * ``integrality=2`` is SciPy's *semi-continuous* marker, so the supposed
+        binary setup indicators could take fractional values;
+      * the first-period sales bound omitted the initial on-hand stock;
+      * solver quantities were rounded to one decimal, discarding optimality;
+      * the failure branch called an undefined ``_fallback_greedy``.
     """
 
     def __init__(
@@ -135,26 +213,28 @@ class HindsightOracle:
 
         H = self.horizon
 
-        # Build correct arrival matrix matching env's FIFO queue
+        # Build the arrival matrix from the *shared* PipelineSchedule so the
+        # oracle plans against exactly the dynamics InventoryEnv simulates.
+        # The pipeline starts empty: no order can arrive before it is placed.
         A = np.zeros((H, H))
         normal_lt = (
             P5_NORMAL_LEAD_TIME if self.regime is not None
             else (self.disruption.normal_lead_time if self.disruption else 2)
         )
-        queue = list(range(normal_lt))
+        schedule: dict[int, list[int]] = {}
         for t in range(H):
-            arrived = queue.pop(0) if queue else -1
             if self.regime is not None:
                 lt = self._get_regime_lead_time(t)
             elif self.disruption is not None:
                 lt = self.disruption.current_lead_time(t)
             else:
                 lt = normal_lt
-            while len(queue) < lt:
-                queue.insert(0, -1)
-            queue.append(t)
-            if 0 <= arrived < H:
-                A[t, arrived] = 1.0
+            arrival = t + max(1, int(lt))
+            schedule.setdefault(arrival, []).append(t)
+        for arrival, placed in schedule.items():
+            if arrival < H:
+                for j in placed:
+                    A[arrival, j] = 1.0
 
         # Variables: order[H], y[H] (binary), on_hand[H], sales[H]
         n = 4 * H
@@ -167,9 +247,12 @@ class HindsightOracle:
             c[2 * H + t] = HOLDING_COST_PER_UNIT      # holding cost
             c[3 * H + t] = -(REVENUE_PER_UNIT + STOCKOUT_COST_PER_UNIT)  # revenue + stockout
 
-        # Integrality: 0=continuous, 2=binary
+        # Integrality: SciPy uses 0=continuous, 1=integer, 2=semi-continuous,
+        # 3=semi-integer.  Binary is integrality 1 combined with [0, 1] bounds;
+        # the previous value 2 declared the setup indicators semi-continuous
+        # and therefore allowed fractional "binaries".
         integrality = np.zeros(n)
-        integrality[H:2 * H] = 2  # y variables are binary
+        integrality[H:2 * H] = 1
 
         # Bounds
         lb = np.zeros(n)
@@ -193,8 +276,10 @@ class HindsightOracle:
         # Inequality:
         # sales[t] <= on_hand[t-1] + arrivals[t]
         # sales[t] <= demands[t]
-        # order[t] <= M * y[t]
-        M = 200.0
+        # order[t] <= M * y[t].  Justified bound: no optimal solution ever
+        # orders more than the total remaining demand, because unsold units
+        # only accrue holding and variable ordering cost.
+        M = float(sum(demands)) + 1.0
         A_ub = np.zeros((3 * H, n))
         b_ub = np.zeros(3 * H)
         for t in range(H):
@@ -205,7 +290,9 @@ class HindsightOracle:
             for j in range(H):
                 if A[t, j] > 0.5:
                     A_ub[t, j] = -1.0
-            b_ub[t] = 0.0
+            # The predecessor stock in period 0 is the (constant) initial
+            # inventory, so it belongs on the right-hand side.
+            b_ub[t] = float(self.initial_inventory) if t == 0 else 0.0
 
             # sales[t] <= demands[t]
             A_ub[H + t, 3 * H + t] = 1.0
@@ -225,10 +312,39 @@ class HindsightOracle:
             c, constraints=constraints, bounds=bounds, integrality=integrality
         )
 
-        if result.success:
-            return [max(0.0, round(result.x[t], 1)) for t in range(H)]
-        else:
-            return self._fallback_greedy(demands)
+        if not result.success:
+            raise RuntimeError(
+                "HindsightOracle MILP did not solve to optimality "
+                f"(status={result.status}: {result.message}). The oracle is a "
+                "reference bound; silently substituting a heuristic would "
+                "invalidate it."
+            )
+        # Do NOT round: the MILP optimum is the reference value, and rounding
+        # order quantities would discard the optimality it certifies.
+        #
+        # The objective prices sales at (revenue + stockout) so that a lost
+        # sale is charged implicitly.  Realised profit therefore equals
+        # -fun - STOCKOUT_COST_PER_UNIT * total demand; the second term is a
+        # constant that does not affect the argmin but must be restored before
+        # the objective is compared with a simulated return.
+        self.last_objective = float(result.fun)
+        self.last_demand_total = float(sum(demands))
+        self.last_planned_return = (
+            -self.last_objective - STOCKOUT_COST_PER_UNIT * self.last_demand_total
+        )
+
+        # Clean solver residue only.  The simulator charges the fixed ordering
+        # cost whenever ``order_qty > 0``, so an order of ~1e-16 would add a
+        # spurious setup cost the MILP never paid for.  The setup indicator
+        # y[t] is the model's own statement about whether an order is placed,
+        # so a quantity is zeroed exactly when y[t] says "no order".  Genuine
+        # quantities are never rounded.
+        cleaned = []
+        for t in range(H):
+            qty = max(0.0, float(result.x[t]))
+            placed = float(result.x[H + t]) >= 0.5
+            cleaned.append(qty if (placed and qty > ORDER_ZERO_TOL) else 0.0)
+        return cleaned
 
     def compute_optimal_trajectory(self) -> tuple[list[InventoryState], list[float]]:
         """Run the environment with pre-computed optimal orders.
@@ -248,6 +364,25 @@ class HindsightOracle:
             history.append(state)
 
         return history, optimal_orders
+
+    def verify_against_simulator(self, tol: float = 1e-6) -> dict:
+        """Check that the MILP objective equals the simulated realised return.
+
+        The oracle may only be described as a reference upper bound when the
+        plan it optimises and the trajectory the simulator actually produces
+        agree.  Returns a dict with both values and the signed gap; callers
+        (and :mod:`tests.test_env`) assert ``abs(gap) <= tol``.
+        """
+        history, orders = self.compute_optimal_trajectory()
+        simulated = float(history[-1].cumulative_profit) if history else 0.0
+        planned = float(getattr(self, "last_planned_return", float("nan")))
+        return {
+            "planned_objective": planned,
+            "simulated_return": simulated,
+            "gap": planned - simulated,
+            "within_tolerance": abs(planned - simulated) <= tol,
+            "orders": orders,
+        }
 
 
 class CausalOptimizer:
@@ -283,6 +418,7 @@ class CausalOptimizer:
         initial_inventory: int = INITIAL_INVENTORY,
         demand_mean: float = DEMAND_MEAN,
         regime_probabilities: Optional[dict[str, float]] = None,
+        knows_true_disruption: bool = False,
     ):
         self.seed = seed
         self.disruption = disruption
@@ -301,18 +437,44 @@ class CausalOptimizer:
             self.normal_lead_time = (
                 P5_NORMAL_LEAD_TIME if regime_probabilities else 2
             )
-        self._queue: list[float] = [0.0] * self.normal_lead_time
+        self._pipeline = PipelineSchedule()
 
-        # Phase 4: Build the ASSUMED disruption for forward planning
+        # Build the ASSUMED disruption used for forward planning.
+        #
+        # INFORMATION BOUNDARY.  ``disruption`` describes the *environment's*
+        # ground truth.  A controller may only plan against it when the caller
+        # explicitly declares perfect information (``knows_true_disruption``),
+        # which is true for the PerfectSemantic reference alone.  Any other
+        # sensor plans either against its own interpreted disruption or, with
+        # no usable interpretation, against the nominal no-disruption model.
+        #
+        # Before September 2026 every branch inherited ``disruption`` here, so
+        # the NoInfo and low-confidence controllers silently planned with the
+        # true lead-time trajectory.  That made NoInfo and PerfectSemantic
+        # numerically identical in the historical sensor x controller matrix.
+        self.knows_true_disruption = bool(knows_true_disruption)
         if assumed_lt_increase is not None and disruption is not None:
             self._assumed_disruption = SupplierDisruption(
-                start_time=assumed_start if assumed_start is not None else disruption.start_time,
-                duration=assumed_duration if assumed_duration is not None else disruption.duration,
+                start_time=assumed_start if assumed_start is not None else DEFAULT_ASSUMED_START,
+                duration=assumed_duration if assumed_duration is not None else DEFAULT_ASSUMED_DURATION,
                 normal_lead_time=disruption.normal_lead_time,
                 disrupted_lead_time=disruption.normal_lead_time + assumed_lt_increase,
             )
-        else:
+        elif self.knows_true_disruption:
             self._assumed_disruption = disruption
+        else:
+            # No information: plan under the nominal (undisrupted) lead time.
+            self._assumed_disruption = None
+
+    def set_regime_probabilities(self, regime_probabilities: dict) -> None:
+        """Adopt a new regime belief without disturbing operational state.
+
+        Used to release warning text mid-episode: the controller plans under
+        the benchmark prior until the warning is published, then re-plans with
+        the interpreted belief while keeping its on-hand stock and in-transit
+        pipeline exactly as they are.
+        """
+        self.regime_probabilities = dict(regime_probabilities)
 
     def _get_expected_lt(self, t: int) -> float:
         """Get expected lead time at period t from regime beliefs."""
@@ -353,23 +515,23 @@ class CausalOptimizer:
         return self.normal_lead_time
 
     def _simulate_arrivals(
-        self, t_start: int, queue_state: list[float], orders: list[float]
+        self, t_start: int, schedule: "PipelineSchedule", orders: list[float]
     ) -> list[float]:
-        """Simulate FIFO queue and return arrivals at each period."""
-        queue = list(queue_state)
+        """Project arrivals under the shared :class:`PipelineSchedule` rules.
+
+        This mirrors :meth:`InventoryEnv.step` period for period, so the
+        planner's arrival model and the simulator cannot drift apart.
+        """
+        projected = schedule.copy()
         arrivals = []
         for i, order in enumerate(orders):
             t = t_start + i
-            arrived = queue.pop(0) if queue else 0.0
-            arrivals.append(arrived)
-            lt = self._get_lt(t)
-            while len(queue) < lt:
-                queue.insert(0, 0.0)
-            queue.append(order)
+            arrivals.append(projected.receive(t))
+            projected.place(t, self._get_lt(t), order)
         return arrivals
 
     def _build_arrival_model(
-        self, t_start: int, queue_state: list[float], remaining: int
+        self, t_start: int, schedule: "PipelineSchedule", remaining: int
     ) -> tuple:
         """Build linear arrival model by simulation.
 
@@ -378,14 +540,14 @@ class CausalOptimizer:
             A: marginal arrival matrix (remaining x remaining)
         """
         a_fixed = np.array(
-            self._simulate_arrivals(t_start, queue_state, [0.0] * remaining)
+            self._simulate_arrivals(t_start, schedule, [0.0] * remaining)
         )
         A = np.zeros((remaining, remaining))
         for j in range(remaining):
             orders_j = [0.0] * remaining
             orders_j[j] = 1.0
             arr_j = np.array(
-                self._simulate_arrivals(t_start, queue_state, orders_j)
+                self._simulate_arrivals(t_start, schedule, orders_j)
             )
             A[:, j] = arr_j - a_fixed
         return a_fixed, A
@@ -395,7 +557,7 @@ class CausalOptimizer:
         from scipy.optimize import linprog
 
         R = remaining
-        a_fixed, A_mat = self._build_arrival_model(t, self._queue, R)
+        a_fixed, A_mat = self._build_arrival_model(t, self._pipeline, R)
         # Phase 5: use belief-aware expected demand per period
         demands = np.array([self._get_expected_demand(t + i) for i in range(R)])
 
@@ -422,6 +584,10 @@ class CausalOptimizer:
 
         # Inequality: sales[i] <= on_hand[i-1] + arrivals[i]
         #             sales[i] <= demands[i]
+        # For i == 0 the predecessor stock is the *current* on-hand level, which
+        # is a constant rather than a decision variable, so it belongs on the
+        # right-hand side.  Omitting it (the pre-2026 form) made the LP believe
+        # no stock was sellable in the first period.
         A_ub = np.zeros((2 * R, n_vars))
         b_ub = np.zeros(2 * R)
         for i in range(R):
@@ -431,7 +597,7 @@ class CausalOptimizer:
             for j in range(R):
                 if A_mat[i, j] > 0.5:
                     A_ub[i, j] = -1.0  # -arrivals
-            b_ub[i] = a_fixed[i]
+            b_ub[i] = a_fixed[i] + (on_hand if i == 0 else 0.0)
 
             A_ub[R + i, 2 * R + i] = 1.0
             b_ub[R + i] = demands[i]
@@ -452,23 +618,17 @@ class CausalOptimizer:
         t = state.time
         on_hand = state.on_hand
 
-        # Pop front (match env's FIFO logic)
-        if self._queue:
-            self._queue.pop(0)
+        # Anything scheduled before the current period has already been
+        # received by the simulator; drop it so projections stay aligned.
+        self._pipeline.prune_before(t)
 
-        # Get current lead time
-        lt = self._get_lt(t)
-
-        # Solve receding-horizon LP
         remaining = self.horizon - t
         if remaining <= 0:
             return 0.0
         order = self._solve_mpc(t, on_hand, remaining)
 
-        # Update internal queue (match env's FIFO logic)
-        while len(self._queue) < lt:
-            self._queue.insert(0, 0.0)
-        self._queue.append(order)
+        # Record the order under the same timing rule the simulator applies.
+        self._pipeline.place(t, self._get_lt(t), order)
 
         return order
 
@@ -516,7 +676,7 @@ class InventoryEnv:
             self.normal_lead_time = (
                 P5_NORMAL_LEAD_TIME if regime else 2
             )
-        self._arrivals: list[float] = []  # queue of arriving orders
+        self._pipeline = PipelineSchedule()  # absolute-time order pipeline
         self._state: Optional[InventoryState] = None
 
     def _get_regime_lead_time(self, t: int) -> int:
@@ -544,7 +704,7 @@ class InventoryEnv:
             self._get_regime_lead_time(0) if self.regime
             else self.normal_lead_time
         )
-        self._arrivals = [0.0] * init_lt  # empty pipeline
+        self._pipeline = PipelineSchedule()  # empty pipeline
         self._state = InventoryState(
             time=0,
             on_hand=float(self.initial_inventory),
@@ -600,7 +760,7 @@ class InventoryEnv:
         s.lead_time = current_lt
 
         # 2. Receive arrivals (orders placed lead_time periods ago)
-        arrived = self._arrivals.pop(0) if self._arrivals else 0.0
+        arrived = self._pipeline.receive(t)
         s.on_hand += arrived
 
         # 3. Generate demand (regime-dependent in Phase 5)
@@ -628,14 +788,13 @@ class InventoryEnv:
         else:
             s.ordering_cost = 0.0
 
-        # 7. Pipeline update — pad queue to (current_lt - 1) waiting slots,
-        #    then append the new order (arrives after current_lt periods).
-        while len(self._arrivals) < current_lt:
-            self._arrivals.insert(0, 0.0)
-        self._arrivals.append(order_qty)
+        # 7. Pipeline update — the order arrives in period (t + current_lt),
+        #    per the declared PipelineSchedule semantics.  Orders already in
+        #    transit are unaffected by a lead-time change.
+        self._pipeline.place(t, current_lt, order_qty)
 
         # 8. Pipeline inventory = sum of in-transit orders
-        s.pipeline = sum(self._arrivals)
+        s.pipeline = self._pipeline.outstanding()
 
         # 9. Costs
         s.holding_cost = HOLDING_COST_PER_UNIT * s.on_hand

@@ -62,6 +62,8 @@ PHASE9B_SEEDS = list(range(4100, 4110))
 
 SENSORS = [
     "NoInfo",
+    "Constant_p1.0",       # the strongest text-free control found in Experiments M/S
+    "NoText_Tuned",
     "RuleBased",
     "TFIDF_LogReg_Raw",
     "TFIDF_LogReg_Calibrated",
@@ -70,6 +72,33 @@ SENSORS = [
 ]
 
 REGIME = Regime.SUPPLIER_CAPACITY_DROP
+
+# --- Text-world pairing -------------------------------------------------
+# Phase 9B iterates over all 16 templates, six of which are labelled `normal`.
+# Until September 2026 every episode was nevertheless simulated in a
+# SUPPLIER_CAPACITY_DROP world, so those six reports were false negatives.
+# That is a legitimate experiment, but it is an *evidence intervention*, not
+# the mechanical one-factor-at-a-time robustness study the results were
+# presented as, and it silently broke the text-world relationship that
+# Phase 9A establishes.
+#
+#   "matched"  (default)  each template is simulated in the world its own
+#                         label describes -- the honest OFAT robustness study.
+#   "false_negative"      normal reports are paired with a capacity-drop
+#                         world -- reported separately as a misinformation /
+#                         false-negative evidence intervention.
+PAIRING_MATCHED = "matched"
+PAIRING_FALSE_NEGATIVE = "false_negative"
+PAIRINGS = (PAIRING_MATCHED, PAIRING_FALSE_NEGATIVE)
+DEFAULT_PAIRING = PAIRING_MATCHED
+
+
+def world_regime_for(template, pairing: str) -> Regime:
+    """Resolve the simulated world for a template under the chosen pairing."""
+    if pairing == PAIRING_FALSE_NEGATIVE:
+        return REGIME
+    tmpl_regime = template.get("regime", REGIME)
+    return tmpl_regime if isinstance(tmpl_regime, Regime) else Regime(tmpl_regime)
 
 VARIANTS = {
     "baseline": {
@@ -121,7 +150,10 @@ VARIANTS = {
 class Phase9BRow:
     variant: str
     seed: int
-    regime: str
+    regime: str                 # the world actually simulated
+    template_regime: str        # the regime the warning text describes
+    pairing: str                # matched | false_negative
+    text_world_mismatch: bool   # True when the report contradicts the world
     sensor: str
     template_id: str
     ambiguity_level: str
@@ -171,14 +203,18 @@ def _tfidf_probs(text, model):
 def _llm_probs(text, model="gpt-4o"):
     """Reuse the cached LLM responses from Phase 9A."""
     import hashlib
+    from src.offline_artifacts import find_cached_response, require_cached_response
+
+    # Cache FIRST: an offline replay must not depend on credentials, and a
+    # missing entry must never be replaced by a silent 50/50 prior recorded
+    # under the model's own name.
+    h = hashlib.sha256(f"{model}||{text}".encode()).hexdigest()[:16]
+    cache_path = find_cached_response(f"phase9_{h}.json")
     api_key = os.environ.get("LLM_API_KEY", "")
     base_url = os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1")
-    if not api_key:
-        return {"normal": 0.5, "supplier_capacity_drop": 0.5}
-
-    h = hashlib.sha256(f"{model}||{text}".encode()).hexdigest()[:16]
-    cache_path = ROOT / ".llm_cache" / f"phase9_{h}.json"
-    if cache_path.exists():
+    if cache_path is None and not api_key:
+        require_cached_response(f"phase9_{h}.json", model=model, text=text)
+    if cache_path is not None:
         return json.loads(cache_path.read_text())
 
     import openai
@@ -209,26 +245,52 @@ def _llm_probs(text, model="gpt-4o"):
             result = {"normal": p_normal / total, "supplier_capacity_drop": p_cd / total}
         else:
             result = {"normal": 0.5, "supplier_capacity_drop": 0.5}
-        cache_path.write_text(json.dumps(result))
+        from src.offline_artifacts import runtime_cache_dir
+        target = runtime_cache_dir() / f"phase9_{h}.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(result))
         return result
-    except Exception:
-        return {"normal": 0.5, "supplier_capacity_drop": 0.5}
+    except Exception as exc:
+        # Never degrade to an uninformative prior recorded under the model's
+        # name: that produced episodes labelled `gpt-4o` containing no model
+        # output at all.  Fail loudly instead.
+        raise RuntimeError(
+            f"Live interpretation failed for model={model!r} and no frozen "
+            f"cache entry exists (phase9_{h}.json): {exc}"
+        ) from exc
 
 
-def _get_sensor_belief(sensor, text, tfidf_raw, tfidf_cal, llm_model="gpt-4o"):
+def _get_sensor_belief(sensor, text, tfidf_raw, tfidf_cal, llm_model="gpt-4o",
+                       world_regime=None, tuned_p_event=None):
+    """Resolve one sensor's belief.
+
+    `world_regime` is the regime actually simulated for this episode. The oracle
+    reference must describe THAT world; previously it always asserted
+    SUPPLIER_CAPACITY_DROP, which under the matched pairing made the
+    "oracle" wrong on every normal-world episode.
+    """
+    from src.notext_controls import constant_belief
+
+    world = world_regime or REGIME
     if sensor == "NoInfo":
         return get_no_info_probs_9()
-    elif sensor == "OracleSemantic":
-        return get_perfect_semantic_probs_9(REGIME)
-    elif sensor == "RuleBased":
+    if sensor.startswith("Constant_p"):
+        return constant_belief(float(sensor.split("_p")[1]), REGIME)
+    if sensor == "NoText_Tuned":
+        if tuned_p_event is None:
+            raise ValueError("NoText_Tuned needs a development-tuned operating point")
+        return constant_belief(tuned_p_event, REGIME)
+    if sensor == "OracleSemantic":
+        return get_perfect_semantic_probs_9(world)
+    if sensor == "RuleBased":
         return _rulebased_probs_9(text)
-    elif sensor == "TFIDF_LogReg_Raw" and tfidf_raw is not None:
+    if sensor == "TFIDF_LogReg_Raw" and tfidf_raw is not None:
         return _tfidf_probs(text, tfidf_raw)
-    elif sensor == "TFIDF_LogReg_Calibrated" and tfidf_cal is not None:
+    if sensor == "TFIDF_LogReg_Calibrated" and tfidf_cal is not None:
         return _tfidf_probs(text, tfidf_cal)
-    elif sensor == "gpt-4o":
+    if sensor == "gpt-4o":
         return _llm_probs(text, model=llm_model)
-    return get_no_info_probs_9()
+    raise ValueError(f"unknown sensor {sensor!r} (or its model was not supplied)")
 
 
 def _compute_variant_metrics(rows, variant_name, variant_dir):
@@ -326,11 +388,13 @@ def _compute_variant_metrics(rows, variant_name, variant_dir):
     return sensor_agg, ci_results
 
 
-def run_phase9b(seeds=None, llm_models=None):
+def run_phase9b(seeds=None, llm_models=None, pairing: str = DEFAULT_PAIRING):
     if seeds is None:
         seeds = PHASE9B_SEEDS
     if llm_models is None:
         llm_models = ["gpt-4o"]
+    if pairing not in PAIRINGS:
+        raise ValueError(f"pairing must be one of {PAIRINGS}, got {pairing!r}")
 
     train_templates = TRAIN_TEMPLATES
     test_templates = _get_heldout_templates()
@@ -338,6 +402,14 @@ def run_phase9b(seeds=None, llm_models=None):
 
     print(f"Phase 9B: {len(VARIANTS)} variants x {len(seeds)} seeds x "
           f"{len(all_templates)} templates x {len(SENSORS)} sensors")
+    print(f"  Text-world pairing: {pairing}")
+    n_mismatch = sum(
+        1 for t in all_templates if world_regime_for(t, pairing) is not (
+            t["regime"] if isinstance(t["regime"], Regime) else Regime(t["regime"])
+        )
+    )
+    print(f"  Templates whose report contradicts the simulated world: {n_mismatch}"
+          f"/{len(all_templates)}")
 
     train_texts = [t["text"] for t in train_templates]
     train_labels = [t["regime"].value for t in train_templates]
@@ -349,6 +421,18 @@ def run_phase9b(seeds=None, llm_models=None):
     tfidf_cal = TFIDFLogReg(calibrate=True, seed=42)
     tfidf_cal.fit(train_texts, train_labels)
     print(f"  TF-IDF calibrated trained")
+
+    # Reuse the Experiment-S no-text operating point, selected on development
+    # seeds. Boundary analysis must not re-tune per variant: that would let the
+    # control see the very perturbation it is being tested against.
+    tuning_path = ROOT / "results" / "phase9a_capacity_confirmation" / "notext_tuning.json"
+    if tuning_path.exists():
+        tuned_p_event = json.loads(tuning_path.read_text())["p_event"]
+        print(f"  No-text control p(event)={tuned_p_event} "
+              f"(from Experiment S development seeds, not re-tuned per variant)")
+    else:
+        tuned_p_event = 1.0
+        print("  No-text tuning file absent; falling back to p(event)=1.0")
 
     for model in llm_models:
         print(f"  Pre-caching LLM responses for {model}...")
@@ -376,16 +460,27 @@ def run_phase9b(seeds=None, llm_models=None):
                 tid = tmpl["template_id"]
                 alevel = tmpl["ambiguity_level"]
 
+                # Resolve the simulated world BEFORE any sensor consults it:
+                # the oracle reference must describe the world this episode
+                # actually runs in.
+                world = world_regime_for(tmpl, pairing)
+                tmpl_regime = (
+                    tmpl["regime"] if isinstance(tmpl["regime"], Regime)
+                    else Regime(tmpl["regime"])
+                )
+
                 for sensor in SENSORS:
                     call_count += 1
                     probs = _get_sensor_belief(
                         sensor, text, tfidf_raw, tfidf_cal,
                         llm_model=llm_models[0] if llm_models else "gpt-4o",
+                        world_regime=world,
+                        tuned_p_event=tuned_p_event,
                     )
 
                     result, _ = run_phase9_episode(
                         seed=seed,
-                        regime=REGIME,
+                        regime=world,
                         sensor=sensor,
                         regime_probabilities=probs,
                         scenario=vcfg["scenario"],
@@ -404,7 +499,10 @@ def run_phase9b(seeds=None, llm_models=None):
                     row = Phase9BRow(
                         variant=vname,
                         seed=seed,
-                        regime=REGIME.value,
+                        regime=world.value,
+                        template_regime=tmpl_regime.value,
+                        pairing=pairing,
+                        text_world_mismatch=(world is not tmpl_regime),
                         sensor=sensor,
                         template_id=tid,
                         ambiguity_level=alevel,

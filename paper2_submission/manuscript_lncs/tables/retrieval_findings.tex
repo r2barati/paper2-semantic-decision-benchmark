@@ -1,0 +1,40 @@
+\begin{table}[t]
+\caption{Experiment~R. Do retrieval quality and decision utility rank the
+ranking systems the same way? Kendall's $\tau_b$ between the nDCG@$k$ ordering
+and the $J_w$ ordering over \{random, BM25, TF--IDF, dense\}; the no-retrieval
+and oracle references are excluded because neither is a retrieval system.}
+\label{tab:rankagreement}
+\centering\small
+\begin{tabular}{llrll}
+\toprule
+Interpreter & $k$ & $\tau_b$ & Best by nDCG & Best by reward \\
+\midrule
+RuleBased & 1 & +0.67 & Dense (MiniLM) & TF--IDF cosine \\
+RuleBased & 3 & +1.00 & Dense (MiniLM) & Dense (MiniLM) \\
+RuleBased & 5 & +1.00 & Dense (MiniLM) & Dense (MiniLM) \\
+TFIDF LogReg Calibrated & 1 & +0.00 & Dense (MiniLM) & Random \\
+TFIDF LogReg Calibrated & 3 & +0.33 & Dense (MiniLM) & Dense (MiniLM) \\
+TFIDF LogReg Calibrated & 5 & +0.00 & Dense (MiniLM) & Dense (MiniLM) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\caption{Experiment~R. Why equal ranking quality need not mean equal
+utility: how many of the $k=3$ retrieved documents actively mislead, that is,
+are non-relevant \emph{and} describe a regime other than the true one.}
+\label{tab:harm}
+\centering\small
+\begin{tabular}{lrrr}
+\toprule
+System & nDCG@3 & Misleading docs retrieved & Belief accuracy \\
+\midrule
+No retrieval & 0.000 & 0.00 & 0.333 \\
+Random & 0.090 & 1.33 & 0.367 \\
+BM25 & 0.273 & 1.28 & 0.433 \\
+TF--IDF cosine & 0.336 & 0.97 & 0.456 \\
+Dense (MiniLM) & 0.617 & 0.87 & 0.589 \\
+Oracle selector & 1.000 & 0.67 & 0.756 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -39,9 +39,11 @@ from src.experiment_phase6 import (
     paired_bootstrap_ci, hierarchical_bootstrap_ci, calibration_analysis,
 )
 from src.metrics import signed_sivr
+from src.notext_controls import shuffled_text_assignment
 from src.confirmation_templates import CONFIRMATION_TEMPLATES
 from src.classical_baseline import (
-    TFIDFLogReg, build_dataset, grouped_train_test_split,
+    TFIDFLogReg, VARIANT_SINGLE, VARIANT_FOLD_ENSEMBLE, VARIANT_CALIBRATED,
+    build_dataset, grouped_train_test_split,
     evaluate_classification, leakage_audit, compute_dataset_manifest,
     cross_validate_on_original, REGIME_LABELS,
 )
@@ -53,7 +55,31 @@ RULEBASED = "RuleBased"
 PERFECT = "PerfectSemantic"
 TFIDF = "TFIDF_LogReg"
 TFIDF_CAL = "TFIDF_LogReg_Calibrated"
+
+# --- Arms added by the September 2026 repairs -------------------------------
+# Ensembling control: `CalibratedClassifierCV` refits one classifier per fold,
+# so TFIDF_CAL differs from TFIDF in two ways at once.  This arm carries the
+# ensembling change WITHOUT the calibration map.
+TFIDF_ENS = "TFIDF_LogReg_FoldEnsemble"
+# Small-sample calibration alternative: isotonic on six calibration points
+# saturates; Platt/sigmoid scaling does not.
+TFIDF_CAL_SIG = "TFIDF_LogReg_Calibrated_Sigmoid"
+# Label-only controls: the same interpreters' hard argmax, isolating
+# probability quality from label quality.
+TFIDF_ARGMAX = "TFIDF_LogReg_Argmax"
+TFIDF_CAL_ARGMAX = "TFIDF_LogReg_Calibrated_Argmax"
+# No-text controls: constant beliefs that never read the warning.
+NOTEXT_UNIFORM = "NoText_Uniform"
+NOTEXT_TUNED = "NoText_Tuned"
+# Shuffled-text control: the real interpreter on a deranged text assignment.
+TFIDF_CAL_SHUFFLED = "TFIDF_LogReg_Calibrated_ShuffledText"
+
 CONTROLLER = "CausalOptimizer"
+
+# Development seeds for tuning the no-text control. Disjoint from the Phase-7
+# evaluation seeds (2000-2019) so the tuned arm is never fitted on its own
+# evaluation data.
+P7_DEV_SEEDS = list(range(2500, 2510))
 
 
 def _save_csv(rows, path):
@@ -78,6 +104,118 @@ def _to_json_serializable(obj):
     if isinstance(obj, (list, tuple)):
         return [_to_json_serializable(v) for v in obj]
     return obj
+
+
+
+# ---------------------------------------------------------------------------
+# Control arms (September 2026 repairs)
+# ---------------------------------------------------------------------------
+
+def _uniform_regime_belief(regimes) -> RegimeInterpretation:
+    """A flat belief over the evaluated regimes; reads no text."""
+    p = 1.0 / len(regimes)
+    return RegimeInterpretation(
+        regime_probabilities={r.value: p for r in regimes},
+        estimated_lt_increase=0, estimated_duration=0, estimated_demand_multiplier=1.0,
+    )
+
+
+def _constant_regime_belief(probabilities: dict) -> RegimeInterpretation:
+    return RegimeInterpretation(
+        regime_probabilities=dict(probabilities),
+        estimated_lt_increase=0, estimated_duration=0, estimated_demand_multiplier=1.0,
+    )
+
+
+def _argmax_regime_belief(ri: RegimeInterpretation) -> RegimeInterpretation:
+    """Collapse a belief onto its most likely regime (label-only control)."""
+    probs = ri.normalized().regime_probabilities
+    top = max(probs, key=probs.get)
+    return _constant_regime_belief({k: (1.0 if k == top else 0.0) for k in probs})
+
+
+def _tune_notext_p7(regimes, templates, dev_seeds=None, grid_step=0.25) -> dict:
+    """Select a constant no-text belief on development seeds only.
+
+    The grid is over simplex points with coordinates in multiples of
+    `grid_step`. Selection uses the balanced mean profit across regimes on
+    seeds disjoint from the Phase-7 evaluation seeds, so the arm is tuned but
+    never on its own evaluation data.
+    """
+    dev_seeds = list(dev_seeds or P7_DEV_SEEDS)
+    labels = [r.value for r in regimes]
+    steps = int(round(1.0 / grid_step))
+
+    candidates = []
+    for i in range(steps + 1):
+        for j in range(steps + 1 - i):
+            k = steps - i - j
+            candidates.append({labels[0]: i / steps, labels[1]: j / steps, labels[2]: k / steps})
+
+    dev_grid = {}
+    best_key, best_val = None, -float("inf")
+    for cand in candidates:
+        regime_means = []
+        for regime in regimes:
+            profits = []
+            for seed in dev_seeds:
+                result, _ = _run_p5_episode(
+                    seed=seed, regime=regime, sensor=NOTEXT_TUNED, controller=CONTROLLER,
+                    regime_interp=_constant_regime_belief(cand),
+                )
+                profits.append(result.total_profit)
+            regime_means.append(float(np.mean(profits)))
+        key = ",".join(f"{cand[l]:.2f}" for l in labels)
+        dev_grid[key] = float(np.mean(regime_means))
+        if dev_grid[key] > best_val:
+            best_val, best_key, best_cand = dev_grid[key], key, cand
+
+    return {
+        "belief": _constant_regime_belief(best_cand),
+        "probabilities": best_cand,
+        "key": best_key,
+        "dev_grid": dev_grid,
+        "dev_seeds": dev_seeds,
+        "selection": "balanced mean profit over development seeds",
+    }
+
+
+def _belief_for_sensor(
+    sensor, text, template_id, regime, *,
+    model, model_cal, model_ens, model_cal_sig,
+    tuned_belief, shuffle_map, text_by_id,
+) -> RegimeInterpretation:
+    """Resolve one sensor's belief. No sensor silently falls back to NoInfo."""
+    if sensor == NOINFO:
+        return no_info_regime_belief()
+    if sensor == NOTEXT_UNIFORM:
+        return _uniform_regime_belief(
+            [Regime.NORMAL, Regime.SUPPLIER_DELAY, Regime.DEMAND_SURGE])
+    if sensor == NOTEXT_TUNED:
+        return tuned_belief
+    if sensor == PERFECT:
+        return perfect_semantic_regime_belief(regime)
+    if sensor == RULEBASED:
+        return rule_based_regime_extract(text)
+    if sensor == TFIDF:
+        return model.predict_regime(text).to_regime_interpretation()
+    if sensor == TFIDF_ARGMAX:
+        return _argmax_regime_belief(model.predict_regime(text).to_regime_interpretation())
+    if sensor == TFIDF_ENS:
+        return model_ens.predict_regime(text).to_regime_interpretation()
+    if sensor == TFIDF_CAL_SIG:
+        return model_cal_sig.predict_regime(text).to_regime_interpretation()
+    if sensor == TFIDF_CAL:
+        return model_cal.predict_regime(text).to_regime_interpretation()
+    if sensor == TFIDF_CAL_ARGMAX:
+        return _argmax_regime_belief(model_cal.predict_regime(text).to_regime_interpretation())
+    if sensor == TFIDF_CAL_SHUFFLED:
+        wrong_text = text_by_id[shuffle_map[template_id]]
+        return model_cal.predict_regime(wrong_text).to_regime_interpretation()
+    raise ValueError(
+        f"unknown Phase-7 sensor {sensor!r}; silently returning the NoInfo prior "
+        "would record a control's result under this sensor's name"
+    )
 
 
 def run_phase7(
@@ -141,10 +279,26 @@ def run_phase7(
         print("Training calibrated model...")
         model_cal = TFIDFLogReg(
             max_features=max_features, ngram_range=ngram_range,
-            C=C, calibrate=True, cal_method=cal_method, seed=42,
+            C=C, variant=VARIANT_CALIBRATED, cal_method=cal_method, seed=42,
         )
         model_cal.fit(orig_texts, orig_labels)
+        print(f"  fold sizes (train/calibration): {model_cal.fold_sizes_}")
         print()
+
+    # Ensembling control: the same fold classifiers, no calibration map.
+    print("Training fold-ensemble control (isolates ensembling)...")
+    model_ens = TFIDFLogReg(
+        max_features=max_features, ngram_range=ngram_range,
+        C=C, variant=VARIANT_FOLD_ENSEMBLE, seed=42,
+    ).fit(orig_texts, orig_labels)
+
+    # Small-sample calibration alternative.
+    print("Training sigmoid-calibrated arm (small-sample alternative)...")
+    model_cal_sig = TFIDFLogReg(
+        max_features=max_features, ngram_range=ngram_range,
+        C=C, variant=VARIANT_CALIBRATED, cal_method="sigmoid", seed=42,
+    ).fit(orig_texts, orig_labels)
+    print()
 
     model.save(output_dir / "tfidf_logreg_model.pkl")
     if model_cal is not None:
@@ -184,9 +338,29 @@ def run_phase7(
     print(f"  Shared families: {audit['families_shared']}")
     print()
 
-    sensors = [NOINFO, RULEBASED, TFIDF, PERFECT]
+    # Deranged text assignment for the shuffled-text control, computed once so
+    # every seed sees the same (wrong) text for a given template.
+    shuffle_map = shuffled_text_assignment([t["template_id"] for t in confirmation_templates])
+    text_by_id = {t["template_id"]: t["text"] for t in confirmation_templates}
+
+    # No-text operating point selected on DEVELOPMENT seeds only.
+    print("Tuning the no-text control on development seeds...")
+    tuned = _tune_notext_p7(regimes, confirmation_templates)
+    print(f"  selected belief: {tuned['belief']}  (dev mean profit "
+          f"{tuned['dev_grid'][tuned['key']]:.1f})")
+    print()
+
+    sensors = [
+        NOINFO, NOTEXT_UNIFORM, NOTEXT_TUNED,
+        RULEBASED,
+        TFIDF, TFIDF_ARGMAX,
+        TFIDF_ENS,
+        TFIDF_CAL_SIG,
+        PERFECT,
+    ]
     if model_cal is not None:
-        sensors.insert(3, TFIDF_CAL)
+        for extra in (TFIDF_CAL, TFIDF_CAL_ARGMAX, TFIDF_CAL_SHUFFLED):
+            sensors.insert(sensors.index(TFIDF_ENS), extra)
 
     all_episodes = []
     all_beliefs = []
@@ -201,20 +375,13 @@ def run_phase7(
                 alevel = tmpl["ambiguity_level"]
 
                 for sensor in sensors:
-                    if sensor == NOINFO:
-                        ri = no_info_regime_belief()
-                    elif sensor == PERFECT:
-                        ri = perfect_semantic_regime_belief(regime)
-                    elif sensor == RULEBASED:
-                        ri = rule_based_regime_extract(text)
-                    elif sensor == TFIDF:
-                        result_baseline = model.predict_regime(text)
-                        ri = result_baseline.to_regime_interpretation()
-                    elif sensor == TFIDF_CAL and model_cal is not None:
-                        result_baseline = model_cal.predict_regime(text)
-                        ri = result_baseline.to_regime_interpretation()
-                    else:
-                        ri = no_info_regime_belief()
+                    ri = _belief_for_sensor(
+                        sensor, text, tid, regime,
+                        model=model, model_cal=model_cal, model_ens=model_ens,
+                        model_cal_sig=model_cal_sig,
+                        tuned_belief=tuned["belief"],
+                        shuffle_map=shuffle_map, text_by_id=text_by_id,
+                    )
 
                     belief = ri.normalized()
 

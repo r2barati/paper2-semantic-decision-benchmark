@@ -26,6 +26,8 @@ from sklearn.metrics import (
     confusion_matrix, classification_report,
 )
 from sklearn.model_selection import GroupKFold, StratifiedKFold
+from sklearn.pipeline import Pipeline
+from sklearn.base import clone
 
 from src.events import (
     Regime, REGIME_WARNING_TEMPLATES, REGIME_PARAMS,
@@ -106,7 +108,40 @@ class ClassicalBaselineResult:
         )
 
 
+# Training-pipeline variants.  These are deliberately named as *pipelines*
+# rather than "raw vs calibrated", because `CalibratedClassifierCV` changes
+# the fitted classifier as well as the probability map (see FOLD_ENSEMBLE).
+VARIANT_SINGLE = "single"            # one logistic regression on all training texts
+VARIANT_FOLD_ENSEMBLE = "fold_ensemble"  # the CV fold ensemble, WITHOUT calibration
+VARIANT_CALIBRATED = "calibrated"    # the CV fold ensemble WITH a calibration map
+VARIANTS = (VARIANT_SINGLE, VARIANT_FOLD_ENSEMBLE, VARIANT_CALIBRATED)
+
+
 class TFIDFLogReg:
+    """TF-IDF + logistic-regression regime classifier.
+
+    Three training pipelines are supported so that the effect of *calibration*
+    can be separated from the effect of *fold ensembling*:
+
+    ``single``
+        One logistic regression fitted on all training texts.
+    ``fold_ensemble``
+        ``cv`` logistic regressions fitted on the same cross-validation folds
+        `CalibratedClassifierCV` uses, averaged, with no calibration map.
+        This is the control that isolates ensembling.
+    ``calibrated``
+        The same fold ensemble with an isotonic or sigmoid calibration map.
+
+    Comparing ``single`` with ``calibrated`` alone therefore compares two
+    training pipelines, not an isolated calibration intervention; the
+    ``fold_ensemble`` control supplies the missing arm.  With small calibration
+    sets, ``cal_method="sigmoid"`` is the recommended alternative to isotonic
+    (scikit-learn cautions against isotonic on very few calibration points).
+
+    The vectorizer is fitted *inside* each fold pipeline whenever
+    cross-validation is used, so fold vocabularies are not shared.
+    """
+
     def __init__(
         self,
         max_features: int = 500,
@@ -115,13 +150,22 @@ class TFIDFLogReg:
         calibrate: bool = False,
         cal_method: str = "isotonic",
         seed: int = 42,
+        variant: Optional[str] = None,
+        cv: int = 3,
     ):
         self.max_features = max_features
         self.ngram_range = ngram_range
         self.C = C
-        self.calibrate = calibrate
         self.cal_method = cal_method
         self.seed = seed
+        self.cv = cv
+
+        if variant is None:
+            variant = VARIANT_CALIBRATED if calibrate else VARIANT_SINGLE
+        if variant not in VARIANTS:
+            raise ValueError(f"variant must be one of {VARIANTS}, got {variant!r}")
+        self.variant = variant
+        self.calibrate = variant == VARIANT_CALIBRATED
 
         self.vectorizer_ = TfidfVectorizer(
             max_features=max_features,
@@ -134,23 +178,72 @@ class TFIDFLogReg:
             random_state=seed,
         )
         self.calibrated_model_ = None
+        self.fold_models_ = None
         self.is_fitted_ = False
         self.train_size_ = 0
         self.vocabulary_size_ = 0
+        self.fold_sizes_ = []
+        self.classes_ = None
+
+    def _make_pipeline(self) -> Pipeline:
+        """Vectorizer + classifier as one estimator, so CV refits the vocabulary."""
+        return Pipeline([
+            ("tfidf", TfidfVectorizer(
+                max_features=self.max_features,
+                ngram_range=self.ngram_range,
+                sublinear_tf=True,
+                strip_accents="unicode",
+            )),
+            ("lr", LogisticRegression(
+                C=self.C, max_iter=1000, solver="lbfgs", random_state=self.seed,
+            )),
+        ])
 
     def fit(self, texts: list[str], labels: list[str]) -> "TFIDFLogReg":
-        X = self.vectorizer_.fit_transform(texts)
+        texts = list(texts)
+        labels = list(labels)
         self.train_size_ = len(texts)
-        self.vocabulary_size_ = len(self.vectorizer_.vocabulary_)
 
-        if self.calibrate:
-            self.model_.fit(X, labels)
-            self.calibrated_model_ = CalibratedClassifierCV(
-                self.model_, cv=3, method=self.cal_method,
+        # The single-model path always exists: it is the shared reference
+        # classifier and supplies the vocabulary used by `predict_*` when no
+        # fold pipeline is active.
+        X = self.vectorizer_.fit_transform(texts)
+        self.vocabulary_size_ = len(self.vectorizer_.vocabulary_)
+        self.model_.fit(X, labels)
+        self.classes_ = list(self.model_.classes_)
+
+        if self.variant in (VARIANT_FOLD_ENSEMBLE, VARIANT_CALIBRATED):
+            splitter = StratifiedKFold(
+                n_splits=self.cv, shuffle=True, random_state=self.seed,
             )
-            self.calibrated_model_.fit(X, labels)
-        else:
-            self.model_.fit(X, labels)
+            self.fold_sizes_ = [
+                {"train": len(tr), "calibration": len(te)}
+                for tr, te in splitter.split(np.zeros(len(texts)), labels)
+            ]
+
+        if self.variant == VARIANT_CALIBRATED:
+            splitter = StratifiedKFold(
+                n_splits=self.cv, shuffle=True, random_state=self.seed,
+            )
+            self.calibrated_model_ = CalibratedClassifierCV(
+                self._make_pipeline(), cv=splitter, method=self.cal_method,
+            )
+            self.calibrated_model_.fit(np.array(texts, dtype=object), labels)
+            self.classes_ = list(self.calibrated_model_.classes_)
+        elif self.variant == VARIANT_FOLD_ENSEMBLE:
+            # Exactly the classifiers CalibratedClassifierCV would fit, with
+            # the calibration map omitted.  Averaging their probabilities
+            # isolates the ensembling component of the calibrated pipeline.
+            splitter = StratifiedKFold(
+                n_splits=self.cv, shuffle=True, random_state=self.seed,
+            )
+            arr = np.array(texts, dtype=object)
+            self.fold_models_ = []
+            for train_idx, _ in splitter.split(arr, labels):
+                pipe = self._make_pipeline()
+                pipe.fit(arr[train_idx], [labels[i] for i in train_idx])
+                self.fold_models_.append(pipe)
+            self.classes_ = list(self.fold_models_[0].classes_)
 
         self.is_fitted_ = True
         return self
@@ -158,22 +251,29 @@ class TFIDFLogReg:
     def predict_proba(self, texts: list[str]) -> np.ndarray:
         if not self.is_fitted_:
             raise RuntimeError("Model not fitted")
-        X = self.vectorizer_.transform(texts)
         if self.calibrated_model_ is not None:
-            return self.calibrated_model_.predict_proba(X)
+            return self.calibrated_model_.predict_proba(np.array(list(texts), dtype=object))
+        if self.fold_models_ is not None:
+            # Align every fold's columns to the shared class order before
+            # averaging; folds can see different label subsets.
+            acc = np.zeros((len(texts), len(self.classes_)))
+            for pipe in self.fold_models_:
+                p = pipe.predict_proba(np.array(list(texts), dtype=object))
+                for j, cls in enumerate(pipe.classes_):
+                    acc[:, self.classes_.index(cls)] += p[:, j]
+            return acc / len(self.fold_models_)
+        X = self.vectorizer_.transform(texts)
         return self.model_.predict_proba(X)
 
     def predict(self, texts: list[str]) -> list[str]:
         if not self.is_fitted_:
             raise RuntimeError("Model not fitted")
-        X = self.vectorizer_.transform(texts)
-        if self.calibrated_model_ is not None:
-            return self.calibrated_model_.predict(X).tolist()
-        return self.model_.predict(X).tolist()
+        probs = self.predict_proba(texts)
+        return [self.classes_[i] for i in probs.argmax(axis=1)]
 
     def predict_regime(self, text: str) -> ClassicalBaselineResult:
         probs = self.predict_proba([text])[0]
-        classes = self.model_.classes_
+        classes = self.classes_
         prob_dict = {cls: float(p) for cls, p in zip(classes, probs)}
         for r in REGIME_LABELS:
             if r not in prob_dict:
@@ -197,13 +297,17 @@ class TFIDFLogReg:
                 "vectorizer": self.vectorizer_,
                 "model": self.model_,
                 "calibrated_model": self.calibrated_model_,
+                "fold_models": self.fold_models_,
+                "classes": self.classes_,
+                "fold_sizes": self.fold_sizes_,
                 "config": {
                     "max_features": self.max_features,
                     "ngram_range": self.ngram_range,
                     "C": self.C,
-                    "calibrate": self.calibrate,
                     "cal_method": self.cal_method,
                     "seed": self.seed,
+                    "variant": self.variant,
+                    "cv": self.cv,
                 },
                 "is_fitted": self.is_fitted_,
                 "train_size": self.train_size_,
@@ -218,14 +322,13 @@ class TFIDFLogReg:
         obj.vectorizer_ = data["vectorizer"]
         obj.model_ = data["model"]
         obj.calibrated_model_ = data["calibrated_model"]
+        obj.fold_models_ = data.get("fold_models")
+        obj.fold_sizes_ = data.get("fold_sizes", [])
         obj.is_fitted_ = data["is_fitted"]
         obj.train_size_ = data["train_size"]
         obj.vocabulary_size_ = data["vocabulary_size"]
+        obj.classes_ = data.get("classes") or list(obj.model_.classes_)
         return obj
-
-    @property
-    def classes_(self):
-        return self.model_.classes_
 
 
 def evaluate_classification(y_true, y_pred, proba, classes) -> dict:

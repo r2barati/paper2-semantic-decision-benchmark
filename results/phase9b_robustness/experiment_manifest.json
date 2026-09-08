@@ -15,9 +15,9 @@
   ],
   "n_seeds": 10,
   "n_templates": 16,
-  "n_sensors": 6,
+  "n_sensors": 8,
   "n_variants": 6,
-  "total_episodes": 5760,
+  "total_episodes": 7680,
   "variants": {
     "baseline": "Baseline (Phase-9A settings)",
     "short_lead": "SHORT_LEAD (L\u00d70.5)",

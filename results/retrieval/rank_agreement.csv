@@ -1,0 +1,7 @@
+interpreter,budget_k,n_systems,concordant,discordant,kendall_tau_b,best_by_ndcg,best_by_reward
+RuleBased,1,4,5,1,0.6667,dense,tfidf
+RuleBased,3,4,6,0,1.0,dense,dense
+RuleBased,5,4,6,0,1.0,dense,dense
+TFIDF_LogReg_Calibrated,1,4,3,3,0.0,dense,random
+TFIDF_LogReg_Calibrated,3,4,4,2,0.3333,dense,dense
+TFIDF_LogReg_Calibrated,5,4,3,3,0.0,dense,dense

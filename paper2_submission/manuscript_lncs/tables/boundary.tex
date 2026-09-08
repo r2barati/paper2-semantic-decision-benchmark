@@ -1,0 +1,22 @@
+\begin{table}[t]
+\caption{Experiment~B. \emph{Every} one-factor-at-a-time variant, including
+the adverse ones. Values are the balanced weighted return $J_w$; OIV is the
+oracle information value. $\dagger$ marks a variant whose OIV is not positive:
+there the oracle-belief reference itself underperforms the uninformed prior, so
+a normalised ratio cannot be read as recovery of information value and the
+finding is about controller--environment mismatch, not semantic sensing.}
+\label{tab:boundary}
+\centering\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Variant & NoInfo & No-text & Rule & TF--IDF & GPT-4o & Oracle & OIV \\
+\midrule
+baseline & 1324 & 1713 & 1436 & 1362 & 1362 & 1435 & +112 \\
+high\_noise & 1313 & 1674 & 1417 & 1344 & 1346 & 1411 & +97 \\
+long\_lead$^{\dagger}$ & -876 & -967 & -902 & -869 & -863 & -878 & -3 \\
+lost\_sales$^{\dagger}$ & 1512 & 1439 & 1489 & 1503 & 1507 & 1490 & -22 \\
+low\_noise & 1334 & 1732 & 1449 & 1375 & 1372 & 1450 & +116 \\
+short\_lead$^{\dagger}$ & 2398 & 2486 & 2411 & 2248 & 2213 & 2214 & -183 \\
+\bottomrule
+\end{tabular}
+\end{table}

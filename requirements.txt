@@ -1,9 +1,30 @@
+# Paper 2 -- semantic decision benchmark
+#
+# Supported Python: >=3.9, <3.13 (developed and verified on 3.9.19 and 3.11).
+#
+# The vendored simulator in third_party/gym-invmgmt-paper is inserted into
+# sys.path rather than pip-installed, so ITS dependencies are not resolved
+# automatically and must be listed here explicitly. Omitting networkx and
+# PyYAML made `import gym_invmgmt` fail on any machine that did not already
+# happen to have them.
+
+# --- core numerics -----------------------------------------------------
 numpy==1.26.4
 scipy==1.13.1
-matplotlib==3.9.0rc2
-scikit-learn==1.6.1
-openai==2.48.0
-pytest==8.4.2
-python-dotenv==1.2.1
 pandas==2.3.3
+scikit-learn==1.6.1
+matplotlib==3.9.0rc2
+
+# --- simulator ---------------------------------------------------------
+# NOTE: gymnasium is pinned to 0.29.1. The README previously claimed 1.0.0;
+# 0.29.1 is what the vendored environment is verified against.
 gymnasium==0.29.1
+networkx==3.2.1            # required by gym_invmgmt.network_topology
+PyYAML==6.0.3              # required by gym_invmgmt.network_topology
+
+# --- interpreters ------------------------------------------------------
+openai==2.48.0             # live LLM only; offline replay needs no key
+python-dotenv==1.2.1
+
+# --- tests -------------------------------------------------------------
+pytest==8.4.2

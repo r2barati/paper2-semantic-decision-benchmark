@@ -731,9 +731,12 @@ def llm_regime_interpret_with_result(
     cache_dir.mkdir(exist_ok=True)
     cache_file = cache_dir / f"{h}.json"
 
-    frozen_cache_file = cache_file.parent.parent / "results" / "frozen_llm_outputs" / cache_file.name
-    if cache_file.exists() or frozen_cache_file.exists():
-        cached = json.loads((cache_file if cache_file.exists() else frozen_cache_file).read_text())
+    # Resolve frozen inputs from the repository root, never from the runtime
+    # cache's parent: redirecting PAPER2_LLM_CACHE_DIR must not move them.
+    from src.offline_artifacts import find_cached_response
+    resolved = find_cached_response(cache_file.name)
+    if resolved is not None:
+        cached = json.loads(resolved.read_text())
         regime_interp = RegimeInterpretation.from_dict(cached)
         llm_result = LLMResult(
             interpretation=Interpretation("regime", 0.0, 0, 0),

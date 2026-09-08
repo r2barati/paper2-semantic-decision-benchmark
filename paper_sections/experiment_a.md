@@ -1,3 +1,9 @@
+> **Superseded in part (September 2026).** This section describes an earlier
+> design. The controlled experiment now uses **three** regimes (normal,
+> supplier delay, demand surge), a **40**-period horizon, and the
+> `CausalOptimizer` receding-horizon controller for the primary comparison ---
+> not a fixed heuristic policy. Counts are in `docs/ACCOUNTING.md`.
+
 # Experiment A: Controlled Semantic-Decision Benchmark
 
 ## Purpose
@@ -28,7 +34,7 @@ Three regimes: Normal (no disruption), SupplierDelay (lead-time increase). Regim
 
 ## Controller
 
-Fixed heuristic policy for all conditions. CausalOptimizer and HindsightOracle use stronger policies but are only used for decomposition analysis, not for SIVR computation.
+The primary controlled comparison uses `CausalOptimizer` (receding-horizon LP) for all conditions; the belief is the only thing that varies. HindsightOracle is a clairvoyant reference used for decomposition, not for SIVR. (This line previously described a fixed heuristic policy, which does not match `src/experiment_phase7.py`.)
 
 ## Key Results (Phase 7)
 

@@ -1,6 +1,12 @@
 sensor,win_rate_vs_NoInfo,tie_rate,n_pairs
+Constant_p0.0,0.0,0.0,480
+Constant_p0.5,0.0,1.0,480
+Constant_p1.0,1.0,0.0,480
+NoText_Tuned,1.0,0.0,480
 RuleBased,0.6875,0.0,480
 TFIDF_LogReg_Raw,0.75,0.0,480
-TFIDF_LogReg_Calibrated,0.4375,0.0,480
+TFIDF_LogReg_Calibrated,0.5,0.0,480
 gpt-4o,0.5625,0.0,480
+TFIDF_LogReg_Calibrated_Argmax,0.5,0.0,480
+TFIDF_LogReg_Calibrated_Shuffled,0.5,0.0,480
 OracleSemantic,0.625,0.0,480

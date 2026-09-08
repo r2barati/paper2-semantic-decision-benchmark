@@ -191,11 +191,65 @@ class TestFillRateMetric:
 # 6. Six sensors configured
 # ---------------------------------------------------------------------------
 
-class TestSixSensors:
-    def test_sensors_list(self):
+class TestSensorRoster:
+    """The roster must keep every original arm AND carry the 2026 controls.
+
+    This test previously pinned the roster to exactly six sensors, which meant
+    adding the text-free and degraded-text controls the audit required would
+    fail a test named `test_sensors_list`. The requirement is that no original
+    arm is dropped and that each control the paper relies on is present, not
+    that the roster never grows.
+    """
+
+    ORIGINAL = {
+        "NoInfo", "RuleBased", "TFIDF_LogReg_Raw", "TFIDF_LogReg_Calibrated",
+        "gpt-4o", "OracleSemantic",
+    }
+    REQUIRED_CONTROLS = {
+        "Constant_p0.0", "Constant_p0.5", "Constant_p1.0", "NoText_Tuned",
+        "TFIDF_LogReg_Calibrated_Argmax", "TFIDF_LogReg_Calibrated_Shuffled",
+    }
+
+    def test_original_sensors_retained(self):
         from src.experiment_phase8b import SENSORS
-        expected = {"NoInfo", "RuleBased", "TFIDF_LogReg_Raw", "TFIDF_LogReg_Calibrated", "gpt-4o", "OracleSemantic"}
-        assert set(SENSORS) == expected, f"Expected sensors {expected}, got {set(SENSORS)}"
+        missing = self.ORIGINAL - set(SENSORS)
+        assert not missing, f"original sensors dropped: {missing}"
+
+    def test_required_controls_present(self):
+        from src.experiment_phase8b import SENSORS
+        missing = self.REQUIRED_CONTROLS - set(SENSORS)
+        assert not missing, (
+            f"missing controls {missing}: without them a positive effect against "
+            "the uninformed prior cannot be distinguished from a better "
+            "controller operating point"
+        )
+
+    def test_no_duplicate_sensors(self):
+        from src.experiment_phase8b import SENSORS
+        assert len(SENSORS) == len(set(SENSORS))
+
+    def test_every_sensor_resolves_to_a_belief(self):
+        """No sensor may silently fall through to the prior."""
+        from src.experiment_phase8b import SENSORS, _get_sensor_belief
+        from src.classical_baseline import TFIDFLogReg
+        from src.events import Regime, REGIME_WARNING_TEMPLATES
+
+        texts = [t["text"] for t in REGIME_WARNING_TEMPLATES]
+        labels = [t["regime"].value for t in REGIME_WARNING_TEMPLATES]
+        raw = TFIDFLogReg(seed=42).fit(texts, labels)
+        cal = TFIDFLogReg(calibrate=True, seed=42).fit(texts, labels)
+
+        for sensor in SENSORS:
+            probs = _get_sensor_belief(
+                sensor, texts[0], Regime.NORMAL,
+                tfidf_raw=raw, tfidf_cal=cal,
+                tuned_p_event=1.0, shuffled_text=texts[1],
+            )
+            assert abs(sum(probs.values()) - 1.0) < 1e-6, (sensor, probs)
+
+        with pytest.raises(ValueError):
+            _get_sensor_belief("NotARealSensor", texts[0], Regime.NORMAL,
+                               tfidf_raw=raw, tfidf_cal=cal)
 
     def test_perfect_semantic_renamed(self):
         from src.experiment_phase8b import SENSORS

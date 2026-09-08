@@ -224,6 +224,204 @@ def family_seed_bootstrap_ci(
     }
 
 
+def weighted_benchmark_return(
+    values_by_regime_family_variant: Mapping[str, Mapping[str, Mapping[str, Mapping[Any, float]]]],
+    regime_weights: Optional[Mapping[str, float]] = None,
+) -> Dict[str, Any]:
+    """The benchmark's finite weighted return -- the single declared estimand.
+
+    ``J(m) = sum_r w_r * mean_f mean_v mean_s value[r][f][v][s]``
+
+    Seeds are averaged within a template variant, variants within a family,
+    families within a regime, and regimes are combined with explicit weights
+    ``w_r``.  The *balanced* estimand uses uniform ``w_r``; the *deployment
+    prior* estimand uses the declared regime prior.
+
+    This nesting matters because group sizes are unequal -- Phase 9A has six
+    normal and ten capacity-drop templates -- so an equal-row mean over all
+    episodes is a different estimand from this one.  Numerator and denominator
+    of any ratio built on top of it (SIVR) must use the SAME weights.
+    """
+    regimes = sorted(values_by_regime_family_variant)
+    if not regimes:
+        raise ValueError("At least one regime is required")
+    if regime_weights is None:
+        weights = {r: 1.0 / len(regimes) for r in regimes}
+    else:
+        raw = {r: float(regime_weights.get(r, 0.0)) for r in regimes}
+        total = sum(raw.values())
+        if total <= 0:
+            raise ValueError("Regime weights must have positive mass")
+        weights = {r: raw[r] / total for r in regimes}
+
+    regime_means = {}
+    counts = {"regimes": len(regimes), "families": 0, "variants": 0, "cells": 0}
+    for regime in regimes:
+        family_means = []
+        for family in sorted(values_by_regime_family_variant[regime]):
+            variant_means = []
+            for variant in sorted(values_by_regime_family_variant[regime][family]):
+                cell = values_by_regime_family_variant[regime][family][variant]
+                if cell:
+                    variant_means.append(float(np.mean(list(cell.values()))))
+                    counts["cells"] += len(cell)
+            if variant_means:
+                family_means.append(float(np.mean(variant_means)))
+                counts["variants"] += len(variant_means)
+        if family_means:
+            regime_means[regime] = float(np.mean(family_means))
+            counts["families"] += len(family_means)
+
+    value = float(sum(weights[r] * regime_means[r] for r in regime_means))
+    return {
+        "value": value,
+        "regime_means": regime_means,
+        "regime_weights": weights,
+        "counts": counts,
+        "nesting": "regime -> family -> variant -> seed",
+    }
+
+
+def crossed_bootstrap_ci(
+    diffs_by_regime_family_variant: Mapping[str, Mapping[str, Mapping[str, Mapping[Any, float]]]],
+    regime_weights: Optional[Mapping[str, float]] = None,
+    n_boot: int = 10000,
+    alpha: float = 0.05,
+    seed: int = 42,
+) -> Dict[str, Any]:
+    """Crossed (two-way cluster) bootstrap for the seeds x templates design.
+
+    The benchmark crosses a *world* (seed) with *language* (template): every
+    template within a regime is evaluated on the same seeds, so a seed is not
+    an independent draw nested under a template.  :func:`family_seed_bootstrap_ci`
+    resampled seeds separately inside each variant, which destroys that shared
+    structure and understates the world-level component of the variance.
+
+    This estimator resamples the two crossed axes independently:
+
+    * one **shared** seed sample per regime, reused by every family/variant in
+      that regime, so a world that is drawn twice is drawn twice everywhere;
+    * families with replacement, and variants with replacement within family,
+      representing the language axis.
+
+    Inference is conditional on the *fixed* template set unless the caller
+    declares otherwise: the three ambiguity-derived families per regime are
+    designed categories, not a demonstrated random sample from a population of
+    language families.  ``family_axis_resampled`` records which reading the
+    returned interval supports.
+
+    The p-value is a centred bootstrap test inversion,
+    ``(1 + #{|b* - point| >= |point|}) / (n_boot + 1)``, which is bounded below
+    by ``1 / (n_boot + 1)``.  It can never be reported as exactly zero, and
+    ``p_value_floor`` gives the Monte Carlo resolution.
+    """
+
+    regimes = sorted(diffs_by_regime_family_variant)
+    if not regimes:
+        raise ValueError("At least one regime is required")
+    if regime_weights is None:
+        weights = {r: 1.0 / len(regimes) for r in regimes}
+    else:
+        raw = {r: float(regime_weights.get(r, 0.0)) for r in regimes}
+        total = sum(raw.values())
+        if total <= 0:
+            raise ValueError("Regime weights must have positive mass")
+        weights = {r: raw[r] / total for r in regimes}
+
+    # Freeze a per-regime seed order and materialise every cell against it.
+    # A cell missing a seed is dropped from that cell only, so unbalanced
+    # cells degrade gracefully rather than silently misaligning worlds.
+    layout: Dict[str, Any] = {}
+    for regime in regimes:
+        seed_ids = sorted({
+            s
+            for fam in diffs_by_regime_family_variant[regime].values()
+            for cell in fam.values()
+            for s in cell
+        })
+        cells = {}
+        for family in sorted(diffs_by_regime_family_variant[regime]):
+            for variant in sorted(diffs_by_regime_family_variant[regime][family]):
+                cell = diffs_by_regime_family_variant[regime][family][variant]
+                cells[(family, variant)] = np.array(
+                    [cell.get(s, np.nan) for s in seed_ids], dtype=float
+                )
+        layout[regime] = {
+            "seed_ids": seed_ids,
+            "families": sorted(diffs_by_regime_family_variant[regime]),
+            "variants": {
+                family: sorted(diffs_by_regime_family_variant[regime][family])
+                for family in sorted(diffs_by_regime_family_variant[regime])
+            },
+            "cells": cells,
+        }
+
+    def regime_mean(regime: str, seed_pos, family_ids, variant_choice) -> float:
+        info = layout[regime]
+        family_means = []
+        for family in family_ids:
+            variant_means = []
+            for variant in variant_choice[family]:
+                values = info["cells"][(family, variant)][seed_pos]
+                values = values[~np.isnan(values)]
+                if values.size:
+                    variant_means.append(float(values.mean()))
+            if variant_means:
+                family_means.append(float(np.mean(variant_means)))
+        if not family_means:
+            raise ValueError(f"Regime {regime!r} has no usable cells")
+        return float(np.mean(family_means))
+
+    point = float(sum(
+        weights[r] * regime_mean(
+            r,
+            np.arange(len(layout[r]["seed_ids"])),
+            layout[r]["families"],
+            layout[r]["variants"],
+        )
+        for r in regimes
+    ))
+
+    rng = np.random.default_rng(seed)
+    boot = np.empty(n_boot, dtype=float)
+    for b in range(n_boot):
+        total_stat = 0.0
+        for regime in regimes:
+            info = layout[regime]
+            n_seeds = len(info["seed_ids"])
+            # ONE shared world resample, reused by every family and variant.
+            seed_pos = rng.integers(0, n_seeds, size=n_seeds)
+            families = list(rng.choice(info["families"], size=len(info["families"]), replace=True))
+            variant_choice = {
+                family: list(rng.choice(
+                    info["variants"][family], size=len(info["variants"][family]), replace=True,
+                ))
+                for family in set(families)
+            }
+            total_stat += weights[regime] * regime_mean(regime, seed_pos, families, variant_choice)
+        boot[b] = total_stat
+
+    centred = boot - point
+    p_value = float((1 + int(np.sum(np.abs(centred) >= abs(point)))) / (n_boot + 1))
+
+    return {
+        "mean": point,
+        "ci_lower": float(np.percentile(boot, 100 * alpha / 2)),
+        "ci_upper": float(np.percentile(boot, 100 * (1 - alpha / 2))),
+        "p_value": p_value,
+        "p_value_floor": 1.0 / (n_boot + 1),
+        "bootstrap_samples": boot,
+        "n_boot": n_boot,
+        "regime_weights": weights,
+        "bootstrap_seed": seed,
+        "bootstrap_hierarchy": "regime -> [shared seeds] x [family -> variant]",
+        "shared_seed_draws": True,
+        "family_axis_resampled": True,
+        "interval_type": "percentile",
+        "p_value_method": "centred bootstrap test inversion",
+    }
+
+
 def information_value(
     j_condition: float,
     j_no_info: float,

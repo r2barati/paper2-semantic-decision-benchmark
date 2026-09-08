@@ -1,0 +1,51 @@
+\begin{table}[t]
+\caption{Experiment~M (held-out multi-echelon transfer, demand surge). Rows are grouped as text-free controls, text interpreters, degraded-text controls, and the oracle-belief reference. $J_w$ is the balanced weighted return; $\Delta J$ is the paired effect against NoInfo. A dev-tuned constant belief that reads no text is the row every interpreter must beat.}
+\label{tab:expM}
+\centering\small
+\begin{tabular}{lrrlrr}
+\toprule
+Information source & $J_w$ & $\Delta J$ & 95\% CI & $p$ & SIVR \\
+\midrule
+NoInfo (prior) & 467.7 & +0.0 & [+0.0, +0.0] & 1.000 & 0.000 \\
+Constant $p_{\mathrm{event}}=0$ & 381.2 & -86.5 & [-93.5, -80.1] & $<$0.0002 & -1.027 \\
+Constant $p_{\mathrm{event}}=0.5$ & 501.1 & +33.3 & [+32.2, +34.8] & $<$0.0002 & 0.396 \\
+Constant $p_{\mathrm{event}}=1$ & 560.4 & +92.7 & [+89.5, +95.8] & $<$0.0002 & 1.100 \\
+\textbf{No-text (dev-tuned)} & 560.4 & +92.7 & [+89.5, +95.8] & $<$0.0002 & 1.100 \\
+\midrule
+RuleBased & 568.7 & +101.0 & [+94.7, +106.0] & $<$0.0002 & 1.198 \\
+TF--IDF (single) & 516.2 & +48.5 & [+36.5, +58.4] & $<$0.0002 & 0.575 \\
+TF--IDF (calib., isotonic) & 530.2 & +62.5 & [+4.7, +95.8] & 0.017 & 0.742 \\
+GPT-4o & 534.9 & +67.1 & [+29.7, +87.2] & 0.002 & 0.797 \\
+\midrule
+TF--IDF cal.\ (label only) & 523.5 & +55.8 & [-23.5, +89.4] & 0.066 & 0.662 \\
+TF--IDF cal.\ (shuffled) & 451.1 & -16.6 & [-67.3, +51.8] & 0.578 & -0.198 \\
+Oracle belief & 552.0 & +84.3 & [+76.8, +91.1] & $<$0.0002 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\caption{Experiment~S (supply-side capacity-drop transfer). Same protocol, a structurally different event mechanism.}
+\label{tab:expS}
+\centering\small
+\begin{tabular}{lrrlrr}
+\toprule
+Information source & $J_w$ & $\Delta J$ & 95\% CI & $p$ & SIVR \\
+\midrule
+NoInfo (prior) & 1333.6 & +0.0 & [+0.0, +0.0] & 1.000 & 0.000 \\
+Constant $p_{\mathrm{event}}=0$ & 1166.7 & -166.9 & [-166.9, -166.9] & $<$0.0002 & -1.481 \\
+Constant $p_{\mathrm{event}}=0.5$ & 1333.6 & +0.0 & [+0.0, +0.0] & 1.000 & 0.000 \\
+Constant $p_{\mathrm{event}}=1$ & 1725.1 & +391.5 & [+386.6, +395.8] & $<$0.0002 & 3.473 \\
+\textbf{No-text (dev-tuned)} & 1725.1 & +391.5 & [+386.6, +395.8] & $<$0.0002 & 3.473 \\
+\midrule
+RuleBased & 1447.0 & +113.4 & [+39.1, +183.1] & 0.003 & 1.006 \\
+TF--IDF (single) & 1362.8 & +29.2 & [-3.9, +68.5] & 0.136 & 0.259 \\
+TF--IDF (calib., isotonic) & 1372.9 & +39.3 & [-73.0, +130.7] & 0.467 & 0.349 \\
+GPT-4o & 1372.6 & +38.9 & [-39.0, +85.2] & 0.271 & 0.345 \\
+\midrule
+TF--IDF cal.\ (label only) & 1392.0 & +58.4 & [-72.8, +114.9] & 0.112 & 0.518 \\
+TF--IDF cal.\ (shuffled) & 1415.2 & +81.6 & [-66.8, +257.9] & 0.327 & 0.724 \\
+Oracle belief & 1446.3 & +112.7 & [+109.2, +115.6] & $<$0.0002 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}

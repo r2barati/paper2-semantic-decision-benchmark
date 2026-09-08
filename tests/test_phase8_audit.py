@@ -175,29 +175,99 @@ class TestAudit7TFIDFIdentity:
         model = TFIDFLogReg.load(str(pkl))
         assert model.calibrated_model_ is not None, "Model must have calibration applied"
 
-    def test_tfidf_saturates_on_surge_templates(self):
-        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
-        from src.classical_baseline import TFIDFLogReg
-        model = TFIDFLogReg.load(str(pkl))
-        surge_tmpls = [t for t in REGIME_WARNING_TEMPLATES if t["regime"] == Regime.DEMAND_SURGE]
-        for tmpl in surge_tmpls:
-            result = model.predict_regime(tmpl["text"])
-            p_surge = result.regime_probabilities.get("demand_surge", 0.0)
-            assert p_surge > 0.95, (
-                f"{tmpl['template_id']}: calibrated P(surge)={p_surge:.4f} should be >0.95"
-            )
+    def test_calibrated_is_confident_but_not_degenerate_in_sample(self):
+        """In-sample confidence, measured rather than assumed.
 
-    def test_tfidf_saturates_on_normal_templates(self):
-        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
+        The pre-September-2026 pipeline fitted the TF-IDF vocabulary on all 18
+        training texts *before* the internal calibration split, and isotonic
+        regression on six calibration points then drove in-sample
+        probabilities to exactly 0/1.  The old assertions (`> 0.95`, `> 0.99`)
+        encoded that leak as an expectation.
+
+        With the vocabulary fitted inside each fold the model is still
+        confident on its own training data -- which is precisely why the
+        confirmation experiments use held-out templates -- but no longer
+        numerically degenerate.  This test pins the corrected behaviour and
+        reports the observed range instead of asserting a saturation artifact.
+        """
         from src.classical_baseline import TFIDFLogReg
+        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
         model = TFIDFLogReg.load(str(pkl))
-        normal_tmpls = [t for t in REGIME_WARNING_TEMPLATES if t["regime"] == Regime.NORMAL]
-        for tmpl in normal_tmpls:
+
+        p_true = []
+        for tmpl in REGIME_WARNING_TEMPLATES:
             result = model.predict_regime(tmpl["text"])
-            p_normal = result.regime_probabilities.get("normal", 0.0)
-            assert p_normal > 0.95, (
-                f"{tmpl['template_id']}: calibrated P(normal)={p_normal:.4f} should be >0.95"
-            )
+            p_true.append(result.regime_probabilities.get(tmpl["regime"].value, 0.0))
+
+        assert min(p_true) > 0.5, (
+            f"calibrated model should still rank the true regime first in sample; "
+            f"observed min P(true)={min(p_true):.4f}"
+        )
+        # Fixing the vocabulary leak raised the observed floor from a fully
+        # degenerate 0/1 map to roughly 0.83, but ISOTONIC regression on six
+        # calibration points still saturates some in-sample texts at exactly
+        # 1.0.  That is scikit-learn's documented small-sample behaviour, not
+        # a leak, and the sigmoid arm below is the alternative that avoids it.
+        n_degenerate = sum(1 for p in p_true if p >= 1.0 - 1e-12)
+        assert n_degenerate < len(p_true), (
+            "every in-sample probability is degenerate, which would indicate "
+            "the fold vocabulary leak has returned"
+        )
+
+    def test_sigmoid_calibration_avoids_small_sample_degeneracy(self):
+        """The small-sample-appropriate calibration arm.
+
+        With three folds over 18 texts each calibration set holds six points.
+        Isotonic regression saturates there; Platt/sigmoid scaling fits two
+        parameters and does not.  Both arms are shipped so the paper can
+        report the comparison instead of picking one silently.
+        """
+        from src.classical_baseline import TFIDFLogReg
+        base = ROOT / "results" / "phase7_classical_baseline"
+        sig = TFIDFLogReg.load(str(base / "tfidf_logreg_calibrated_sigmoid.pkl"))
+
+        p_true = [
+            sig.predict_regime(t["text"]).regime_probabilities.get(t["regime"].value, 0.0)
+            for t in REGIME_WARNING_TEMPLATES
+        ]
+        assert min(p_true) > 0.5, f"sigmoid should still rank truth first: {min(p_true):.4f}"
+        assert max(p_true) < 1.0 - 1e-9, (
+            f"sigmoid calibration should not saturate; max P(true)={max(p_true):.6f}"
+        )
+
+    def test_fold_ensemble_control_exists_and_differs_from_calibrated(self):
+        """The control that separates calibration from ensembling.
+
+        `CalibratedClassifierCV` refits one classifier per fold, so the
+        calibrated pipeline differs from the single-model pipeline in *two*
+        ways.  The fold-ensemble checkpoint is the arm that isolates the
+        ensembling half; without it the raw-vs-calibrated contrast is a
+        comparison of training pipelines, not of calibration.
+        """
+        from src.classical_baseline import TFIDFLogReg, VARIANT_FOLD_ENSEMBLE
+        base = ROOT / "results" / "phase7_classical_baseline"
+        ens = TFIDFLogReg.load(str(base / "tfidf_logreg_fold_ensemble.pkl"))
+        cal = TFIDFLogReg.load(str(base / "tfidf_logreg_calibrated_model.pkl"))
+        assert ens.variant == VARIANT_FOLD_ENSEMBLE
+        assert ens.calibrated_model_ is None, "control must carry no calibration map"
+        assert ens.fold_models_ and len(ens.fold_models_) == ens.cv
+
+        text = REGIME_WARNING_TEMPLATES[0]["text"]
+        pe = ens.predict_regime(text).regime_probabilities
+        pc = cal.predict_regime(text).regime_probabilities
+        assert max(abs(pe[k] - pc.get(k, 0.0)) for k in pe) > 1e-6, (
+            "fold ensemble and calibrated model must be distinguishable, "
+            "otherwise the control arm is vacuous"
+        )
+
+    def test_fold_sizes_are_recorded(self):
+        """Training/calibration counts must be reportable, not guessed."""
+        from src.classical_baseline import TFIDFLogReg
+        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
+        model = TFIDFLogReg.load(str(pkl))
+        assert model.fold_sizes_, "calibration fold sizes must be persisted"
+        assert all(f["calibration"] > 0 for f in model.fold_sizes_)
+        assert sum(f["calibration"] for f in model.fold_sizes_) == model.train_size_
 
 
 # ---------------------------------------------------------------------------
@@ -269,54 +339,93 @@ class TestAudit8ControllerSensitivity:
 # Audit 9: TF-IDF equals OracleSemantic
 # ---------------------------------------------------------------------------
 
-class TestAudit9TFIDFEqualsOracle:
-    def test_tfidf_matches_oracle_for_surge(self):
-        from src.gym_adapter import (
-            make_surge_env, BeliefAdaptiveController,
-            get_perfect_semantic_probs, get_tfidf_probs,
-        )
-        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
+class TestAudit9TFIDFVersusOracle:
+    """Is the classical interpreter distinguishable from the oracle?
+
+    The original tests asserted that calibrated TF-IDF *equalled* the oracle
+    belief on training templates.  That was true, and it was a defect: it made
+    the interpreter an oracle proxy on its own training data.  The tests are
+    inverted here.  What the confirmation design actually requires is that on
+    HELD-OUT templates the interpreter is clearly not an oracle proxy; the
+    in-sample case is documented, not asserted as a target.
+    """
+
+    @staticmethod
+    def _model():
         from src.classical_baseline import TFIDFLogReg
-        tfidf_model = TFIDFLogReg.load(str(pkl))
+        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
+        return TFIDFLogReg.load(str(pkl))
 
-        surge_tmpl = [t for t in REGIME_WARNING_TEMPLATES if t["regime"] == Regime.DEMAND_SURGE][0]
-        ps_probs = get_perfect_semantic_probs(Regime.DEMAND_SURGE)
-        tf_probs = get_tfidf_probs(surge_tmpl["text"], tfidf_model)
-
-        for key in ["normal", "demand_surge"]:
-            assert abs(ps_probs[key] - tf_probs[key]) < 1e-6, (
-                f"PS[{key}]={ps_probs[key]} != TFIDF[{key}]={tf_probs[key]}"
-            )
-
-    def test_tfidf_matches_oracle_for_normal(self):
+    def test_not_oracle_equivalent_on_heldout_templates(self):
         from src.gym_adapter import get_perfect_semantic_probs, get_tfidf_probs
-        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
-        from src.classical_baseline import TFIDFLogReg
-        tfidf_model = TFIDFLogReg.load(str(pkl))
+        from src.confirmation_templates import CONFIRMATION_TEMPLATES
 
-        normal_tmpl = [t for t in REGIME_WARNING_TEMPLATES if t["regime"] == Regime.NORMAL][0]
-        ps_probs = get_perfect_semantic_probs(Regime.NORMAL)
-        tf_probs = get_tfidf_probs(normal_tmpl["text"], tfidf_model)
+        model = self._model()
+        deviations = []
+        for tmpl in CONFIRMATION_TEMPLATES:
+            regime = tmpl["regime"]
+            if regime not in (Regime.NORMAL, Regime.DEMAND_SURGE):
+                continue
+            oracle = get_perfect_semantic_probs(regime)
+            got = get_tfidf_probs(tmpl["text"], model)
+            deviations.append(max(abs(oracle[k] - got[k]) for k in ("normal", "demand_surge")))
 
-        for key in ["normal", "demand_surge"]:
-            assert abs(ps_probs[key] - tf_probs[key]) < 1e-6
+        assert deviations, "no held-out normal/surge templates found"
+        assert max(deviations) > 1e-3, (
+            "calibrated TF-IDF is numerically indistinguishable from the oracle "
+            "on held-out text, so the confirmation experiment would be comparing "
+            "the oracle against itself"
+        )
 
-    def test_tfidf_all_surge_templates_degenerate(self):
+    def test_in_sample_two_class_belief_is_still_oracle_equivalent(self):
+        """Records a real limitation rather than asserting it away.
+
+        Two projections must not be confused:
+
+        * The 3-class classifier output is confident but not degenerate
+          in-sample once the fold vocabulary leak is fixed (min P(true) ~ 0.83).
+        * The gym adapter renormalises onto {normal, demand_surge}, discarding
+          the supplier_delay mass.  Under that projection the residual
+          probability on the *other* relevant class is zero for every training
+          template, so the belief the controller actually consumes collapses
+          to exactly the oracle belief.
+
+        This is why the confirmation experiments must use held-out templates,
+        and it is the fact the paper states.  The complementary held-out test
+        above is the one that licenses the design.
+        """
         from src.gym_adapter import get_tfidf_probs
-        pkl = ROOT / "results" / "phase7_classical_baseline" / "tfidf_logreg_calibrated_model.pkl"
-        from src.classical_baseline import TFIDFLogReg
-        tfidf_model = TFIDFLogReg.load(str(pkl))
 
+        model = self._model()
+        considered, degenerate = 0, 0
         for tmpl in REGIME_WARNING_TEMPLATES:
-            probs = get_tfidf_probs(tmpl["text"], tfidf_model)
-            if tmpl["regime"] == Regime.DEMAND_SURGE:
-                assert probs["demand_surge"] > 0.99, (
-                    f"{tmpl['template_id']}: P(surge)={probs['demand_surge']:.4f} should be ~1.0"
-                )
-            elif tmpl["regime"] == Regime.NORMAL:
-                assert probs["normal"] > 0.99, (
-                    f"{tmpl['template_id']}: P(normal)={probs['normal']:.4f} should be ~1.0"
-                )
+            if tmpl["regime"] not in (Regime.NORMAL, Regime.DEMAND_SURGE):
+                continue
+            considered += 1
+            p_true = get_tfidf_probs(tmpl["text"], model)[tmpl["regime"].value]
+            assert p_true > 0.5, f"{tmpl['template_id']}: P(true)={p_true:.4f}"
+            if p_true >= 1.0 - 1e-12:
+                degenerate += 1
+
+        assert considered == 12, f"expected 12 in-sample normal/surge templates, got {considered}"
+        assert degenerate == considered, (
+            "in-sample two-class beliefs are no longer oracle-equivalent; the "
+            "documented limitation has changed and the manuscript text that "
+            f"describes it must be updated ({degenerate}/{considered} degenerate)"
+        )
+
+    def test_three_class_in_sample_belief_is_not_degenerate(self):
+        """The complementary projection, so the two are never conflated."""
+        model = self._model()
+        p_true = [
+            model.predict_regime(t["text"]).regime_probabilities.get(t["regime"].value, 0.0)
+            for t in REGIME_WARNING_TEMPLATES
+        ]
+        assert min(p_true) > 0.5
+        assert min(p_true) < 1.0 - 1e-9, (
+            "the 3-class in-sample distribution should retain some mass off "
+            f"the true class; observed min P(true)={min(p_true):.6f}"
+        )
 
 
 # ---------------------------------------------------------------------------

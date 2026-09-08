@@ -32,8 +32,13 @@ def write(name, text):
 
 
 def phase8b_tables():
-    sivr = [r for r in read("sivr_recomputed.csv")
-            if r["phase"] == "Phase 8B" and r["regime"] == "ALL"]
+    # `sivr_all_regimes` keeps every regime row; `sivr` is the aggregate view.
+    # The regime-specific table below previously iterated over `sivr`, which had
+    # already been filtered to regime == "ALL", so the file named
+    # `corrected_phase8b_regime_rewards.md` contained no regime breakdown at all.
+    sivr_all_regimes = [r for r in read("sivr_recomputed.csv")
+                        if r["phase"] == "Phase 8B"]
+    sivr = [r for r in sivr_all_regimes if r["regime"] == "ALL"]
     effects = [r for r in read("raw_reward_effects.csv")
                if r["phase"] == "Phase 8B"]
     by = {(r["sensor"], r["aggregation_estimand"]): r for r in sivr}
@@ -63,7 +68,13 @@ def phase8b_tables():
         "| Sensor | Regime | NoInfo | Sensor | Oracle-Belief Reference | Δ vs NoInfo | Signed OIV | SIVR status |",
         "|---|---|---:|---:|---:|---:|---:|---|",
     ]
-    for r in sorted(sivr, key=lambda x: (x["aggregation_estimand"], x["regime"], x["sensor"])):
+    per_regime = [r for r in sivr_all_regimes if r["regime"] != "ALL"]
+    if not per_regime:
+        raise SystemExit(
+            "sivr_recomputed.csv contains no per-regime rows; the regime table "
+            "would be silently empty"
+        )
+    for r in sorted(per_regime, key=lambda x: (x["aggregation_estimand"], x["regime"], x["sensor"])):
         if r["aggregation_estimand"] != "balanced_benchmark":
             continue
         lines.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(

@@ -1,0 +1,537 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+% Scalable outline fonts. Without these, microtype's font expansion fails on a
+% minimal TeX Live install that ships only bitmap Computer Modern.
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+
+\title{When Does Retrieved Text Improve Sequential Decisions?}
+\subtitle{Consequence-Aware Evaluation of Evidence Selection}
+
+\author{Anonymous Author(s)}
+\authorrunning{Anonymous}
+\institute{Anonymous Institution}
+
+\maketitle
+
+\begin{abstract}
+Retrieval is normally evaluated by relevance and downstream generation quality.
+Many operational deployments instead consume retrieved text through a decision
+policy, where the cost of an error depends on which action it induces and on how
+the system evolves afterwards. We present an executable benchmark that measures
+the value of retrieved evidence by the sequential utility of the decisions it
+produces, holding the interpreter and controller fixed. On an operational report
+feed with entity-scoped distractors, stale reports and routine traffic, we
+compare BM25, TF--IDF and dense retrieval against random and oracle evidence
+selection under matched evidence budgets, and pair each system with a fixed
+probabilistic interpreter and a receding-horizon inventory controller. Retrieval quality and decision utility do not induce the same ordering. With one
+interpreter, every practical retrieval system is worse than retrieving nothing
+while the oracle evidence selector is clearly better, and improving nDCG can
+lower realised reward; with another interpreter the two orderings agree exactly.
+The mechanism is that non-relevant documents are not equally harmful --- a
+current report about a different site moves the controller the wrong way,
+whereas an off-topic memo only wastes an evidence slot --- so utility is a
+property of the pipeline rather than of the ranking. We also show that text-free
+controls are a demanding baseline: a constant belief tuned only on development
+seeds matches or exceeds most text interpreters, and in one transfer a
+shuffled-text ablation matches the genuine interpreter, so positive effects
+against an uninformed prior do not by themselves establish the value of reading
+text. The benchmark, its frozen artifacts and its controls are released
+to support consequence-aware evaluation of information access.
+\keywords{Evaluation \and Evidence selection \and Downstream utility \and
+Retrieval-augmented decision making \and Calibration.}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+An operator monitoring a supply network receives a stream of reports. Most
+concern other sites; some are stale; a few describe conditions that should change
+what they order this period. Choosing which reports to act on is an information
+access problem, and its consequences are sequential: an order placed now arrives
+several periods later, into a state that earlier decisions produced.
+
+Standard retrieval evaluation scores such a system by topical relevance, and
+downstream-aware evaluation such as eRAG scores it by the quality of the text a
+model subsequently generates~\cite{salemi2024erag}. Neither captures what the
+operator is actually exposed to. Two rankings with identical nDCG can carry
+different operational risk, because the ways a document can be non-relevant are
+not interchangeable: a current report about a \emph{different} site, written in
+the same operational register but describing a different regime, will move a
+controller in the wrong direction; an off-topic notice merely consumes an
+evidence slot.
+
+We ask a single question: \emph{when does retrieved text improve sequential
+decisions?} To answer it we build an executable path from corpus to consequence,
+
+\begin{equation}
+\label{eq:path}
+q,\,\mathcal{D} \;\longrightarrow\; R_k(q,\mathcal{D}) \;\longrightarrow\;
+b(z\mid \cdot) \;\longrightarrow\; \pi(a_t\mid s_t,b) \;\longrightarrow\;
+s_{t+1} \;\longrightarrow\; U,
+\end{equation}
+
+in which a retrieval system $R_k$ selects $k$ documents from a candidate pool
+$\mathcal{D}$ under a fixed query $q$, a fixed interpreter maps the selected text
+to a belief $b$ over operational regimes, a fixed controller maps state and
+belief to an action, and a simulator returns realised utility $U$. Because every
+stage after retrieval is held constant, differences in $U$ are attributable to
+evidence selection.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+  \item \textbf{A consequence-aware evaluation of evidence selection.} We
+    measure retrieval by the sequential decision utility it induces, and report
+    it alongside conventional retrieval metrics on the same episodes
+    (Section~\ref{sec:retrieval}).
+  \item \textbf{Evidence that the two orderings diverge}, together with a
+    mechanism: non-relevant documents differ in how they mislead, so equal nDCG
+    does not imply equal utility.
+  \item \textbf{Demanding text-free controls.} Constant-belief and
+    development-tuned no-text operating points, shuffled-text and label-only
+    ablations, which we show are strong enough to overturn naive readings of
+    positive effects against an uninformed prior (Section~\ref{sec:controls}).
+  \item \textbf{A reproducible artifact}: frozen corpora, embeddings, model
+    checkpoints and semantic outputs, reconstructible offline without
+    credentials, with the estimand, weighting and uncertainty declared.
+\end{enumerate}
+
+\paragraph{Scope.} The environments and report text are synthetic. We do not
+introduce a retrieval model, and we do not claim that any interpreter or
+controller is universally preferable. The claim is about \emph{evaluation}: an
+information-access system that consumes text through a decision policy should be
+scored on the decisions, and the controls that make such a claim credible are
+stronger than those typically reported.
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Downstream-aware retrieval evaluation.}
+eRAG evaluates retrieval by the downstream performance of the language model that
+consumes it, and shows that upstream relevance can be a poor proxy for end-task
+utility~\cite{salemi2024erag}. CUE-R estimates per-evidence utility by
+intervention and includes no-retrieval controls, and GroGU makes grounding
+utility explicit as a consumer-specific quantity; both are recent preprints and
+we treat them as such~\cite{cuer2026,grogu2026}. Our downstream consumer is not a
+generator but a control policy acting in a stochastic environment, so the
+quantity being estimated is the realised return of a trajectory, not the quality
+of a text output; the error asymmetry we exploit comes from the cost structure of
+the environment rather than from a judge. The observation that relevance is
+situational and task-dependent long predates this work~\cite{borlund2003concept};
+our contribution is an executable instrument for a specific consequential task,
+not the observation that consequences matter.
+
+\paragraph{Decision-focused prediction and calibration.}
+Predict-then-optimize and decision-focused learning train or evaluate predictions
+through a downstream objective~\cite{donti2017task,elmachtoub2022smart,mandi2022rank};
+value-aware model learning makes the analogous point for learned
+dynamics~\cite{farahmand2017value,lambert2020objective}, decision calibration
+formalises the dependence on a decision-maker~\cite{zhao2021decision}, and
+value-of-information theory gives the classical account of when information
+changes a decision~\cite{howard1966information}. Probability quality is
+standardly assessed with proper scores and calibration
+diagnostics~\cite{guo2017calibration,degroot1983comparison,niculescu2005predicting}.
+We do not learn through the objective: we hold the pipeline fixed and vary the
+information supplied to it, which is what makes this an evaluation rather than a
+training method. We also separate calibration from the ensembling that
+accompanies it in common implementations (Section~\ref{sec:calibration}).
+
+\paragraph{Environment and baselines.}
+The multi-echelon simulator derives from an inventory benchmark lineage in
+operations research~\cite{hubbs2020orgym}. The retrieval baselines are Okapi
+BM25~\cite{robertson1994okapi} and cosine similarity over sentence
+embeddings~\cite{reimers2019sentencebert}, scored with
+nDCG~\cite{jarvelin2002cumulated}.
+
+\section{Framework}
+\label{sec:framework}
+
+\subsection{Objects and estimand}
+
+Let $z$ be a latent operational regime, $\mathcal{D}$ a candidate pool of reports
+and $q$ a fixed query expressing a standing information need. A retrieval system
+returns an ordered list; the top $k$ documents, $R_k$, are the evidence. A fixed
+interpreter maps their concatenation to a belief $b(z)$, and a fixed controller
+maps state and belief to an action.
+
+Write $G_i(m)$ for the \emph{realised} return of episode $i$ under information
+source $m$,
+\begin{equation}
+G_i(m) \;=\; \sum_{t=0}^{T-1} r\!\left(s^{(i)}_t, a^{(i)}_t, z^{(i)}\right),
+\end{equation}
+undiscounted: the horizon is finite and fixed at $T=40$, and any discounting
+applied inside the environment is part of $r$. We keep realised returns distinct
+from their expectation, which we estimate by the weighted benchmark return
+\begin{equation}
+\label{eq:jw}
+J_w(m) \;=\; \sum_{r} w_r \,
+\operatorname*{mean}_{f \in \mathcal{F}_r} \;
+\operatorname*{mean}_{v \in \mathcal{V}_{r,f}} \;
+\operatorname*{mean}_{i \in \mathcal{S}} \; G_i(m; r, f, v),
+\end{equation}
+averaging seeds within a template variant $v$, variants within an ambiguity
+family $f$, families within a regime $r$, and combining regimes with declared
+weights $w_r$. The \emph{balanced} estimand uses uniform $w_r$ and is primary;
+a deployment-prior estimand using declared regime frequencies is reported as
+secondary. Group sizes are unequal, so \eqref{eq:jw} is not an equal-row mean over
+episodes, and the distinction is numerically material.
+
+For a no-information reference $n$ and an oracle-belief reference $o$, the oracle
+information value is $\mathrm{OIV} = J_w(o) - J_w(n)$, and the normalised
+diagnostic is
+\begin{equation}
+\label{eq:sivr}
+\mathrm{SIVR}(m) \;=\; \frac{J_w(m) - J_w(n)}{J_w(o) - J_w(n)},
+\qquad\text{same } w_r \text{ in numerator and denominator.}
+\end{equation}
+SIVR is secondary throughout: it is undefined when the denominator is
+numerically negligible, flagged when $\mathrm{OIV}<0$, and not bounded above by
+one, because $o$ is a perfect \emph{belief} passed through a fixed controller
+rather than an optimal policy. Raw paired effects and their intervals come first.
+The implementation's $10^{-9}$ guard detects a numerically zero denominator only;
+whether $\mathrm{OIV}$ is statistically distinguishable from zero is a separate
+question, answered by the interval.
+
+\subsection{Uncertainty}
+\label{sec:uncertainty}
+
+The design crosses worlds (seeds) with language (templates): every template
+within a regime is evaluated on the same seeds, so seeds are not independent
+draws nested under templates. We therefore resample the two axes independently:
+one \emph{shared} seed sample per regime, reused by every family and variant, and
+families and variants with replacement. Intervals are percentile intervals from
+$B$ replicates; $p$-values are centred bootstrap test inversions,
+$(1+\#\{|b^\ast-\hat\theta|\ge|\hat\theta|\})/(B+1)$, which are bounded below by
+$1/(B+1)$ and are never reported as exactly zero. With three designed ambiguity
+families per regime, the family axis is small; we report intervals as conditional
+on the fixed template set and treat generalisation to new language as an open
+question rather than an established one.
+
+\section{Experiment R: retrieval quality versus decision utility}
+\label{sec:retrieval}
+
+\subsection{Setup}
+
+Each episode is a (seed, regime) pair. The candidate pool contains four kinds of
+document, all in the same operational register:
+
+\begin{description}
+  \item[relevant] a current report about the operator's own node;
+  \item[wrong entity] a current report about a \emph{different} node, drawn
+    across all regimes, so some of these errors are actively misleading and some
+    are accidentally correct;
+  \item[stale] the operator's node, but an event already marked resolved;
+  \item[off-topic] routine corporate traffic attributed to the operator's node,
+    so it cannot be filtered on entity alone.
+\end{description}
+
+Relevance is determined by the query --- entity and recency --- and never by
+regime; identifying the regime is the interpreter's job. This separation is what
+makes the retrieval task solvable and the dissociation measurable.
+
+Systems: random (floor), BM25, TF--IDF cosine, dense sentence-embedding cosine,
+and an oracle evidence selector (ceiling). A no-retrieval control that reads
+nothing supplies the paired reference. Evidence budgets $k\in\{1,3,5\}$ are
+matched across systems. Interpreters are the rule-based extractor and the
+calibrated TF--IDF classifier; the controller is the receding-horizon optimiser.
+
+\input{tables/retrieval_main}
+
+\subsection{Findings}
+
+\paragraph{The retrieval task is solvable, and the systems separate on it.}
+Ranking quality orders the systems as random $<$ BM25 $<$ TF--IDF cosine $<$
+dense $<$ oracle, with a wide spread in nDCG@3 (Table~\ref{tab:retrieval}).
+Belief accuracy --- whether the interpreter identifies the true regime from the
+retrieved evidence --- rises monotonically with nDCG for both interpreters, so
+the upstream half of the pipeline behaves as intended: better evidence does
+produce better beliefs.
+
+\paragraph{Better beliefs do not imply better decisions.}
+The downstream half does not follow. With the calibrated TF--IDF interpreter at
+$k=3$, \emph{every} practical retrieval system is worse than retrieving nothing:
+BM25 loses $74.3$ reward against the no-retrieval control (95\% CI
+$[-98.9,-47.9]$) despite tripling random's nDCG, TF--IDF cosine loses $61.1$, and
+only dense retrieval reaches parity ($-1.5$, $[-31.1,+29.2]$). The oracle
+selector, by contrast, gains $69.0$ ($[+40.2,+96.1]$). Ranking quality and
+decision utility therefore agree only weakly: Kendall's $\tau_b$ between the two
+orderings over the four ranking systems is $+0.33$ at $k=3$ and $0.00$ at $k=1$
+and $k=5$ (Table~\ref{tab:rankagreement}). An evaluation that stopped at nDCG
+would report steady progress across a region in which realised utility is flat
+or negative.
+
+\paragraph{The gap has a mechanism, and it is not noise.}
+Non-relevant documents are not interchangeable. Table~\ref{tab:harm} decomposes
+what each system actually puts in front of the interpreter: the number of
+retrieved documents that are non-relevant \emph{and} describe a regime other
+than the true one. Random retrieval surfaces $1.33$ such documents per episode
+and BM25 $1.28$ --- BM25 raises nDCG by preferring operationally-worded reports,
+but many of those reports are current reports about a \emph{different} node,
+which is precisely the error that moves the controller. Dense retrieval improves
+because it reduces misleading evidence to $0.87$, not merely because it ranks
+relevant documents higher. Standard graded relevance treats an off-topic notice
+and a confident report about another site as equally non-relevant; the
+controller does not.
+
+\paragraph{Whether the dissociation appears depends on the consumer.}
+With the rule-based interpreter the two orderings agree ($\tau_b=1.0$ at $k=3$
+and $k=5$) and every retrieval system beats the no-retrieval control. The same
+retrieval systems, the same corpus and the same controller yield opposite
+practical conclusions under two different interpreters, because the rule-based
+extractor degrades gracefully on mixed evidence while the calibrated classifier
+becomes confidently wrong. Utility is a property of the pipeline, not of the
+ranking alone, which is the concern GroGU raises for grounding
+utility~\cite{grogu2026} and which we can here measure end to end.
+
+\paragraph{More evidence is not better.}
+Moving from $k=3$ to $k=5$ lowers dense retrieval's realised reward under the
+calibrated interpreter ($-1.5$ to $-18.9$) while raising its nDCG ($0.617$ to
+$0.691$). The additional documents are mostly non-relevant, and the interpreter
+has no mechanism for discounting them.
+
+\input{tables/retrieval_findings}
+
+\section{Text-free and degraded-text controls}
+\label{sec:controls}
+
+Experiment~R measures evidence selection against a no-retrieval reference. A
+second question is what the \emph{text} contributes at all, once a competitive
+text-free policy is allowed. We evaluate two transfer environments --- a held-out
+multi-echelon demand-surge setting (Experiment~M) and a structurally different
+supply-side capacity drop (Experiment~S) --- against constant-belief endpoints, a
+no-text operating point tuned only on development seeds, a label-only ablation,
+and a shuffled-text ablation in which the interpreter reads a real warning
+belonging to a different template.
+
+\input{tables/controls_main}
+
+\paragraph{A constant belief is a demanding baseline.}
+In Experiment~M the development-tuned no-text control selects
+$p_{\mathrm{event}}=1$ and returns $560.4$, beating single TF--IDF ($516.2$),
+calibrated TF--IDF ($530.2$) and GPT-4o ($534.9$), and exceeding the
+oracle-belief reference itself ($552.0$). Only the rule-based interpreter
+($568.7$) is above it. In Experiment~S the same control returns $1725.4$ against
+$1484.0$ for the best interpreter and $1516.3$ for the oracle-belief reference.
+Every interpreter's effect against the uninformed prior is positive and
+statistically clear in both experiments; none of that establishes value over
+competitive text-free operation. The mechanism is visible in the tuning grid:
+reward increases monotonically in $p_{\mathrm{event}}$, so the base-stock
+controller is systematically under-positioned under the benchmark prior, and any
+belief that raises the order-up-to level captures part of that gap without
+reading anything.
+
+\paragraph{The shuffled-text control separates the two experiments.}
+In Experiment~M, shuffling text destroys the effect: the calibrated interpreter
+falls from $530.2$ to $451.1$, below the uninformed prior. Reading the
+\emph{right} text is doing real work there. In Experiment~S it does not: the
+shuffled control returns $1421.8$ against $1422.0$ for the genuine interpreter,
+even though belief accuracy halves from $0.875$ to $0.500$. Whatever gain the
+calibrated interpreter shows in Experiment~S comes from the shape of its belief
+distribution moving the controller toward higher stock, not from identifying the
+regime. We report this as a negative result: the capacity-drop transfer does not
+support a claim that reading the warning is what produced the improvement.
+
+\paragraph{Label-only beliefs.}
+Collapsing the calibrated interpreter to its argmax costs little in
+Experiment~M ($530.2 \to 523.5$) and helps in Experiment~S
+($1422.0 \to 1446.3$). Probability quality, as measured by proper scores, is
+therefore not the operative variable in these transfers, which is the reverse of
+what the controlled benchmark suggests (Section~\ref{sec:calibration}).
+
+\section{Calibration is not an isolated intervention}
+\label{sec:calibration}
+
+A recurring claim in this literature is that recalibrating a classifier improves
+downstream value even when it costs accuracy. The controlled benchmark
+(Experiment~C) lets us test that claim carefully, and the care turns out to
+matter.
+
+\input{tables/calibration}
+
+\paragraph{The usual comparison is confounded.}
+\texttt{CalibratedClassifierCV} does not apply a probability map to a fixed
+model: with $k$-fold cross-validation it fits $k$ classifiers and averages them.
+A raw-versus-calibrated contrast therefore mixes a calibration map with an
+ensembling change. Adding the missing arm --- the same fold ensemble with no
+calibration map --- separates them. Ensembling alone \emph{lowers} realised
+value (SIVR $0.245 \to 0.154$), and the calibration map then recovers more than
+it lost ($0.154 \to 0.338$). The conclusion that calibration helps survives, but
+the naive $0.245 \to 0.338$ difference is not attributable to calibration, and
+reporting it as such overstates what was shown.
+
+\paragraph{Small calibration sets.}
+With three folds over eighteen training texts each calibration set holds six
+points. Isotonic regression saturates there, driving some in-sample
+probabilities to exactly one; Platt scaling does not. We therefore report both,
+and note that the sigmoid arm has higher accuracy ($0.861$ versus $0.806$) but
+lower realised value ($0.261$ versus $0.338$). Accuracy costs are also larger
+than previously reported once the fold vocabulary is fitted inside each fold
+rather than on the full training set beforehand: three held-out texts of
+thirty-six, not one.
+
+\paragraph{Probability quality is not the operative variable here.}
+The strongest single result in this experiment is negative for the standard
+story. Collapsing the raw classifier to its hard label --- discarding all
+probabilistic information --- raises SIVR from $0.245$ to $0.773$, more than
+either calibrated arm achieves. The label-only ablation has the same accuracy as
+the model it is derived from, a better Brier score ($0.222$ versus $0.552$) and a
+much worse log-loss ($2.558$ versus $0.932$); the two proper scores disagree
+about it, and neither predicts its operational advantage. What the controller
+responds to is where the belief mass sits relative to its own asymmetric costs,
+which no upstream score measures.
+
+\paragraph{And the no-text control is above all of them.}
+The development-tuned constant belief reaches SIVR $0.737$, above every TF--IDF
+arm and just below the rule-based extractor ($0.779$). The shuffled-text control
+is slightly negative ($-0.062$), so reading the correct text is doing real work
+in this environment --- but not enough work to beat a text-free policy that was
+allowed a single tuned parameter.
+
+\section{Transfer and boundaries}
+\label{sec:boundaries}
+
+Experiment~B perturbs one environment factor at a time around the supply-side
+setting. We report \emph{every} variant, including the ones that go the wrong
+way, and separate two reasons a normalised value can be negative.
+
+\input{tables/boundary}
+
+\paragraph{Half the variants have no well-defined information value.}
+In three of the six variants --- long lead, lost sales and short lead --- the
+oracle-belief reference itself underperforms the uninformed prior. The oracle
+information value is then negative, the normalised ratio's denominator flips
+sign, and no statement of the form ``this interpreter recovers $x$ of the
+available information value'' is meaningful. What those rows show is a fixed
+controller mismatched to a perturbed environment, not a failure of semantic
+sensing, and we mark them rather than reporting a ratio. This is a limitation of
+the diagnostic and of the fixed-controller design, and it is the reason raw
+paired effects are primary throughout this paper.
+
+\paragraph{Interpreters can still lose badly.}
+Under the short-lead variant the calibrated TF--IDF interpreter returns $2248$
+and GPT-4o $2213$ against $2398$ for the uninformed prior --- losses of $150$ and
+$185$. Halving the lead time leaves the controller with little time to act on a
+warning, so a belief that shifts stock upward mostly buys holding cost. An
+earlier version of this work omitted the short-lead variant and misreported the
+sign of the lost-sales case; both are now in the table, with every other variant.
+
+\paragraph{Text--world pairing.}
+The boundary study iterates over sixteen report templates, six of which describe
+normal operation. Simulating all of them in a disrupted world turns those six
+into false-negative reports. That is a legitimate experiment, but it is an
+evidence intervention, not mechanical robustness, and it breaks the text--world
+relationship the transfer experiment establishes. The default pairing now
+simulates each report in the world it describes; the false-negative arm remains
+available and is reported separately when used. Repairing the pairing changes
+conclusions: under the previous design the short-lead variant appeared to have a
+positive oracle information value, and it does not.
+
+\paragraph{The text-free control again.}
+In five of six variants the development-tuned no-text control returns more than
+every interpreter, and in the sixth the ordering is unchanged from the baseline.
+The controls are not a robustness afterthought; they are the comparison that
+determines what the interpreters have shown.
+
+\section{Limitations}
+\label{sec:limitations}
+
+The report feed and the environments are synthetic, single-SKU and finite-regime;
+the pools are generated rather than authored, so there is one template family per
+regime in Experiment~R and the language axis carries no variance there. The query
+is fixed, and relevance is defined by construction rather than by assessors. The
+dense retriever is a single general-purpose sentence encoder with frozen
+embeddings, not a trained or tuned dense retrieval system, and we make no claim
+about the ceiling of dense retrieval on this task. The controller is fixed and
+not jointly optimised with the interpreter, so results describe value under a
+declared belief-to-action mapping and not the value of an interpreter under every
+controller. Cached LLM outputs cover a small set of models and are labelled with
+reconstructed rather than certified provider provenance. Finally, the evidence is
+consumed by concatenation; belief-level pooling over separately interpreted
+documents is a natural variant we do not evaluate.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Information access systems that feed decision policies should be evaluated on the
+decisions. In this benchmark, retrieval quality and sequential decision utility
+do not induce the same ordering, and the gap has a concrete mechanism: the ways a
+document can be non-relevant differ in how far they move a controller from a good
+action. The controls matter as much as the systems: a constant belief tuned only
+on development seeds is a demanding baseline, and effects measured against an
+uninformed prior alone can survive it or not. We release the benchmark, its
+frozen artifacts and its controls so that consequence-aware claims about
+evidence selection can be checked rather than asserted.
+
+\appendix
+\section{Design, accounting and reproduction}
+\label{app:design}
+
+\input{tables/appendix}
+
+\paragraph{Environment, costs and timing.}
+Single-item lost-sales inventory over a finite horizon of $T=40$ periods: revenue
+$10$ per unit sold, ordering cost $5$ fixed plus $2$ per unit, holding cost $1$
+per unit of ending inventory, stockout penalty $8$ per unit of unmet demand,
+initial on-hand $30$, Poisson demand with base mean $8$. Three regimes:
+\textsc{normal}; \textsc{supplier delay}, raising the lead time during the event
+window; and \textsc{demand surge}, multiplying the demand rate. The supply-side
+transfer instead reduces a factory's capacity in a multi-echelon network. Within
+a period the order is: receive arrivals, realise demand, fulfil from on-hand,
+place an order. An order placed in period $t$ under lead time $L$ arrives at the
+start of period $t+L$; orders already in transit keep their arrival period, so a
+lead-time change applies only to orders placed from that period onward. The
+simulator and every planner share one implementation of this schedule, so a
+planner's arrival model cannot drift from the dynamics it plans against.
+
+\paragraph{Information release.}
+Warning text is published at period $12$; the event window begins at period $20$.
+Before publication no interpreter has read anything and every controller plans
+under the benchmark prior. From publication the interpreted belief replaces the
+prior while on-hand stock and the in-transit pipeline carry over unchanged.
+
+\paragraph{Belief to action.}
+The controlled experiments use a receding-horizon linear program solved each
+period, executing only its first order. Expected lead time and demand for each
+future period are the belief-weighted averages over regimes. The multi-echelon
+experiments use a belief-adaptive base-stock policy whose effective demand rate
+is $\mathbb{E}_b[\mu]$ and whose order-up-to target is
+$\mathbb{E}_b[\mu]\bar{L} + 1.65\sqrt{\bar{L}\,\mathbb{E}_b[\mu]}$. The
+controller is identical across information sources within an experiment.
+
+\paragraph{Interpreters, information and retrieval.}
+No non-oracle interpreter receives the regime, future demand, future state or
+environment internals; the oracle-belief reference receives the true regime and
+is a reference, not a deployable system. The TF--IDF classifiers are fitted only
+on training templates and evaluated on disjoint held-out templates. LLM beliefs
+are replayed from frozen canonical responses, with model labels reconstructed by
+re-deriving each cache key from every known (model, text) pair and unmatched
+entries labelled \texttt{unknown} rather than defaulted. BM25 uses the Okapi form
+with $k_1=1.5$, $b=0.75$ and idf floored at zero; dense retrieval is cosine
+similarity over frozen \texttt{all-MiniLM-L6-v2} embeddings, shipped so the
+published numbers reproduce without downloading weights. Ties break by document id.
+
+\paragraph{Reproduction and impact.}
+The release reconstructs its own offline inputs: cached semantic responses are
+rematerialised from a tracked, checksum-verified manifest and classifier
+checkpoints are retrained from tracked templates with fixed seeds, neither step
+needing credentials or network access. A verification entry point then replays
+stored beliefs through the simulator and regenerates every table in this paper
+from the frozen episode files; continuous integration installs from the lock file
+alone into a clean environment on two Python versions and runs the full offline
+suite. On impact: this paper shows that an operational decision-support component
+can look better on upstream metrics while being worse to act on, so deployment
+should retain human oversight, domain validation and conservative fallbacks. The
+synthetic study here does not establish deployment safety.
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+\end{document}

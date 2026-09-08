@@ -1,0 +1,7 @@
+# Optional extras for the retrieval / evidence-selection experiment.
+#
+# The experiment ships FROZEN dense embeddings, so reproducing the published
+# retrieval results needs nothing from this file. These packages are only
+# required to regenerate embeddings from the encoder itself.
+sentence-transformers==5.1.2
+torch==2.2.2

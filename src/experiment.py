@@ -29,6 +29,7 @@ from src.env import InventoryEnv, HORIZON, HindsightOracle, CausalOptimizer
 from src.events import (
     DEFAULT_DISRUPTION,
     WARNING_TEMPLATES,
+    P4_WARNING_TIME,
     TRUE_LT_INCREASE,
     TRUE_DURATION,
     TRUE_EVENT_TYPE,
@@ -57,7 +58,7 @@ from src.metrics import (
 # Configuration
 NUM_SEEDS = 30
 SEED_BASE = 1000
-WARNING_TIME = 15
+WARNING_TIME = P4_WARNING_TIME
 PROBABILITY_THRESHOLD = 0.70
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
@@ -115,12 +116,15 @@ def _run_episode(
         normal_lead_time=disruption.normal_lead_time,
     )
 
-    # CausalOptimizer: receding-horizon with perfect semantic knowledge
+    # CausalOptimizer: receding-horizon with perfect semantic knowledge.
+    # This condition is *defined* as an informed reference, so the true
+    # disruption is disclosed deliberately and explicitly.
     causal_optimizer = None
     if condition == "CausalOptimizer":
         causal_optimizer = CausalOptimizer(
             seed=seed,
             disruption=disruption,
+            knows_true_disruption=True,
         )
 
     # Determine whether and how to adapt
@@ -1443,7 +1447,11 @@ def _run_episode_matrix(
     causal_optimizer = None
     if controller == CONTROLLER_OPTIMIZER:
         if sensor == SENSOR_PERFECT:
-            causal_optimizer = CausalOptimizer(seed=seed, disruption=disruption)
+            # The perfect-semantic reference is the ONLY controller entitled to
+            # plan against the environment's true disruption.
+            causal_optimizer = CausalOptimizer(
+                seed=seed, disruption=disruption, knows_true_disruption=True,
+            )
         elif (sensor == SENSOR_RULEBASED or sensor.startswith("LLM:")) and interpretation is not None:
             if interpretation.probability >= threshold:
                 causal_optimizer = CausalOptimizer(
@@ -1452,8 +1460,12 @@ def _run_episode_matrix(
                     assumed_duration=interpretation.estimated_duration,
                 )
             else:
+                # Interpretation below threshold: fall back to the nominal
+                # no-disruption plan, NOT to the true disruption.
                 causal_optimizer = CausalOptimizer(seed=seed, disruption=disruption)
         else:
+            # NoInfo and every other uninformed sensor plan under the nominal
+            # lead time; `disruption` supplies only its public normal_lead_time.
             causal_optimizer = CausalOptimizer(seed=seed, disruption=disruption)
 
     adaptation_end = WARNING_TIME + estimated_duration if switch else 0

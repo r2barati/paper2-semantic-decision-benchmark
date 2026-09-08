@@ -119,7 +119,8 @@ def check_regenerate() -> bool:
         return False
 
     figures = ROOT / "paper2_submission" / "manuscript_lncs" / "figures"
-    fig_before = {p.name: p.read_bytes() for p in sorted(figures.glob("*.png"))}
+    fig_before = {p.name: p.read_bytes()
+                  for p in sorted(figures.glob("*")) if p.is_file()}
 
     for cmd in (
         [sys.executable, "-m", "results.publication.generate_lncs_tables"],
@@ -130,9 +131,11 @@ def check_regenerate() -> bool:
             print(f"  FAILED: {' '.join(cmd)}")
             return False
 
-    # Figures are compared on the PNG rather than the PDF: the PDF embeds a
-    # creation timestamp, so it differs on every run regardless of content.
-    fig_after = {p.name: p.read_bytes() for p in sorted(figures.glob("*.png"))}
+    # Both the PNG and the PDF are compared. The generator suppresses
+    # matplotlib's creation timestamp, so a figure that has not changed is
+    # byte-identical in either format.
+    fig_after = {p.name: p.read_bytes()
+                 for p in sorted(figures.glob("*")) if p.is_file()}
     fig_drift = sorted(n for n in fig_before if fig_before[n] != fig_after.get(n))
     if fig_drift:
         for name in fig_drift:

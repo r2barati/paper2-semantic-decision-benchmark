@@ -130,9 +130,14 @@ def interaction_figure(budget: int = 3) -> Path:
     fig.tight_layout(pad=0.4)
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / "interaction.pdf"
-    fig.savefig(path, format="pdf", facecolor=SURFACE, bbox_inches="tight")
+    # `CreationDate: None` suppresses matplotlib's timestamp. Without it the
+    # PDF bytes differ on every run even when the plot is identical, so the
+    # tracked figure churns in version control and cannot be drift-checked.
+    fig.savefig(path, format="pdf", facecolor=SURFACE, bbox_inches="tight",
+                metadata={"CreationDate": None})
     fig.savefig(OUT / "interaction.png", format="png", dpi=200,
-                facecolor=SURFACE, bbox_inches="tight")
+                facecolor=SURFACE, bbox_inches="tight",
+                metadata={"Software": None})
     plt.close(fig)
     return path
 

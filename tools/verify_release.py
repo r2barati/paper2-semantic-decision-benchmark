@@ -104,19 +104,43 @@ def check_replay(n_per_group: int = 2) -> bool:
 
 
 def check_regenerate() -> bool:
+    """Regenerate the paper's tables and require them to be UNCHANGED.
+
+    Rewriting the files and reporting that they exist proves nothing. The
+    contract is that the committed tables are exactly what the committed data
+    and analysis produce, so this snapshots them, regenerates, and diffs. Any
+    drift between the paper and the data fails here.
+    """
     print("== publication regeneration ==")
-    steps = [
-        [sys.executable, "-m", "results.publication.generate_lncs_tables"],
-    ]
-    for cmd in steps:
-        result = subprocess.run(cmd, cwd=str(ROOT))
-        if result.returncode != 0:
-            print(f"  FAILED: {' '.join(cmd)}")
-            return False
     tables = ROOT / "paper2_submission" / "manuscript_lncs" / "tables"
-    produced = sorted(p.name for p in tables.glob("*.tex"))
-    print(f"  ok: regenerated {len(produced)} table files: {', '.join(produced)}")
-    return bool(produced)
+    before = {p.name: p.read_text() for p in sorted(tables.glob("*.tex"))}
+    if not before:
+        print("  FAILED: no committed tables to compare against")
+        return False
+
+    cmd = [sys.executable, "-m", "results.publication.generate_lncs_tables"]
+    result = subprocess.run(cmd, cwd=str(ROOT))
+    if result.returncode != 0:
+        print(f"  FAILED: {' '.join(cmd)}")
+        return False
+
+    after = {p.name: p.read_text() for p in sorted(tables.glob("*.tex"))}
+    drifted = sorted(n for n in before if before[n] != after.get(n))
+    missing = sorted(set(before) - set(after))
+    if drifted or missing:
+        for name in drifted:
+            print(f"  DRIFT: {name} differs from the committed version")
+            b, a = before[name].splitlines(), after[name].splitlines()
+            for i, (x, y) in enumerate(zip(b, a)):
+                if x != y:
+                    print(f"    line {i + 1}\n      committed: {x}\n      regenerated: {y}")
+                    break
+        for name in missing:
+            print(f"  MISSING after regeneration: {name}")
+        return False
+
+    print(f"  ok: {len(after)} table files regenerate byte-identically")
+    return True
 
 
 def main() -> int:

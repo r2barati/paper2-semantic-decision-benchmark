@@ -1,0 +1,30 @@
+{
+  "dev": [
+    "v3p-q06",
+    "v3p-q09",
+    "v3p-q10",
+    "v3p-q11",
+    "v3p-q15",
+    "v3p-q16"
+  ],
+  "test": [
+    "v3p-q01",
+    "v3p-q02",
+    "v3p-q03",
+    "v3p-q04",
+    "v3p-q05",
+    "v3p-q07",
+    "v3p-q08",
+    "v3p-q12",
+    "v3p-q13",
+    "v3p-q14",
+    "v3p-q17",
+    "v3p-q18",
+    "v3p-q19",
+    "v3p-q20"
+  ],
+  "held_out_entities": [
+    "R4"
+  ],
+  "quarantine": "prototype IDs MUST NOT appear in V3 full benchmark"
+}

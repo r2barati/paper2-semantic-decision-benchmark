@@ -1,0 +1,14 @@
+| row | p_value | p_holm | reject_holm_05 |
+| --- | --- | --- | --- |
+| C0/C1/Qwen/Qwen3-8B-AWQ/3 | 0.0006 | 0.0028 | True |
+| C0/C3/Qwen/Qwen3-8B-AWQ/3 | 0.0000 | 0.0000 | True |
+| C1/C3/Qwen/Qwen3-8B-AWQ/3 | 0.0002 | 0.0012 | True |
+| C0/C1/Qwen/Qwen3-8B-AWQ/5 | 0.0026 | 0.0105 | True |
+| C0/C3/Qwen/Qwen3-8B-AWQ/5 | 0.0026 | 0.0105 | True |
+| C1/C3/Qwen/Qwen3-8B-AWQ/5 | 0.0000 | 0.0000 | True |
+| C0/C1/Qwen/Qwen3-14B-AWQ/3 | 0.0001 | 0.0004 | True |
+| C0/C3/Qwen/Qwen3-14B-AWQ/3 | 0.0000 | 0.0000 | True |
+| C1/C3/Qwen/Qwen3-14B-AWQ/3 | 0.0000 | 0.0000 | True |
+| C0/C1/Qwen/Qwen3-14B-AWQ/5 | 0.0026 | 0.0105 | True |
+| C0/C3/Qwen/Qwen3-14B-AWQ/5 | 0.0026 | 0.0105 | True |
+| C1/C3/Qwen/Qwen3-14B-AWQ/5 | 0.0000 | 0.0000 | True |

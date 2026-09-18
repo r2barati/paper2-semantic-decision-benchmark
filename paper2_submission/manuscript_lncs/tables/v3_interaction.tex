@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\caption{Retriever$\times$consumer interaction (rerank vs BM25, $k=3$, accuracy): $\Delta\Delta$ with 95\% CI and Holm $p$ over 10 preregistered cells. Q5/Q6 rows report Holm $p$ only (Q6-C3 degenerate: identical profiles).}
+\label{tab:interaction}
+\begin{tabular}{lcc}
+\toprule
+Cell & $\Delta\Delta$ [95\% CI] & Holm $p$ \\
+\midrule
+Q3\_rerank-bm25\_C0-C1\_k3\_8B & $-0.138$ $[-0.225,-0.056]$ & $0.0150$$^*$ \\
+Q3\_rerank-bm25\_C0-C3\_k3\_8B & $-0.106$ $[-0.175,-0.037]$ & $0.0360$$^*$ \\
+Q3\_rerank-bm25\_C1-C3\_k3\_8B & $+0.031$ $[-0.050,+0.113]$ & $1.0000$ \\
+Q3\_rerank-bm25\_C0-C1\_k3\_14B & $-0.081$ $[-0.150,-0.013]$ & $0.1855$ \\
+Q3\_rerank-bm25\_C0-C3\_k3\_14B & $-0.113$ $[-0.188,-0.037]$ & $0.0297$$^*$ \\
+Q3\_rerank-bm25\_C1-C3\_k3\_14B & $-0.031$ $[-0.087,+0.025]$ & $1.0000$ \\
+Q5\_rerank\_C3-C1\_k3\_8B & $+0.037$ $[-0.019,+0.094]$ & $1.0000$ \\
+Q5\_rerank\_C3-C1\_k3\_14B & $+0.031$ $[-0.019,+0.081]$ & $1.0000$ \\
+Q6\_rerank\_8B-14B\_C1\_k3 & $-0.0063$ $[-0.0312,+0.0187]$ & $1.0000$ \\
+Q6\_rerank\_8B-14B\_C3\_k3 & $+0.0000$ $[+0.0000,+0.0000]$ & $1.0000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+

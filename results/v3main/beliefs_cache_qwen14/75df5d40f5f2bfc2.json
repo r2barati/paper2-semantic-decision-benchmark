@@ -1,0 +1,1 @@
+{"model": "Qwen/Qwen3-14B-AWQ", "prompt_sha": "66e6890ba9c5464c", "raw": "{\"normal\": 0.6, \"supplier_delay\": 0.4, \"demand_surge\": 0.0, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}", "usage": {"completion_tokens": 53, "prompt_tokens": 472, "total_tokens": 525, "completion_tokens_details": null, "prompt_tokens_details": null}}

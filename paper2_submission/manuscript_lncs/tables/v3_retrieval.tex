@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Retrieval quality on the 160 test queries (trec\_eval; 95\% query-bootstrap CIs: BM25 $[0.095,0.135]$, dense $[0.153,0.198]$, hybrid $[0.157,0.207]$, rerank $[0.156,0.210]$ --- point-ordered with overlapping intervals). The frozen ranker is RRF over BM25 and instructed dense embeddings ($k=120$) with reranker depth 30, selected on dev only.}
+\label{tab:retrieval}
+\begin{tabular}{lcccc}
+\toprule
+System & nDCG@10 & R@10 & R@20 & RR \\
+\midrule
+BM25 & 0.1150 & 0.1365 & 0.2604 & 0.2102 \\
+Dense & 0.1754 & 0.2062 & 0.3771 & 0.2656 \\
+Hybrid RRF & 0.1817 & 0.2167 & 0.4094 & 0.2857 \\
+Reranked & 0.1829 & 0.1938 & 0.3708 & 0.2812 \\
+\bottomrule
+\end{tabular}
+\end{table}
+

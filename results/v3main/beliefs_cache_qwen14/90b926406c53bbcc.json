@@ -1,0 +1,1 @@
+{"model": "Qwen/Qwen3-14B-AWQ", "prompt_sha": "5966cadde90e8236", "raw": "{\"entity_match\": true, \"event\": \"none\", \"fresh\": false, \"stance\": \"refute\", \"confidence\": 0.9}", "usage": {"completion_tokens": 33, "prompt_tokens": 240, "total_tokens": 273, "completion_tokens_details": null, "prompt_tokens_details": null}}

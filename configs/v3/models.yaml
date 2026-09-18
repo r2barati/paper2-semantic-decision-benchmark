@@ -1,0 +1,64 @@
+# V3 frozen model pins — Phase 1 prototype
+# Frozen: 2026-09-13. Never edit values below; supersede by adding a new file.
+# "pending-compute" means pinned by ID but not yet executable in this env
+# (recorded honestly; see Gate-A report for what actually ran).
+
+gpt_frontier:
+  provider: openai
+  model_id: gpt-4o-2024-11-20
+  status: live-verified   # 2026-09-13: minimal test call succeeded
+  temperature: 0
+  top_p: 1.0
+  max_tokens: 512
+  structured_output: strict-json-instruction  # free-form JSON parsed + Pydantic-validated, no vendor structured-output lock-in
+  key_env: OPENAI_API_KEY
+  # NOTE: V1/V2 frozen cache records model_id gpt-4o with snapshot "unknown"
+  # (reconstructed provenance). V3 records explicit snapshot IDs for all new calls.
+
+llm_open:
+  provider: local-vllm-openai-compatible
+  model_id: Qwen/Qwen3-8B-AWQ   # OFFICIAL 4-bit AWQ variant (group_size=128, zero-point); no home-made quantization
+  hf_revision_sha: 4da05a8edb55c6046cce958586c33b61da07bb79  # resolved 2026-09-13; re-resolve + repin at serve time
+  license: Apache-2.0
+  context_tokens: 40960
+  status: pending-compute  # needs GPU host (Kaggle T4); BF16 8B rejected in favor of official AWQ
+  temperature: 0            # EXPLICIT override; upstream generation_config.json defaults to sampling (t=0.6, top_p=0.95)
+  top_p: 1.0
+  max_tokens: 512
+  dtype: awq-4bit-official
+  chat_template: qwen3-instruct  # record exact template string + tokenizer/config hashes at serve time
+  versions_to_record_at_serve: [transformers-or-vllm, tokenizer_sha, config_sha, dtype]
+
+dense:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  hf_revision_sha: 97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3
+  status: pending-download  # ~1.2GB weights exceed safe free disk (1.7GB) on this machine
+  package: sentence-transformers==5.1.2
+  normalization: l2
+  instruction_prefix: configs/v3/qwen_instruction.txt  # Phase-1C: ONE predeclared domain
+    # instruction, frozen BEFORE seeing its score. Format per Qwen docs:
+    # "Instruct: {instruction}\nQuery: {query}" on QUERIES ONLY; documents bare.
+    # Bare-query numbers retained as implementation ablation (runs/v3proto/dense-qwen3*).
+  dim_to_record_at_download: true
+  stand_in_for_proto_diagnostics_only:
+    model_id: sentence-transformers/all-MiniLM-L6-v2  # already HF-cached locally (V2 dense)
+    note: validates run format/metrics/consumers ONLY; never reported as the frozen dense baseline
+
+reranker:
+  model_id: Qwen/Qwen3-Reranker-0.6B
+  hf_revision_sha: e61197ed45024b0ed8a2d74b80b4d909f1255473  # corrected 2026-09-13: earlier transcription dropped a char; download rejects wrong SHA, so pin is self-checking
+  status: pending-download
+  candidate_set: top-50
+  stand_in_for_proto_diagnostics_only:
+    model_id: cross-encoder/ms-marco-MiniLM-L-6-v2  # ~80MB; pipeline validation only
+    note: validates rerank mechanics ONLY; never reported as the frozen reranker
+
+lexical:
+  primary: in-repo-bm25  # src/retrieval.py BM25(k1=1.5,b=0.75); validated V2 baseline
+  preferred: pyserini-lucene  # BLOCKED here: no Java runtime; adopt on first Java-capable machine, cross-check vs in-repo
+  note: in-repo BM25 is the frozen Phase-1 lexical baseline; Pyserini adoption must reproduce its rankings within tolerance or document why
+
+ir_metrics:
+  package: ir_measures==0.4.3
+  primary: [nDCG@10, Recall@10, Recall@20, MRR]
+  cross_check: src/retrieval.py hand-rolled ndcg_at_k

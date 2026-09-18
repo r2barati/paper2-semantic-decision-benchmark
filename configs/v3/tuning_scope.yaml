@@ -1,0 +1,32 @@
+# Phase-2 dev-tunable parameters — PREDECLARED 2026-09-13, BEFORE the 200/4000 corpus exists.
+# Rule: optimize ONLY on the future dev split; freeze before touching test qrels/utility.
+# Anything not listed here may NOT be tuned after scale-up.
+
+fusion_rrf:
+  candidates:
+    k_rrf: [30, 60, 120]            # RRF depth constant
+    systems: [[bm25, dense]]         # fixed pair; no raises (e.g. no rerank-in-fusion)
+  selection_metric: nDCG@10 on dev
+  frozen_default_if_tie_or_flat: {k_rrf: 60}
+
+rerank_depth:
+  candidates:
+    top_n: [30, 50, 100]             # candidate set into the frozen Qwen3 reranker
+  selection_metric: nDCG@10 on dev
+  frozen_default: {top_n: 50}
+
+context_k:
+  candidates:
+    k: [3, 5]                        # evidence budget into consumers
+  selection_note: k=3 headline (V2 continuity); k=5 reported if dev shows non-degenerate behavior
+  frozen_default: {k: 3}
+
+abstention_tau:
+  fixed: 0.5                          # NOT tunable (predeclared since Phase 1); report rate only
+
+prompts:
+  frozen: [C1_prompt_sha 66e6890ba9c5464c, C3_doc_prompt_sha 5966cadde90e8236]
+  rule: no prompt edits after scale-up except to fix a validated functional bug (logged)
+
+explicitly_not_tuned: [bm25_k1_b, dense_instruction_text, reranker_recipe, llm_temperature,
+  model_revisions, corpus_contents, qrels, grade_definitions, split_assignment]

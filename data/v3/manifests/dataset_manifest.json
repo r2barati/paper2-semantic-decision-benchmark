@@ -1,0 +1,10 @@
+{
+  "seed": 20260914,
+  "files": {
+    "corpus.jsonl": "fb6228f32db37b72d62f60e977d269522a655baa95dcc0ee3605fd5cb7539382",
+    "queries.jsonl": "096ce514c19f94c63efa8aedc5a074ab4492ade421ce96593c7998565c65bfb8",
+    "qrels/dev.tsv": "98e0fb45a16599d4db40c85e3c6bffbbf8c535e0dd450c6bc23f879c5f8960b6",
+    "qrels/test.tsv": "5e1192274ca007cf4393667fe5e423861ec1ac7c660e5a37219da1be24a6e987",
+    "splits/splits.json": "4e4d6b346a3f845ec058ab45c8d8b055bfe911dc992e883455a510bde78ef3bb"
+  }
+}

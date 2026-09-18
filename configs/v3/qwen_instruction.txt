@@ -1,0 +1,1 @@
+Given an operational supply-chain information need, retrieve documents relevant to the described entity, event, and time context.

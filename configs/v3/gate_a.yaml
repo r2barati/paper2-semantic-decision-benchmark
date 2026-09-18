@@ -1,0 +1,23 @@
+# Gate A — DIAGNOSTICS, explicitly not targets. FROZEN 2026-09-13.
+# Report all five. Revise the generator ONLY on independent validity evidence
+# (kappa failure, leakage/near-dup failure, construction bug). Saturation with
+# no defect found is reported as-is ("generator yields an easy retrieval task")
+# and addressed by a new PREDECLARED generator variant, never by tuning to numbers.
+
+diagnostics:
+  D1_saturation: {metric: nDCG@10 of best real system, report: value}
+  D2_spread: {metric: max-minus-min nDCG@10 over BM25/dense/hybrid/rerank, report: value}
+  D3_headroom: {metric: oracle-relevant minus best real system nDCG@10, report: value}
+  D4_consumer_variation:
+    - belief-accuracy range across retrievers for C1 on dev queries
+    - C3 abstention rate (report; degenerate if 0% or >50%)
+  D5_validity:
+    - cohen_kappa on dual annotation (validity floor: 0.6 per category for scale-up confidence)
+    - leakage tests (ID disjointness, TF-IDF-train exclusion, near-dup under threshold)
+    - oracle-factual subset-of-relevant check (expect overlap high but <100%)
+
+scale_up_criterion: >
+  Corpus credible (D5 green), non-degenerate (no construction bug explaining
+  ties at floor/ceiling), and C1/C3 show retrieval-to-belief variation worth
+  simulating. Judgment recorded in reports/v3proto/gate_a.md with numbers attached.
+out_of_scope_phase1: [simulation/profit analysis, k=5, gym transfer, test-profit tuning, extra systems/LLMs]

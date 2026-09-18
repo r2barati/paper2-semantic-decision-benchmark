@@ -1,0 +1,5 @@
+{
+ "tuned_family_holm": "9 comparisons (tuned-vs-prior + tuned-vs-8 real C1/C3 arms k=3, balanced J, crossed B=5000)",
+ "reject": "9/9",
+ "note": "oracle-C3 reversed [-118,-35]; all real arms tuned-ahead with CIs excluding zero"
+}

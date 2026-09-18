@@ -1,0 +1,36 @@
+{
+  "files": {
+    "beliefs_Qwen_Qwen3-14B-AWQ.parquet": {
+      "sha256": "f65489b2c6282b841aaceee20ec304aa9353bd024648013158447327f74bd50b",
+      "rows": 12600,
+      "model": "Qwen_Qwen3-14B-AWQ",
+      "cache_dir": "/Users/sanamimani/paper2_semantic_decision_benchmark/results/v3main/beliefs_cache_qwen14",
+      "cache_entries": 5509
+    },
+    "beliefs_Qwen_Qwen3-8B-AWQ.parquet": {
+      "sha256": "1b7cea5b0ab11788f8dae67fa5b5b18cd04508846a98c7c9eeb210ab48d78363",
+      "rows": 12600,
+      "model": "Qwen_Qwen3-8B-AWQ",
+      "cache_dir": "/Users/sanamimani/paper2_semantic_decision_benchmark/results/v3main/beliefs_cache_awq",
+      "cache_entries": 5509
+    }
+  },
+  "errors": {
+    "beliefs_Qwen_Qwen3-14B-AWQ.parquet": [],
+    "beliefs_Qwen_Qwen3-8B-AWQ.parquet": []
+  },
+  "prompts": {
+    "C1_prompt_sha": "66e6890ba9c5464c",
+    "C3_doc_prompt_sha": "5966cadde90e8236",
+    "ABSTAIN_TAU": 0.5,
+    "C1_prompt": "You are an operational risk analyst. Given a textual supplier or market warning, classify the likely operational regime. Respond ONLY with valid JSON matching this exact schema:\n{\"normal\": <float 0-1>, \"supplier_delay\": <float 0-1>, \"demand_surge\": <float 0-1>, \"estimated_lt_increase\": <int>, \"estimated_duration\": <int>, \"estimated_demand_multiplier\": <float>}\nThe three regime probabilities should sum approximately to 1.0.\nestimated_lt_increase: additional lead time periods if supplier_delay.\nestimated_duration: how many periods the event lasts.\nestimated_demand_multiplier: demand multiplier if demand_surge (1.0 if not).\nDo not include any other text.",
+    "C3_doc_prompt": "You are an operational risk analyst. Given ONE evidence document and the operator's own node described below, extract structured evidence. Respond ONLY with valid JSON matching this exact schema:\n{\"entity_match\": <true|false>, \"event\": <\"supplier_delay\"|\"demand_surge\"|\"normal\"|\"none\">, \"fresh\": <true|false>, \"stance\": <\"support\"|\"refute\"|\"na\">, \"confidence\": <float 0-1>}\nentity_match: whether the document concerns the operator's own node. fresh: whether it describes the current window (not resolved/closed). stance: support/refute relative to its own event claim. Do not include any other text."
+  },
+  "data_sha": {
+    "data/v3/corpus.jsonl": "fb6228f32db37b72",
+    "data/v3/queries.jsonl": "096ce514c19f94c6",
+    "data/v3/qrels/dev.tsv": "98e0fb45a16599d4",
+    "data/v3/qrels/test.tsv": "5e1192274ca007cf",
+    "data/v3/splits/splits.json": "4e4d6b346a3f845e"
+  }
+}

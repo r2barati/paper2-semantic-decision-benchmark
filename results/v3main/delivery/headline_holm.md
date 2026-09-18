@@ -1,0 +1,12 @@
+| cell | p | p_value | p_holm | reject_holm_05 |
+| --- | --- | --- | --- | --- |
+| Q3_rerank-bm25_C0-C1_k3_8B | 0.0015 | 0.0015 | 0.0150 | True |
+| Q3_rerank-bm25_C0-C3_k3_8B | 0.0045 | 0.0045 | 0.0360 | True |
+| Q3_rerank-bm25_C1-C3_k3_8B | 0.4961 | 0.4961 | 1.0000 | False |
+| Q3_rerank-bm25_C0-C1_k3_14B | 0.0265 | 0.0265 | 0.1855 | False |
+| Q3_rerank-bm25_C0-C3_k3_14B | 0.0033 | 0.0033 | 0.0297 | True |
+| Q3_rerank-bm25_C1-C3_k3_14B | 0.3204 | 0.3204 | 1.0000 | False |
+| Q5_rerank_C3-C1_k3_8B | 0.2066 | 0.2066 | 1.0000 | False |
+| Q5_rerank_C3-C1_k3_14B | 0.2641 | 0.2641 | 1.0000 | False |
+| Q6_rerank_8B-14B_C1_k3 | 0.8161 | 0.8161 | 1.0000 | False |
+| Q6_rerank_8B-14B_C3_k3 | 1.0000 | 1.0000 | 1.0000 | False |

@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{Paired $\Delta J$ vs no-retrieval control at $k=3$ (160 test queries $\times$ 5 seeds; crossed bootstrap, $B=5{,}000$). $^*$: Holm rejection (105 arms); unstarred cells Holm-n.s. Displayed CIs are unadjusted; stars carry multiplicity control. A harm claim is headlined only if Holm-robust under balanced weights and same-signed under empirical weights. Cluster CIs (median $1.08\times$, max $1.19\times$) agree in direction for every starred cell. Refs: NoInfo $1779.0$, PerfectBelief $1994.4$, Hindsight $2451.2$. NoText\_Tuned $1881.1$ (\S\ref{sec:tuned}).}
+\label{tab:utility}
+{\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccccc}
+\toprule
+System & C0 & C1/8B & C1/14B & C3/8B & C3/14B \\
+\midrule
+BM25 & \shortstack{$-8.5$\\$[-32,+16]$} & \shortstack{$-103.5^*$\\$[-137,-71]$} & \shortstack{$-89.7^*$\\$[-118,-63]$} & \shortstack{$-43.4$\\$[-71,-15]$} & \shortstack{$-59.8^*$\\$[-82,-37]$} \\
+Dense & \shortstack{$-4.6$\\$[-26,+17]$} & \shortstack{$-91.5^*$\\$[-122,-61]$} & \shortstack{$-93.2^*$\\$[-121,-66]$} & \shortstack{$-27.9$\\$[-58,+3]$} & \shortstack{$-55.2^*$\\$[-79,-31]$} \\
+Hybrid & \shortstack{$-9.8$\\$[-35,+15]$} & \shortstack{$-74.6^*$\\$[-105,-44]$} & \shortstack{$-73.9^*$\\$[-97,-51]$} & \shortstack{$-36.6$\\$[-64,-10]$} & \shortstack{$-54.4^*$\\$[-73,-35]$} \\
+Rerank & \shortstack{$-40.2$\\$[-68,-13]$} & \shortstack{$-43.6^*$\\$[-65,-23]$} & \shortstack{$-40.9^*$\\$[-62,-20]$} & \shortstack{$-21.8$\\$[-56,+11]$} & \shortstack{$-20.7$\\$[-48,+7]$} \\
+Random & \shortstack{$-35.0$\\$[-62,-9]$} & \shortstack{$-90.4^*$\\$[-110,-71]$} & \shortstack{$-89.9^*$\\$[-104,-75]$} & \shortstack{$-13.1$\\$[-26,-2]$} & \shortstack{$+10.9^*$\\$[+7,+14]$} \\
+Oracle & \shortstack{$+39.3$\\$[+9,+69]$} & \shortstack{$+74.9^*$\\$[+38,+111]$} & \shortstack{$+70.6^*$\\$[+32,+108]$} & \shortstack{$+178.9^*$\\$[+135,+221]$} & \shortstack{$+162.5^*$\\$[+125,+200]$} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+

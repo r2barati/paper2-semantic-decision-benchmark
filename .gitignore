@@ -61,9 +61,21 @@ results/**
 
 # Local environments, coverage, and build products
 .venv/
+.venv-kaggle/
 venv/
 *.log
 .coverage
 htmlcov/
 dist/
 build/
+
+# Remote-compute credentials must never enter the repo. Authentication is
+# machine-level only (~/.kaggle/access_token, exactly as ADIA does); the
+# runner reads it from $HOME at runtime and fails loudly if absent.
+.kaggle/
+kaggle.json
+**/kaggle.json
+**/access_token
+**/*api*key*.json
+kaggle/access_token
+kaggle_kernel/**/.kaggle/

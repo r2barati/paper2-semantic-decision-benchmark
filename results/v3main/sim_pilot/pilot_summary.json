@@ -1,0 +1,13 @@
+{
+ "n_episodes": 960,
+ "wall_min": 1.66,
+ "mean_episode_s": 0.687,
+ "hindsight_s": [
+  0.048,
+  0.048,
+  0.048,
+  0.048
+ ],
+ "paired_diff_query_var": 18423.9,
+ "paired_diff_seed_var": 2914.46
+}

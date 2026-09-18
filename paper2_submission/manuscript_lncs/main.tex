@@ -30,25 +30,40 @@
 Retrieval is evaluated by relevance, and increasingly by the quality of the
 text a language model then generates. A growing class of deployments instead
 feeds retrieved evidence to a decision policy, where an error's cost depends on
-which action it induces and on how the system evolves afterwards. We build an
-executable benchmark for that setting --- an operational report feed, a
-retrieval step, a fixed probabilistic interpreter, a fixed controller, and a
-simulator that returns realised utility --- and report a negative result. The
-value of a ranking is not a property of the ranking. At a matched evidence
-budget, every ranking system we test \emph{helps} one downstream consumer and
-\emph{harms} another: the retriever~$\times$~consumer interaction changes sign
-for all four, and ranking quality orders systems correctly for one consumer
-(rank-reversal rate $0.00$) but not the other ($0.33$). The information is
-present and extractable --- an oracle relevance selector helps both consumers
---- so the failure is a mismatch between retrieval and its consumer, not an
-absence of useful evidence. Supporting diagnostics locate the mismatch:
-text-free, shuffled-text and label-only controls show that belief accuracy and
-probabilistic sophistication do not imply operational value, and a
-perfect-semantic belief reference is not an upper bound on realised return. We
-release the benchmark, its frozen artifacts and its controls; every table
-regenerates from the stored episodes.
+which action it induces and on how the system evolves afterwards. The
+observation that topical relevance can diverge from task value is textbook
+information retrieval~\cite{borlund2003concept}, and recent retrieval-augmented
+generation (RAG) evaluation has measured versions of it: relevance labels
+correlate weakly with downstream performance~\cite{salemi2024erag}, grounding
+utility is model-specific~\cite{grogu2026}, and distracting passages can hurt
+more than random ones~\cite{cuconasu2024power,yoran2024making} --- with
+irrelevant context distracting even strong models~\cite{shi2023large} while
+retrieval helps mostly tail queries~\cite{mallen2023trust}. Selective
+retrieval~\cite{jiang2023active,asai2023selfrag} and position
+sensitivity~\cite{liu2023lost} are established remedies our design does not
+implement. What those
+studies do not provide is a frozen, regenerable instrument that scores evidence
+by \emph{sequential realised return} under a fixed controller, with the loss
+attributed across retrieval, interpretation and control. We build one: an
+operational report feed, BM25 / dense / hybrid / reranked retrieval, naive and
+provenance-aware LLM consumers plus a model-free rule-based reference, a
+development-tuned no-text comparator (labeled extension, outside the frozen
+matrix), a fixed receding-horizon controller, and a simulator that returns
+realised operating profit over 160 held-out queries $\times$ 5 paired
+seeds. The measured pattern is a mismatch, not a scarcity: for LLM consumers, real retrieval
+reduces return relative to no-text operating points (all C1 arms $-41$ to
+$-104$ and three of eight C3 cells, Holm-robust; remaining real-retriever
+comparisons directionally negative but Holm-n.s., except random/C3/14B
+$+11.0$, an abstention-fallback cell), while oracle-selected
+evidence from
+the same corpus adds up to $+178$; a relevance-to-factual refinement gap of $0.00$ and a
+downstream control gap of $+456.8$ locate the loss. Relevance-only evaluation
+cannot see the consumer dependence we measure: a retriever$\times$consumer
+interaction that survives Holm correction for rule-vs-LLM contrasts. Every
+table regenerates from stored episodes; all analysis code, model pins and
+randomisation are frozen.
 \keywords{Retrieval evaluation \and Downstream utility \and Evidence selection
-\and Consumer dependence \and Calibration.}
+\and Consumer dependence \and Negative results.}
 \end{abstract}
 
 \section{Introduction}
@@ -61,11 +76,18 @@ information access problem, and its consequences are sequential: an order
 placed now arrives several periods later, into a state that earlier decisions
 produced.
 
-Standard retrieval evaluation scores such a system by topical relevance, and
-downstream-aware evaluation such as eRAG scores it by the quality of the text a
-model subsequently generates~\cite{salemi2024erag}. Both treat the value of a
-ranking as a property of the ranking. This paper reports that in a
-consequential setting it is not.
+Standard retrieval evaluation scores such a system by topical relevance. That
+topical relevance need not equal task value has been known for decades, from
+situational relevance to task-based evaluation~\cite{borlund2003concept}, and
+the RAG literature has recently quantified single-step versions of the
+divergence: eRAG shows upstream relevance is a weak proxy for end-task
+utility~\cite{salemi2024erag}; GroGU shows grounding utility differs per
+consuming model~\cite{grogu2026}; strong retrievers can retrieve harder
+distractors than weak ones~\cite{cuconasu2024power,yoran2024making}. None of
+these gives IR a reusable way to score evidence by what it does to a
+\emph{sequential} decision process with persisting state and asymmetric costs.
+That instrument is this paper's contribution; the empirical pattern it reveals
+is consistent with, and narrower than, the effects above.
 
 We ask when retrieved text improves sequential decisions, and make the whole
 path executable so the question can be answered rather than argued:
@@ -78,84 +100,92 @@ s_{t+1} \;\longrightarrow\; U.
 \end{equation}
 
 A retrieval system $R_k$ selects $k$ documents from a candidate pool
-$\mathcal{D}$ under a fixed query $q$; a fixed interpreter maps the selected
+$\mathcal{D}$ under a fixed query $q$; a fixed consumer maps the selected
 text to a belief $b$ over operational regimes; a fixed controller maps state and
 belief to an action; a simulator returns realised utility $U$. Holding
-everything after retrieval constant makes differences in $U$ attributable to
-evidence selection. Varying only the interpreter, with retrieval held constant,
-isolates the consumer.
+everything after retrieval constant --- with shared seeds making each
+query-seed cell a paired counterfactual across sources (demand draws and
+regime paths are action-independent given the seed, so exogenous randomness
+is exactly paired; histories diverge thereafter by design, and that
+divergence IS the treatment effect) --- makes differences
+in $U$ attributable to
+evidence selection. Varying only the consumer, with retrieval held constant,
+isolates consumption. An oracle ladder (Section~\ref{sec:ladder}) separates
+selection from veracity from interpretation from control.
 
 \paragraph{The result.}
-At $k=3$, every ranking system --- random, BM25, TF--IDF cosine and dense
-retrieval --- produces a positive paired effect for a rule-based consumer and a
-negative one for a calibrated classifier consumer. The
-retriever~$\times$~consumer interaction changes sign in all four cases and
-reaches $+89$ reward units. Ranking quality orders systems exactly as realised
-utility does for the first consumer and disagrees on a third of pairs for the
-second. The evidence itself is not the problem: an oracle relevance selector
-improves \emph{both} consumers, by $+60.6$ and $+69.0$ respectively. What fails
-is the match between what practical rankers retrieve and what a particular
-consumer does with it.
+At $k=3$, real retrieval reduces operating return relative to a no-retrieval
+control for LLM consumers (BM25 $-103.5$ $[-137,-71]$, dense $-91.5$,
+hybrid $-74.6$, rerank $-43.6$; all Holm-robust over the 105-arm family),
+while oracle-selected evidence from the same corpus adds up to $+178.9$
+$[+135,+221]$. A no-text belief tuned only on development queries reaches
+$1881.1$ ($+102.1$ over the prior, $p<0.0002$): even the best constant policy
+that reads nothing beats every real-retriever arm, so the harm finding survives a
+tuned comparator. The loss decomposes cleanly: a relevance-to-factual
+refinement gap of $0.00$ (both oracle sets saturate their consumer), an
+interpretation gap that shrinks $140.5 \to 36.4$ from naive to
+provenance-aware consumption, and a downstream control gap of $+456.8$ that
+dominates everything even under perfect semantics.
 
 \paragraph{Contributions.}
-(i) An executable benchmark that scores evidence selection by the sequential
-decision utility it induces, with retrieval quality reported on the same
-episodes (Section~\ref{sec:retrieval}).
-(ii) A measured negative result --- consumer-dependent retrieval utility ---
-reported as an interaction, a rank-reversal rate, episode-level correlations and
-a harmful-retrieval rate rather than a single headline number.
-(iii) Diagnostics that locate the mismatch: text-free, shuffled-text and
-label-only controls showing that belief accuracy and probability quality do not
-imply operational value (Section~\ref{sec:diagnosis}).
-(iv) A reproducible artifact with the estimand, weighting and uncertainty
-declared, in which every table in this paper regenerates from the stored
-episodes.
+(i) A frozen, regenerable retrieval$\to$belief$\to$control benchmark scoring
+evidence by sequential realised return, with retrieval quality on the same
+episodes (Section~\ref{sec:transfer}).
+(ii) A measured mismatch pattern --- real retrieval harms, oracle evidence
+helps --- with a tuned no-text comparator, a rule-vs-LLM interaction, and a
+four-gap attribution (Sections~\ref{sec:utility}--\ref{sec:ladder}).
+(iii) A statistical discipline for this design: paired shared-seed worlds,
+crossed bootstrap, Holm over 105 arms, dual priors, text-cluster honesty
+check (Section~\ref{sec:uncertainty}).
+(iv) A reproducible artifact regenerating every table from stored episodes.
 
-\paragraph{Scope.} The report feed and environments are synthetic. We introduce
-no retrieval model and claim no interpreter or controller is preferable in
-general. The claim is about \emph{evaluation}: a retrieval system that feeds a
-decision policy cannot be scored independently of that policy, and the controls
-needed to support such a claim are stronger than those usually reported.
+\paragraph{Scope.} Synthetic feed and environments; constructed, not
+human-assessed, relevance (Section~\ref{sec:limitations}). No new retrieval
+model; no consumer or controller claimed preferable in general. The claim is
+about \emph{evaluation} --- score decision-bound evidence at induced actions
+and realised return, against a no-retrieval control and matched budget ---
+scoped throughout to arms, priors and environments where corrections hold.
 
 \section{Related work}
 \label{sec:related}
 
-\paragraph{Downstream-aware retrieval evaluation.}
-eRAG evaluates retrieval by the downstream performance of the language model
-that consumes it, showing that upstream relevance can be a poor proxy for
-end-task utility~\cite{salemi2024erag}. CUE-R estimates per-evidence utility by
-intervention and includes no-retrieval controls; GroGU argues grounding utility
-is consumer-specific. Both are recent preprints and we treat them as
-such~\cite{cuer2026,grogu2026}. Our downstream consumer is a control policy in a
-stochastic environment rather than a generator, so the estimated quantity is a
-trajectory's realised return, not text quality, and the error asymmetry comes
-from the environment's cost structure rather than a judge. Where GroGU argues
-for consumer specificity, we measure it end to end and find it strong enough to
-reverse the sign of a ranking's value. That relevance is situational and
-task-dependent long predates this work~\cite{borlund2003concept}; the
-contribution here is an instrument for one consequential task, not the
-observation that consequences matter.
+\paragraph{What we inherit.}
+That relevance can diverge from downstream value is established: situational
+and task-based relevance critique~\cite{borlund2003concept}; eRAG's weak
+relevance-to-utility correlation~\cite{salemi2024erag}; model-specific
+grounding utility~\cite{grogu2026}; distracting-passage harm that grows with
+retriever strength~\cite{cuconasu2024power,yoran2024making}; component-wise
+RAG evaluation with uncertainty~\cite{saadfalcon2023ares,es2023ragas}. That
+prediction quality differs from decision quality is established:
+task-based end-to-end learning~\cite{donti2017task,elmachtoub2022smart,mandi2022rank}, value-aware dynamics~\cite{farahmand2017value,lambert2020objective}, decision calibration~\cite{zhao2021decision}, and the
+classical value of information~\cite{howard1966information}. Probability
+quality is standardly assessed with proper scores and calibration
+diagnostics~\cite{guo2017calibration,degroot1983comparison,niculescu2005predicting}. \emph{None of these claims is ours:} each could have
+explained our results, and the controls below test those explanations rather
+than evading them. Closest are inventory decision-focused learning --- where
+prior work trains \emph{through} a stochastic program, we freeze an
+equivalent loop and vary only the supplied text --- and the SPO
+loss~\cite{elmachtoub2022smart}, which already scores predictions by induced
+decision error and which our $\Delta J$ applies to retrieved evidence; the
+closest operational-language system instead keeps its LLM around the solver
+as translator, not sensor~\cite{li2023optiguide}.
 
-\paragraph{Decision-focused prediction and calibration.}
-Predict-then-optimize and decision-focused learning train or evaluate
-predictions through a downstream
-objective~\cite{donti2017task,elmachtoub2022smart,mandi2022rank}; value-aware
-model learning makes the analogous point for learned
-dynamics~\cite{farahmand2017value,lambert2020objective}, decision calibration
-formalises dependence on a decision-maker~\cite{zhao2021decision}, and
-value-of-information theory gives the classical account of when information
-changes a decision~\cite{howard1966information}. Probability quality is
-standardly assessed with proper scores and calibration
-diagnostics~\cite{guo2017calibration,degroot1983comparison,niculescu2005predicting}.
-We do not learn through the objective: we hold the pipeline fixed and vary what
-is supplied to it, which makes this an evaluation rather than a training method.
+\paragraph{What remains novel here.}
+We are not aware of prior work combining a frozen sequential controller and
+world, retrieved natural-language evidence, matched budgets, paired
+world$\times$language randomisation, and a six-node oracle ladder separating
+selection, veracity, interpretation and control. In particular, no prior study
+we know measures a rule-vs-LLM interaction on realised operating return, or a
+tuned no-text policy beating every tested real retriever while oracle evidence
+helps. The normalised value diagnostic is standard skill-score bookkeeping;
+we claim no new metric.
 
 \paragraph{Environment and baselines.}
-The multi-echelon simulator derives from an inventory benchmark lineage in
-operations research~\cite{hubbs2020orgym} and is used at a pinned published
-version~\cite{gyminvmgmt}. Retrieval baselines are Okapi
-BM25~\cite{robertson1994okapi} and cosine similarity over sentence
-embeddings~\cite{reimers2019sentencebert}, scored with
+The controlled simulator is a single-item lost-sales inventory model; the
+secondary transfer uses a pinned published multi-echelon
+package~\cite{gyminvmgmt}. Retrieval baselines are Okapi
+BM25~\cite{robertson1994okapi} and cosine similarity over frozen
+sentence embeddings~\cite{reimers2019sentencebert}, scored with
 nDCG~\cite{jarvelin2002cumulated}.
 
 \section{Framework}
@@ -166,14 +196,13 @@ nDCG~\cite{jarvelin2002cumulated}.
 Let $z$ be a latent operational regime, $\mathcal{D}$ a candidate pool of
 reports and $q$ a fixed query expressing a standing information need. A
 retrieval system returns an ordered list; its top $k$ documents are the
-evidence. A fixed interpreter maps their concatenation to a belief $b(z)$, and a
-fixed controller maps state and belief to an action.
+evidence. A fixed consumer maps that evidence to a belief $b(z)$, and a fixed
+controller maps state and belief to an action.
 
 Write $G_i(m)$ for the \emph{realised} return of episode $i$ under information
 source $m$, $G_i(m)=\sum_{t=0}^{T-1} r(s^{(i)}_t,a^{(i)}_t,z^{(i)})$,
-undiscounted: the horizon is finite and fixed at $T=40$, and any discounting
-inside the environment is part of $r$. We keep realised returns distinct from
-their expectation, which we estimate by the weighted benchmark return
+undiscounted over the fixed $T=40$ horizon. Its expectation is estimated by
+the weighted benchmark return
 \begin{equation}
 \label{eq:jw}
 J_w(m) \;=\; \sum_{r} w_r \,
@@ -181,282 +210,353 @@ J_w(m) \;=\; \sum_{r} w_r \,
 \operatorname*{mean}_{v \in \mathcal{V}_{r,f}} \;
 \operatorname*{mean}_{i \in \mathcal{S}} \; G_i(m; r, f, v),
 \end{equation}
-averaging seeds within a template variant $v$, variants within an ambiguity
-family $f$, families within a regime $r$, and combining regimes with declared
-weights $w_r$. The \emph{balanced} estimand uses uniform $w_r$ and is primary; a
-deployment-prior estimand is secondary. Group sizes are unequal, so
+averaging seeds within a query $v$, queries within a family $f$, families
+within a regime $r$, and combining regimes with declared weights $w_r$. The
+\emph{balanced} estimand uses uniform $w_r$ and is primary; an
+\emph{empirical} estimand matching the test bank mix (normal $0.2$, delay
+$0.4$, surge $0.4$) is reported alongside every headline so that no
+conclusion rests on the weighting choice. Group sizes are unequal, so
 \eqref{eq:jw} is not an equal-row mean over episodes, and the difference is
 numerically material.
 
 Effects are reported as paired differences $\Delta J$ against a declared
-reference: for retrieval, a control that retrieves nothing; for interpreters,
-the uninformed prior. Where a normalised diagnostic is used, its numerator and
-denominator carry identical weights. We report it sparingly: the
-\emph{perfect-semantic reference} --- a correct belief passed through the fixed
-controller --- is demonstrably not an upper bound on realised return
-(Section~\ref{sec:diagnosis}), so normalising by it does not yield a recovered
-fraction of anything.
+reference: for retrieval, a control that retrieves nothing; for consumers,
+the uninformed prior. Headline utility estimands use the 160 held-out test
+queries; development queries enter episodes only for matrix coverage. Gaps
+are signed differences of balanced $J$: retrieval $J(\text{actual}) -
+J(\text{NoInfo})$, relevance-to-factual $J(\text{OracleFactual}) -
+J(\text{OracleRelevant})$, interpretation $J(\text{PerfectBelief}) -
+J(\text{OracleFactual})$, control $J(\text{Hindsight}) -
+J(\text{PerfectBelief})$, with rungs defined in
+Section~\ref{sec:ladder}. A development-tuned constant no-text belief
+(Section~\ref{sec:tuned}) provides the stronger comparator. The normalised
+diagnostic $\mathrm{SIVR} = (J(\text{condition}) - J(\text{NoInfo})) /
+(J(\text{oracle-semantic}) - J(\text{NoInfo}))$ is reported against both
+PerfectBelief and matched OracleFactual references with an explicit guard
+(NaN and a marked status, never absolute normalisation, when the reference
+gap is zero or negative); it is bookkeeping, not a new metric. With a fixed
+heuristic controller, the value of information need not be non-negative: our
+estimand is the value of information \emph{to this controller class}, not
+universal value of information, so negative realised value diagnoses the
+pairing, never a violation of decision theory. The \emph{perfect-semantic
+reference} --- the true regime passed through the fixed controller --- is
+demonstrably not an upper bound on realised return, so normalising by it
+does not yield a recovered fraction of anything; we report raw paired
+effects first and mark rather than interpret degenerate ratios.
 
 \subsection{Uncertainty}
 \label{sec:uncertainty}
 
-The design crosses worlds (seeds) with language (templates): every template
-within a regime is evaluated on the same seeds, so seeds are not independent
-draws nested under templates. We resample the two axes independently --- one
-\emph{shared} seed sample per regime, reused by every family and variant, plus
-families and variants with replacement. Intervals are percentile intervals from
-$B$ replicates; $p$-values are centred bootstrap test inversions,
-$(1+\#\{|b^\ast-\hat\theta|\ge|\hat\theta|\})/(B+1)$, bounded below by $1/(B+1)$
-and never reported as exactly zero. With three designed ambiguity families per
-regime the family axis is small, so intervals are conditional on the fixed
-template set and generalisation to new language remains open.
+Queries are the primary unit; five paired seeds ($60000$--$60004$, disjoint
+from all development ranges) quantify environmental uncertainty, shared
+across every treatment. The design crosses worlds (seeds) with language
+(queries): every query is evaluated on the same seeds, so we resample one
+\emph{shared} seed sample per regime plus queries with replacement
+(crossed bootstrap, $B=5{,}000$; $p$-values are centred test inversions
+bounded below by $1/(B+1)$, never zero). Paired randomisation testing
+follows IR significance-testing practice~\cite{smucker2007comparison}, and
+family-wise control follows classifier-comparison
+practice~\cite{demsar2006statistical}. Semantic statistics use paired
+query bootstrap ($B=10{,}000$). Multiplicity is controlled by Holm
+adjustment~\cite{holm1979simple}: over the 105-arm utility family (5 retrieval $\times$ 10 $+$
+2 oracle $\times$ 10 $+$ 7 interventions $\times$ 5 --- every
+(system, consumer, model, $k$) combination of the frozen matrix), and over ten preregistered
+headline semantic cells; all other contrasts are estimation with CIs,
+labeled exploratory. Three honesty provisions apply: (i) 200 IDs share 64
+texts (63 test) --- a text-cluster bootstrap (median $1.08\times$, max $1.19\times$ wider; cluster-bootstrap practice
+follows~\cite{cameron2008bootstrap})
+accompanies every starred claim, which holds under both; effective
+$N\approx137$; (ii) inference is to new queries/seeds \emph{within this
+bank}, not new language; (iii) regime-conditional statements are exploratory
+($n=5$ seeds).
 
-\section{Experiment R: consumer-dependent retrieval utility}
-\label{sec:retrieval}
+\section{Retrieval to semantic transfer}
+\label{sec:transfer}
 
-\subsection{Setup}
+Setup: 200 queries over a 64-node report feed (40 dev / 160 test;
+regime-faithful pool judgments; test seal held until frozen analysis).
+Systems: random, BM25, instructed dense, RRF hybrid ($k=120$), reranker over
+hybrid top-30 (depth dev-selected), oracle-relevant/factual ceilings, seven
+prespecified interventions. Consumers C0/C1/C3 (no C2 was ever defined): C0
+(rule-based, model-free), C1 (naive
+LLM use), C3 (per-document extraction, frozen abstention $\tau=0.5$, an arbitrary
+predeclared constant with no ablation; C1 prompts for regime probabilities
+plus event parameters as strict JSON, C3 for per-document entity, event,
+freshness, stance and confidence; a frozen-payload sweep over
+$\tau\in\{0.3,0.7\}$ leaves C3 accuracy and abstention unchanged to four
+decimals, since per-document support avoids the threshold band (identical
+beliefs imply identical downstream returns, so no utility rerun is needed);
+abstentions carry the prior, score $0$ accuracy, keep prior Brier --- a
+reject option in the classical sense~\cite{chow1970optimum}, without a
+coverage-risk analysis~\cite{geifman2019selectivenet}, which we leave to
+future work). Two pinned open-weight
+models (8B/14B); 11{,}018 content-addressed cache files, zero assembly writes.
 
-Each episode is a (seed, regime) pair. The candidate pool holds four kinds of
-document, all in the same operational register: \emph{relevant}, a current
-report about the operator's own node; \emph{wrong entity}, a current report
-about a different node, drawn across all regimes so that some of these errors
-actively mislead and some are accidentally correct; \emph{stale}, the operator's
-node but an event already marked resolved; and \emph{off-topic}, routine
-corporate traffic attributed to the operator's node so that it cannot be
-filtered on entity alone.
+\input{tables/v3_retrieval}
 
-Relevance is determined by the query --- entity and recency --- and never by
-regime; identifying the regime is the interpreter's job. That separation is what
-makes the retrieval task solvable and the dissociation measurable.
+Table~\ref{tab:retrieval} shows the frozen ranker is point-ordered
+(BM25 $0.115$ to reranked $0.183$; dense/hybrid/rerank intervals overlap),
+though rerank's edge over hybrid shrinks out of sample ($+0.024$ dev $\to$
+$+0.001$ test) and trades recall for nDCG --- a finding, not a tuning
+trigger. No position analysis beyond $k\in\{3,5\}$ is attempted; $k=5$
+repeats the pattern (all ten C1 arms Holm-robust negative) with full numbers
+in the frozen artifact.
 
-Systems: random (floor), BM25, TF--IDF cosine, dense sentence-embedding cosine,
-and an oracle relevance selector; a no-retrieval control supplies the paired
-reference. Evidence budgets $k\in\{1,3,5\}$ are matched across systems. The two
-consumers are a rule-based extractor and a calibrated TF--IDF classifier; the
-controller is a receding-horizon optimiser and is identical throughout.
+\input{tables/v3_semantic}
 
-\input{tables/retrieval_main}
-
-\subsection{The retrieval task is solvable, and the evidence is there}
-
-Ranking quality orders the systems random $<$ BM25 $<$ TF--IDF cosine $<$ dense
-$<$ oracle, with a wide spread in nDCG@3 (Table~\ref{tab:retrieval}), and the
-rate at which retrieved documents actively mislead falls monotonically along the
-same ordering, from $0.44$ for random to $0.22$ for the oracle selector. The
-oracle relevance selector improves \emph{both} consumers, by $+60.6$
-$[+48,+73]$ and $+69.0$ $[+40,+96]$. Selecting the right evidence from this pool
-is therefore both possible and worth doing, for either consumer.
-
-\subsection{But its value is not a property of the ranking}
+Semantic accuracy (Table~\ref{tab:semantic}) sits at $0.275$--$0.450$ outside
+abstention-collapse cells --- barely above model-free C0 on identical evidence
+and far below oracle evidence (C3: $0.96$--$0.97$). C1 is \emph{worse} than C0
+in 17 of 20 real-retriever cells (BM25/8B: $0.275$ vs $0.406$). C3 beats C1 on
+oracle ($+0.25$) but marginally on real retrieval, and abstains on garbage.
+Scale shows no systematic advantage (34/42 nulls, null $=$ CI includes zero;
+8 scattered mixed-sign
+cells, max $|\Delta|=0.144$). Better retrieval is directionally consistent
+with better semantics for LLM consumers but underpowered ($n=4$, exact
+$p=0.083$--$0.92$); orderings are stable across consumers ($\rho\ge0.80$,
+$p<0.003$). Evidence-hit explains $+0.36$--$+0.42$ accuracy on retrieval
+systems. Held-out entities score \emph{higher} (BM25/C1/8B $0.38$ vs $0.23$;
+descriptive, plausibly an easier mix).
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.86\textwidth]{figures/interaction}
-\caption{The same rankings, two consumers, one zero line. The horizontal axis is
-a property of the retrieval alone; the vertical axis is what that retrieval
-turned out to be worth, as a paired effect against retrieving nothing (bars are
-95\% crossed bootstrap intervals). Across the whole practical range the two
-consumers sit on opposite sides of zero, converging only at the oracle
-selector. A relevance-only evaluation observes the horizontal axis and cannot
-distinguish the two situations.}
-\label{fig:interaction}
+\includegraphics[width=0.76\textwidth]{figures/fig1_transfer}
+\caption{Retrieval quality against semantic quality across the four practical
+rankers (test queries, C3/8B, $k=3$). The ordering transfers in rank while
+absolute accuracy stays low --- the pattern the utility stage then breaks.}
+\label{fig:transfer}
 \end{figure}
 
-\input{tables/retrieval_findings}
+\input{tables/v3_interaction}
 
-Every practical ranking system helps the rule-based consumer and harms the
-calibrated one (Figure~\ref{fig:interaction}). Dense retrieval is $+48.4$ $[+32,+65]$ for the first and $-1.5$
-$[-31,+29]$ for the second; BM25 is $+14.9$ $[+5,+26]$ and $-74.3$ $[-99,-48]$.
-The retriever~$\times$~consumer interaction changes sign for all four systems
-and ranges from $+49.9$ to $+89.2$ reward units
-(Table~\ref{tab:consumerdep}). There is no single number that describes what
-BM25 is worth here.
+The retriever$\times$consumer interaction (Table~\ref{tab:interaction}) is
+carried by rule-vs-LLM contrasts (3/10 Holm-robust); C1-vs-C3 and parity
+differences retain nulls --- a level shift between model-free and LLM
+consumption, not between LLM consumers.
 
-Ranking quality inherits that ambiguity. For the rule-based consumer the nDCG
-ordering and the utility ordering agree on every pair (rank-reversal rate
-$0.00$, $\tau_b=+1.00$); for the calibrated consumer they disagree on a third of
-pairs ($0.33$, $\tau_b=+0.33$). An evaluator who selected a retriever on nDCG
-would be right every time for one consumer and wrong a third of the time for the
-other, with no upstream signal distinguishing the two situations.
+\section{Sequential utility}
+\label{sec:utility}
 
-\subsection{The gradient is shared; the level is not}
+Feeding the exact frozen beliefs through the frozen controller and simulator
+($105$ arms $\times$ $200$ queries $\times$ $5$ paired seeds $=$ $105{,}000$
+episodes for coverage; headline estimands use the 160 test queries) gives Table~\ref{tab:utility} and
+Figure~\ref{fig:rxc}.
 
-The episode-level correlation between ranking quality and realised reward is
-almost identical for the two consumers ($r=+0.372$ and $+0.382$;
-$\rho=+0.392$ and $+0.367$), computed within episodes so that episode
-difficulty cannot dominate. This is worth stating precisely, because it narrows
-the claim. \emph{Within} a consumer, better evidence does produce better
-decisions, and to a similar degree for both. What differs is the level: the
-calibrated consumer is worse than retrieving nothing across the whole practical
-range, and only reaches parity once retrieval is near-oracle. Consumer
-dependence here is an offset, not a reversed gradient --- which is precisely why
-a relevance-only evaluation cannot detect it.
+\input{tables/v3_utility}
 
-\subsection{More evidence is not better}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.76\textwidth]{figures/fig2_rxc}
+\caption{Paired change in operating return vs retrieving nothing (8B, $k=3$,
+95\% crossed intervals). Real retrieval sits at or below zero for LLM
+consumers; only oracle evidence crosses into positive value.}
+\label{fig:rxc}
+\end{figure}
 
-The last panel of Table~\ref{tab:consumerdep} follows the strongest ranker
-across budgets. Moving from $k=3$ to $k=5$ raises dense retrieval's nDCG
-($0.617 \to 0.691$) while lowering its effect on the calibrated consumer
-($-1.5 \to -18.9$) and leaving the rule-based consumer flat
-($+48.4 \to +46.0$). The extra documents are mostly non-relevant, and neither
-consumer has a mechanism for discounting them --- but only one of them pays for
-that.
+All BM25/dense/hybrid/rerank LLM-consumer arms sit at or below the
+no-retrieval control at $k=3$, with Holm-robust harm for all C1 arms ($-41$ to $-104$)
+and three of eight C3 cells (14B only); every real-retriever C0 comparison is directionally negative but
+Holm-n.s. A majority
+of individual queries are harmed ($46$--$74\%$ across real-ranker arms and
+budgets, seed-averaged $\Delta<0$, vs $3.7\%$ for
+oracle-C3). A second fixed policy class (belief-adaptive base-stock, same
+beliefs/seeds/protocol, labeled extension) preserves rerank/C1 ($-55.0^*$)
+and rerank/C3 ($-94.8^*$) harm and oracle-LLM gains ($+100$--$+107^*$), but
+reverses BM25/C1 ($+54.5^*$) and the tuned constant ($-39.3$): harm lives at
+the pairing level, which is what decision-bound evaluation must score. Under empirical weights, BM25/dense/hybrid C1 harm and all
+oracle-LLM gains persist Holm-robust; rerank-C1/C3 and all real-retriever C0
+comparisons go
+Holm-n.s.\ (neutral arms flip sign), so universality is disclaimed and only
+the robust subset is headlined. Within naive consumption, harm generally
+declines with test nDCG (8B: $-104\to-92\to-75\to-44$; 14B:
+$-90\to-93\to-74\to-41$ with one adjacent swap) --- against a pure
+weak-retriever artifact, which would not grade smoothly with ranking quality
+while the oracle flips sign. Better IR is less
+harmful for naive consumption (rerank $>$ hybrid $>$ dense $\approx$ BM25 for
+C1) but still harmful or neutral --- except random/C3/14B $+11.0$:
+C3 abstains on random evidence and falls back to the strong prior, so this
+cell measures the fallback, not retrieval helping; kept out of headlines.
+(C3 already implements the selective gate --- abstention maps to the prior by
+construction, verified by a no-op selective rerun --- so no separate
+selective arm exists to run.)
 
-\section{Locating the mismatch}
-\label{sec:diagnosis}
+\section{Locating the loss}
+\label{sec:ladder}
 
-Why does one consumer convert better evidence into better decisions while the
-other does not? We hold retrieval aside and vary the belief directly, in two
-transfer environments: a held-out multi-echelon demand-surge setting
-(Experiment~M) and a supply-side capacity drop (Experiment~S). Alongside the
-interpreters we run constant-belief endpoints, a no-text operating point tuned
-only on development seeds, a shuffled-text ablation in which the interpreter
-reads a real warning belonging to a different template, and a label-only
-ablation that discards the interpreter's probabilities.
+\input{tables/v3_gaps}
 
-\input{tables/controls_main}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.76\textwidth]{figures/fig3_ladder}
+\caption{Oracle ladder waterfall (C3/8B, $k=3$, balanced $J$): actual
+retrieval destroys value vs no retrieval, oracle evidence restores it, and
+the hindsight reference shows control leaving the largest gains unrealised
+even under perfect semantics.}
+\label{fig:ladder}
+\end{figure}
 
-\paragraph{A text-free control is a demanding baseline.}
-In Experiment~M the development-tuned no-text control returns $560.4$, above
-single TF--IDF ($516.2$), calibrated TF--IDF ($530.2$) and GPT-4o ($534.9$);
-only the rule-based interpreter ($568.7$) exceeds it. In Experiment~S it returns
-$1725.1$ against $1447.0$ for the best interpreter. Reward increases
-monotonically in the assumed event probability, so the controller is
-systematically under-positioned under the benchmark prior and any belief that
-raises the order-up-to level captures part of that gap without reading anything.
-This is the same failure mode that makes the calibrated consumer fragile in
-Experiment~R: its value depends on where its belief mass sits relative to the
-controller's operating point, not only on whether the belief is right.
+The ladder (Table~\ref{tab:gaps}, Figure~\ref{fig:ladder}) attributes the
+loss rung by rung with controller, world, seeds and budget fixed:
+\textsc{NoInfo} (prior), \textsc{ActualRetrieval} (frozen belief row),
+\textsc{OracleRelevant} (top-$k$ by grade), \textsc{OracleFactual} (+fresh,
+entity-matching, non-refuting), \textsc{PerfectBelief} (true-regime one-hot,
+retrieval-independent), \textsc{HindsightOracle} (clairvoyant MILP) ---
+separating selection, veracity, interpretation and control: the relevance-to-factual refinement gap is $0.00$ in every arm (both
+oracle sets saturate their consumer identically); the interpretation gap
+shrinks $140.5 \to 36.4$ from naive to provenance-aware consumption; the
+downstream control gap ($+456.8$, bundling demand-foresight value with
+controller suboptimality) dominates everything, so even perfect
+semantics leave more than twice the perfect-semantics value on the table.
+Regime slices (exploratory, per-regime paired CIs, no multiplicity control)
+show the mechanism is concentrated, not diffuse:
+reranked evidence helps substantially in delay worlds ($+150$--$+206$ across
+consumers and models) while hurting in normal ($-225$--$-157$) and surge
+($-129$--$-79$) worlds.
 
-\paragraph{Belief accuracy does not imply operational value.}
-In Experiment~S the shuffled-text control returns $1415.2$, \emph{above} the
-genuine interpreter's $1372.9$, at roughly half the belief accuracy. Whatever
-that interpreter gains there comes from the shape of its belief distribution,
-not from identifying the regime. In Experiment~M shuffling does destroy the
-effect ($530.2 \to 451.1$, below the uninformed prior), so reading the correct
-text is doing real work in one environment and not the other.
+\paragraph{Interventions on oracle evidence.}
+Perturbing the oracle-factual base seven prespecified ways (drop-decisive,
+stale-swap, inject-contra, wrong-entity-swap, duplicate-top, order-reverse,
+irrelevant-inject) stays positive throughout (duplicate-top/C3 $+185$
+balanced / $+215$ empirical; all Holm-robust): excellent evidence stays
+excellent. Contra-injection splits
+the consumers (C1 $+29$n.s.\ vs C3 $+165^*$) --- provenance-awareness pays,
+but only where evidence starts near-perfect.
 
-\paragraph{Probabilistic sophistication does not either.}
-Collapsing the calibrated interpreter to its hard label costs little in
-Experiment~M ($530.2 \to 523.5$) and helps in Experiment~S
-($1372.9 \to 1392.0$). In the controlled benchmark the label-only ablation of
-the raw classifier reaches a normalised value of $0.773$ against $0.245$ for its
-own probabilities, with a better Brier score ($0.222$ versus $0.552$) and a much
-worse log-loss ($2.558$ versus $0.932$): the two proper scores disagree about
-it, and neither predicts its operational advantage.
+\subsection{The tuned no-text comparator}
+\label{sec:tuned}
 
-\paragraph{Calibration is not an isolated intervention.}
-\texttt{CalibratedClassifierCV} fits one classifier per fold and averages them,
-so a raw-versus-calibrated contrast mixes a calibration map with an ensembling
-change. Adding the missing arm --- the same fold ensemble with no calibration
-map --- separates them: ensembling alone \emph{lowers} normalised value
-($0.245 \to 0.154$) and the calibration map then recovers past it
-($\to 0.338$). The direction survives; the naive difference is not attributable
-to calibration.
+Because a fixed prior is a weak comparator, we tuned a constant no-text
+belief on development queries only (66-triple grid at step $0.1$, 40 queries,
+disjoint seeds;
+selection, not inference) and evaluated it
+once on test: always anticipate surge, with runners-up $(0.1,0,0.9)$ and
+$(0,0.1,0.9)$ at dev $J=1869.5$ behind the winner's $1885.6$ (full grid in
+the frozen artifact). The top-3 dev order is preserved on test (runners-up
+$J=1869.1$ vs winner $1881.1$; paired winner-minus-runner-up $+19.8$
+$[+4,+20]$, exploratory outside Holm), against winner's-curse luck.
+It reaches $J=1881.1$, $+102.1$ over the prior ($p<0.0002$ crossed bootstrap,
+$B=5{,}000$, same paired scheme; Holm over the 9 tuned-family comparisons ---
+tuned-vs-prior plus tuned-vs-each-real-C1/C3-arm --- rejects $9/9$; labeled
+extension, SIVR $0.474$,
+i.e.\ 47\% of the perfect-semantics value recovered) ---
+and still every real-retriever arm sits below it (paired tuned-minus-arm
+CIs, all excluding zero: rerank/C1 $[+108,+184]$, rerank/C3 $[+82,+165]$,
+oracle-C3 $[-118,-35]$ the other way). The comparator cuts both ways:
+it rules out a straw-man prior, but its edge is prior-dependent (lost at
+$-39$ normal-heavy) and mechanistic (equals perfect semantics in surge worlds
+since a missed unit costs $18$ against $\sim$1--3 to carry one).
 
-\paragraph{The perfect-semantic reference is not an upper bound.}
-A correct belief passed through the fixed controller is beaten by a constant
-belief that reads nothing, in both transfer environments
-(Table~\ref{tab:transfers}). We therefore call it a reference rather than an
-oracle, and avoid normalising by it where a raw paired effect will do.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.76\textwidth]{figures/fig4_xmodel}
+\caption{Cross-model accuracy parity (rerank, $k=3$; 8B minus 14B with 95\%
+intervals). Within-family scale does not move semantic quality; the
+transfer pattern replicates across both models.}
+\label{fig:xmodel}
+\end{figure}
+
+A secondary transfer to a published multi-echelon simulator corroborates
+no-text robustness only: no arm beats NoInfo there (perfect beliefs $-50.7$
+$[-62,-41]$) while rankings flip (rerank $-240.7$), reported as environment
+dependence given the transfer's own two-class projection artifact.
 
 \section{Boundaries and limitations}
 \label{sec:limitations}
 
-\input{tables/boundary}
-
-Perturbing one environment factor at a time shows how conditional these
-quantities are. In three of six variants the perfect-semantic reference itself
-underperforms the uninformed prior, so no normalised information-value statement
-is meaningful there and we mark rather than report a ratio. Under short lead
-times the calibrated interpreter returns $2248$ and GPT-4o $2213$ against the
-uninformed prior's $2398$: halving the lead time leaves too little time to act,
-so a belief that shifts stock upward mostly buys holding cost.
-
-The report feed and environments are synthetic, single-SKU and finite-regime.
-Experiment~R's pools are generated rather than authored, so it carries no
-language-axis variance; its query is fixed and relevance is defined by
-construction rather than by assessors, which makes the oracle selector a ceiling
-for \emph{these} judgments rather than for downstream utility in general. Two
-consumers do not establish the shape of consumer dependence, only that it is
-large enough to reverse a sign. The dense retriever is one general-purpose
-sentence encoder with frozen embeddings, not a trained dense retrieval system.
-The controller is fixed and not jointly optimised with the interpreter. Cached
-LLM outputs cover a small set of models with reconstructed rather than certified
-provenance. Evidence is consumed by concatenation; belief-level pooling over
-separately interpreted documents is a natural variant we do not evaluate.
+The feed is synthetic, single-SKU and finite-regime, with constructed, not
+human-assessed, relevance --- unlike the situational programmes that motivate
+this work, which require real users (validation unexecuted; agent-audit
+priors $0.82$/$0.90$, $\kappa=0.874$, are priors, not substitutes); absolute
+nDCG values should
+not be compared outside this bank. One simulator; two fixed controller
+classes (primary LP plus a base-stock extension that reverses some arms),
+two open-weight models from one family; the C0 pattern needs no LLM and
+carries the model-free half of the claim. 160 test queries over 63 unique
+texts
+(effective $N\approx137$); five seeds adequate for balanced headlines
+(query:seed variance $6$--$7{:}1$ in pilots; leave-one-seed-out headline
+$\Delta$ within $\pm10$), not
+for regime-conditional inference (exploratory). Held-out templates
+unavailable; held-out entities score higher for
+an untested mix reason. The tuned comparator is prior-dependent (loses under
+normal-heavy weights, where BM25/C1 is $-30$ $[-93,+35]$n.s.\ and oracle-C3
+$+79$ $[+6,+151]$); BM25/dense/hybrid C1 harm and oracle-LLM value point
+the same way under all five weightings checked (full CIs under balanced and
+empirical only). SIVR is
+reported bookkeeping with signed guards, not a new metric. Nothing here
+establishes deployment safety.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-In a setting where retrieved text drives a decision policy, the value of a
-ranking is not a property of the ranking. Every retrieval system we tested helps
-one consumer and harms another, the interaction changes sign in every case, and
-relevance-based evaluation is a reliable guide for one consumer and unreliable
-for the other with nothing upstream to distinguish them. The evidence is
-extractable --- an oracle selector helps both --- so this is a mismatch problem,
-not a scarcity problem. For evaluation practice the implication is narrow and
-concrete: a retrieval component intended for a decision-making consumer should
-be scored against that consumer, with a no-retrieval control and a matched
-budget, and a reported improvement in relevance should not be assumed to
-survive the handoff.
+For a decision consumer, evidence quality must be scored at the level of
+induced actions and realised return: better-ranked evidence yields marginally
+better beliefs yet, for LLM consumers, operating returns at or below reading
+nothing on real retrieval (Holm-robust harm on every real-retriever naive-use
+arm), while oracle evidence from
+the same corpus is worth up to $+179$. The failure is a mismatch between
+retrieval, consumer and controller --- a second fixed policy class preserves
+rerank harm and oracle gains while reversing BM25/C1 and the tuned constant,
+confirming harm lives at the pairing level --- located by the ladder:
+selection is not the bottleneck (relevance-to-factual $0.00$),
+interpretation closes part of the gap ($141 \to 36$), and control leaves the
+most value unrealised ($+456.8$; this bundles demand-foresight value with
+controller suboptimality, since the clairvoyant resolves sample-path
+randomness the regime controller never sees). Score retrieval intended for a decision loop
+against that loop, with a no-retrieval control, a tuned no-text comparator
+and a matched budget --- and do not assume a relevance gain survives the
+handoff.
 
 \appendix
 \section{Design, accounting and reproduction}
 \label{app:design}
 
-\input{tables/appendix}
-
 \paragraph{Environment, costs and timing.}
-Single-item lost-sales inventory over a finite horizon of $T=40$ periods:
-revenue $10$ per unit sold, ordering cost $5$ fixed plus $2$ per unit, holding
-cost $1$ per unit of ending inventory, stockout penalty $8$ per unit of unmet
-demand, initial on-hand $30$, Poisson demand with base mean $8$. Three regimes:
-\textsc{normal}; \textsc{supplier delay}, raising the lead time during the event
-window; and \textsc{demand surge}, multiplying the demand rate. The supply-side
-transfer instead reduces a factory's capacity in a multi-echelon network. Within
-a period the order is: receive arrivals, realise demand, fulfil from on-hand,
-place an order. An order placed in period $t$ under lead time $L$ arrives at the
-start of period $t+L$; orders already in transit keep their arrival period, so a
-lead-time change applies only to orders placed from that period onward. The
-simulator and every planner share one implementation of this schedule.
+Single-item lost-sales inventory over $T=40$ periods: revenue $\$10$/sale,
+ordering $\$5$ fixed plus $\$2$/unit, holding $\$1$, stockout penalty $\$8$,
+initial on-hand $30$, Poisson demand (mean $8$). Regimes: \textsc{normal};
+\textsc{supplier delay} (lead time up in window); \textsc{demand surge}
+(demand rate up). Within a period: receive arrivals, realise demand, fulfil,
+order. Orders placed at $t$ under lead time $L$ arrive at $t+L$; in-transit
+orders keep arrival periods. One shared schedule implementation.
 
-\paragraph{Information release.}
-Warning text is published at period $12$; the event window begins at period
-$20$. Before publication no interpreter has read anything and every controller
-plans under the benchmark prior. From publication the interpreted belief
-replaces the prior while on-hand stock and the in-transit pipeline carry over.
+\paragraph{Information release and belief to action.}
+Warning at period $12$; events periods $20$--$29$. Before publication all
+controllers plan under the benchmark prior; after, the interpreted belief
+replaces it with state and pipeline carried over. The controller solves a
+receding-horizon LP per period (SciPy \texttt{linprog}, HiGHS; flow-balance
+and bound constraints with horizon 40 in the artifact), executing its first order by minimising
+$\sum_\tau(2\hat{q}_\tau+\hat{I}_\tau-18\hat{s}_\tau)$, where the coefficients are the stated variable/holding
+costs and the revenue-plus-stockout at stake, under
+belief-weighted demand and lead time, identically across sources. The online
+program is a continuous relaxation: the simulator's $\$5$ per-order fixed
+cost is charged on execution but not anticipated in planning (uniform across
+arms); only the hindsight reference solves the mixed-integer form with setup
+binaries, so the control gap further bundles relaxation against foresight.
 
-\paragraph{Belief to action.}
-The controlled experiments solve a receding-horizon linear program each period
-and execute only its first order, with belief-weighted expected lead time and
-demand per future period. The multi-echelon experiments use a belief-adaptive
-base-stock policy with effective rate $\mathbb{E}_b[\mu]$ and order-up-to target
-$\mathbb{E}_b[\mu]\bar{L} + 1.65\sqrt{\bar{L}\,\mathbb{E}_b[\mu]}$. The
-controller is identical across information sources within an experiment.
+\paragraph{Retrieval, consumers, models.}
+BM25 ($k_1=1.5$, $b=0.75$, idf floored at zero); instructed dense embeddings;
+RRF hybrid ($k=120$)~\cite{cormack2009reciprocal}; reranker over hybrid top-30 (depth 30 selected on dev
+only); oracle-relevant and oracle-factual ceilings; seven prespecified
+evidence interventions; budgets $k\in\{3,5\}$. C0 rule-based reference; C1
+naive LLM use; C3 per-document extraction with frozen abstention
+($\tau=0.5$). LLM consumers use \url{Qwen/Qwen3-8B-AWQ}@\texttt{4da05a8e}
+and \url{Qwen/Qwen3-14B-AWQ}@\texttt{31c69efc}, resolvable revisions at
+\texttt{huggingface.co}, served once via frozen
+prompts (SHA C1 \texttt{66e6890b}, C3 \texttt{5966cadd}); 11{,}018 outputs
+cached content-addressed with prompt/model SHAs and usage records; kernels
+ran qrel-free with hard-abort seal guards.
 
-\paragraph{Interpreters, information and retrieval.}
-No non-oracle interpreter receives the regime, future demand, future state or
-environment internals. The TF--IDF classifiers are fitted only on training
-templates and evaluated on disjoint held-out ones. LLM beliefs are replayed from
-frozen canonical responses, with model labels reconstructed by re-deriving each
-cache key from every known (model, text) pair and unmatched entries labelled
-\texttt{unknown}. BM25 uses the Okapi form with $k_1=1.5$, $b=0.75$ and idf
-floored at zero; dense retrieval is cosine similarity over frozen
-\texttt{all-MiniLM-L6-v2} embeddings, shipped so the published numbers reproduce
-without model weights. Ties break by document id.
-
-\paragraph{Reproduction.}
-The release reconstructs its own offline inputs: cached semantic responses come
-from a tracked, checksum-verified manifest, and classifier checkpoints are
-retrained from tracked templates with fixed seeds; neither step needs
-credentials or network access. The multi-echelon simulator is a pinned published
-package~\cite{gyminvmgmt}, and every stored episode replays through it to its
-recorded reward exactly. A verification entry point regenerates every table in
-this paper from the stored episodes and fails if any differs. This paper shows
-that a decision-support component can look better on upstream metrics while
-being worse to act on, so deployment needs human oversight and conservative
-fallbacks; a synthetic study does not establish deployment safety.
+\paragraph{Accounting and reproduction.}
+25{,}200 frozen belief rows (2 models $\times$ C0/C1/C3) with SHA manifest
+(0 gate errors); 108{,}000 controlled episodes plus 107{,}000 gym episodes,
+seeds $60000$--$60004$ throughout; 3{,}424-file superseded GPT partial
+preserved but excluded under a logged model-substitution amendment (billing
+block; replacement probes gated in the artifact log). Cross-session cache nondeterminism
+(36 disputed keys, 140 rows) moves headline effects by at most $0.0021$
+Brier / $0.0$ accuracy. Every table regenerates from stored episodes and
+beliefs (57/57 byte-identical rerun). A synthetic study does not establish
+deployment safety.
 
 % Marker for an exact content-page count: ECIR allows 12 content pages
 % including appendices, with unlimited reference pages. Read this label's page

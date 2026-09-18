@@ -1,0 +1,49 @@
+# V3 full benchmark dataset rules — FROZEN 2026-09-14, BEFORE generation.
+# Scale: 200 queries / ~4,000 documents. Retrieval stack, instruction, prompts,
+# metric definition: all frozen (see ../phase1 reports + tuning_scope.yaml).
+# Tune ONLY tuning_scope.yaml items on dev AFTER this freeze.
+
+seed: 20260914
+n_queries: 200
+regime_stratification: {supplier_delay: 80, demand_surge: 80, normal: 40}
+
+entities:  # AMENDED 2026-09-14 (v3): 16 -> 64 nodes. Reason (measured, both extremes):
+  # (a) 8-entity build: ~328 same-node competitors -> dev nDCG@10 ~0.015 (near-chance).
+  # (b) 16-entity build: ~200 competitors -> ~0.06, still near-chance for top-k transfer.
+  # (c) Regime-AGNOSTIC qrels (tried as V3.1): saturate at 0.98 (entity filter = solved).
+  # Regime-faithful qrels are unmeasurable past ~150 same-node competitors and trivially
+  # saturated if regime is dropped. Target ~70 same-entity current docs/query: 64 nodes
+  # x ~3 queries. Queries keep the single generic template (no topical leak); the
+  # measured number is accepted whatever it is. Corpus REGENERATED (new node names);
+  # test text is new; test metrics remain sealed.
+  standard_count: 48
+  held_out_count: 16   # ~50 queries held out (robustness asset preserved)
+
+per_query_mix:
+  grade3_fully_relevant: 2
+  grade2_partial: 2
+  grade1_stale: 2
+  grade0_wrong_entity: 5        # 2 misleading / 2 accidentally-correct / 1 neutral
+  grade0_contradictory: 1       # on half the non-normal queries
+  grade0_offtopic: 8            # 3 lexical + 3 semantic + 2 routine
+shared_cross_query_distractors: 120
+
+variant_holdout:
+  fraction_test_only_per_bank: 0.20   # ~20% of bank texts never appear in dev pools
+  mechanism: bank-item index hash mod 5 == 0 -> test-only
+
+template_derivation_cap:
+  max_fraction_from_existing_banks: 0.00  # full build is 100% freshly authored (V1/V2 banks: zero verbatim use)
+severity_timing_metadata:
+  severity: [major, moderate]             # recorded per query; text-realized via clear/hedged mix
+  event_timing: [early, standard, late]   # text mentions only; simulator timing UNCHANGED (frozen contract)
+
+splits: {dev: 40 queries, test: 160 queries}
+dev_constraints:
+  - zero held-out-entity queries in dev
+  - zero test-only bank variants in dev pools
+  - stratified regimes 16/16/8
+id_scheme: {query: "v3-q{:03d}", doc: "v3-d{:05d}"}
+quarantine_note: v3p-* prototype IDs MUST NOT appear here; enforced by test
+grade_definitions: entity-recency-aboutness-only  # 3 own+current+faithful; 2 own+current+hedged; 1 own+resolved; 0 else
+forbidden_giveaways: no-joint-regime-plus-full-parameters  # enforced by generator assertion (see src/corpus_v3.py)

@@ -1,0 +1,37 @@
+# V3 Phase-1 prototype dataset rules — FROZEN 2026-09-13
+# These rules are the frozen object. Gate-A numbers are diagnostics, not targets.
+# Scale: 20 queries / ~300 docs. Seed fixes all sampling.
+
+seed: 20260913
+n_queries: 20
+regime_stratification: {supplier_delay: 8, demand_surge: 8, normal: 4}
+
+per_query_mix:
+  grade3_fully_relevant: 2        # own node + current window + regime-faithful
+  grade2_partial: 2               # own node + current, vague/hedged
+  grade1_stale: 2                 # own node, resolved/closed window (1 stale for normal queries where applicable)
+  grade0_wrong_entity: 3          # 1 misleading (other regime) / 1 accidentally-correct (true regime) / 1 neutral
+  grade0_contradictory: 1         # paired against a grade-3 doc, on 10 of 20 queries
+  grade0_offtopic: 5              # mix: 2 lexically-similar + 2 semantically-similar + 1 routine
+shared_cross_query_distractors: 20  # routine traffic shared across pools
+
+template_derivation_cap:
+  max_fraction_from_existing_banks: 0.30  # 18+36+16 banks usable as seed FACTS only, never verbatim
+  min_fraction_freshly_authored: 0.70
+
+forbidden_giveaways:  # generator TESTS reject docs matching these
+  - joint regime-plus-full-parameters in one sentence (e.g. "lead time 4->8 for 10 periods starting period 20")
+  - query entity id appearing in a wrong-entity doc
+  - current-window marker on a stale doc and vice versa
+
+grade_definitions:  # entity/recency/aboutness ONLY; regime never enters qrels
+  3: own-node AND current-window AND operationally about the information need
+  2: own-node AND current-window BUT vague/hedged/partial
+  1: own-node BUT resolved/closed window
+  0: otherwise (wrong entity, contradictory, off-topic)
+
+entity_groups: [CEDAR-FALLS-DC/R3, ALDERGROVE-DC/R1, BRIARWOOD-DC/R2, DUNMORE-DC/R4]
+held_out_entities_proto: [DUNMORE-DC/R4]  # 4 queries; quarantined from dev tuning
+splits: {dev: 6 queries, test: 14 queries}  # prototype only; quarantined from V3 full test regardless
+id_scheme: {query: "v3p-qNN", doc: "v3p-dNNNN"}
+quarantine_note: prototype query/doc IDs MUST NOT appear in the V3 full benchmark even on pass

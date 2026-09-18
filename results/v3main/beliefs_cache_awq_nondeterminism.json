@@ -1,0 +1,374 @@
+{
+ "policy": "first-wins in numeric shard-start order",
+ "n_diverged_files": 46,
+ "diverged": [
+  {
+   "file": "0461e7d379e24cb1.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "11bd82ce11c911b5.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.85, \"supplier_delay\": 0.05, \"demand_surge\": 0.1, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "2a58e9eebec29519.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "420660a00015e944.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}"
+  },
+  {
+   "file": "5da3c61e83817cd0.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"supplier_delay\", \"fresh\": true, \"stance\": \"support\", \"confidence\": 0.9}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"supplier_delay\", \"fresh\": true, \"stance\": \"support\", \"confidence\": 0.95}"
+  },
+  {
+   "file": "6171f0f4e9ee52a7.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.6, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "6e55c8b6d9025347.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "738d5fc45c6cad87.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.9}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.95}"
+  },
+  {
+   "file": "7b893028c873003c.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.65, \"supplier_delay\": 0.25, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "8ee60ff825abf421.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.7, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "9c13dff69b720d2b.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.2}"
+  },
+  {
+   "file": "b118151000f21adc.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.7, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 14, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "cbc0db02ce4700c8.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.5}",
+   "later_raw": "{\"normal\": 0.15, \"supplier_delay\": 0.65, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 14, \"estimated_demand_multiplier\": 1.5}"
+  },
+  {
+   "file": "d02b5608a59516ab.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "dbfbc70c52c712ba.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0.0, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0.0, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "e7434e895145c748.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 4, \"estimated_demand_multiplier\": 1.2}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.2, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 4, \"estimated_demand_multiplier\": 1.2}"
+  },
+  {
+   "file": "edcb7461e691be0a.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "f2b68d69d26cc826.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.7, \"supplier_delay\": 0.2, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.8, \"supplier_delay\": 0.15, \"demand_surge\": 0.05, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "f2d0903c82926134.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_50_100.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}"
+  },
+  {
+   "file": "15005005d371bac3.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_100_150.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.3, \"demand_surge\": 0.3, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.5}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.2, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.5}"
+  },
+  {
+   "file": "57f766857fe88bd4.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_100_150.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "79184f947edc43a9.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_100_150.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"supplier_delay\", \"fresh\": true, \"stance\": \"support\", \"confidence\": 0.95}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.9}"
+  },
+  {
+   "file": "ac12c3b631009b5f.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_100_150.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0.0, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "b5e174ee4af1a09f.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_100_150.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.9}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.95}"
+  },
+  {
+   "file": "0461e7d379e24cb1.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "11bd82ce11c911b5.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.85, \"supplier_delay\": 0.05, \"demand_surge\": 0.1, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "2a58e9eebec29519.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "37716c26bf831524.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 0, \"estimated_duration\": 2, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 0, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "420660a00015e944.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}"
+  },
+  {
+   "file": "6171f0f4e9ee52a7.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.6, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "65feaac49bfebefb.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"supplier_delay\", \"fresh\": true, \"stance\": \"support\", \"confidence\": 0.95}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"supplier_delay\", \"fresh\": true, \"stance\": \"support\", \"confidence\": 0.9}"
+  },
+  {
+   "file": "738d5fc45c6cad87.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.9}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.95}"
+  },
+  {
+   "file": "79184f947edc43a9.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"entity_match\": true, \"event\": \"supplier_delay\", \"fresh\": true, \"stance\": \"support\", \"confidence\": 0.95}",
+   "later_raw": "{\"entity_match\": true, \"event\": \"normal\", \"fresh\": true, \"stance\": \"na\", \"confidence\": 0.9}"
+  },
+  {
+   "file": "7b893028c873003c.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.65, \"supplier_delay\": 0.25, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "7e2ddfab1f37b8e1.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.4, \"supplier_delay\": 0.5, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.6, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "87c2487ee0807b34.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.83, \"supplier_delay\": 0.17, \"demand_surge\": 0.0, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.83, \"supplier_delay\": 0.17, \"demand_surge\": 0, \"estimated_lt_increase\": 0, \"estimated_duration\": 2, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "8ee60ff825abf421.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.7, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "9c13dff69b720d2b.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}",
+   "later_raw": "{\"normal\": 0.6, \"supplier_delay\": 0.3, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.2}"
+  },
+  {
+   "file": "b118151000f21adc.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.7, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 14, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "b6747b71e225bd7e.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.7, \"supplier_delay\": 0.2, \"demand_surge\": 0.1, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.7, \"supplier_delay\": 0.2, \"demand_surge\": 0.1, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "bdf24555567b6b51.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.03, \"demand_surge\": 0.02, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "cbc0db02ce4700c8.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.5}",
+   "later_raw": "{\"normal\": 0.15, \"supplier_delay\": 0.65, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 14, \"estimated_demand_multiplier\": 1.5}"
+  },
+  {
+   "file": "d02b5608a59516ab.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "dbfbc70c52c712ba.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0.0, \"estimated_lt_increase\": 2, \"estimated_duration\": 3, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.95, \"supplier_delay\": 0.05, \"demand_surge\": 0.0, \"estimated_lt_increase\": 0, \"estimated_duration\": 0, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "edcb7461e691be0a.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": false,
+   "kept_raw": "{\"normal\": 0.3, \"supplier_delay\": 0.5, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 2, \"estimated_duration\": 7, \"estimated_demand_multiplier\": 1.0}"
+  },
+  {
+   "file": "f2d0903c82926134.json",
+   "kept_shard": "earlier",
+   "later_shard": "cache_shard_150_200.zip",
+   "same_parsed_belief": true,
+   "kept_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.0}",
+   "later_raw": "{\"normal\": 0.2, \"supplier_delay\": 0.6, \"demand_surge\": 0.2, \"estimated_lt_increase\": 3, \"estimated_duration\": 5, \"estimated_demand_multiplier\": 1.2}"
+  }
+ ]
+}

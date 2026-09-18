@@ -7,22 +7,46 @@
 {gym-invmgmt}: a multi-echelon inventory management {G}ymnasium environment
   with configurable topology and composable demand engines. Python package
   (2026), version 0.2.1. Source distribution
-  \texttt{gym\_invmgmt-0.2.1.tar.gz}, SHA-256
-  \texttt{a2a286cd95d9967b27db5ed5301d262862dd98bfbe1b50358fc9944af1d60311}
+  \texttt{gym\_invmgmt-0.2.1.tar.gz},
+  SHA-256\\\texttt{a2a286cd95d9967b27db5ed5301d26286282bfbe1b50358fc9944af1d60311}
+
+\bibitem{asai2023selfrag}
+Asai, A., Wu, Z., Wang, Y., Sil, A., Hajishirzi, H.: {Self-RAG}: Learning to
+  retrieve, generate, and critique through self-reflection (2023)
 
 \bibitem{borlund2003concept}
 Borlund, P.: The concept of relevance in {IR}. Journal of the American Society
   for Information Science and Technology  \textbf{54}(10),  913--925 (2003).
   \doi{10.1002/asi.10286}
 
-\bibitem{cuer2026}
-{CUE-R authors}: {CUE-R}: Intervention-based per-evidence utility estimation
-  for retrieval-augmented generation. \url{https://arxiv.org/abs/2604.05467}
-  (2026), arXiv preprint arXiv:2604.05467; preprint, not peer reviewed
+\bibitem{cameron2008bootstrap}
+Cameron, A.C., Gelbach, J.B., Miller, D.L.: Bootstrap-based improvements for
+  inference with clustered errors. The Review of Economics and Statistics
+  \textbf{90}(3),  414--427 (2008)
+
+\bibitem{chow1970optimum}
+Chow, C.K.: On optimum recognition error and reject tradeoff. IEEE Transactions
+  on Information Theory  \textbf{16}(1),  41--46 (1970)
+
+\bibitem{cormack2009reciprocal}
+Cormack, G.V., Clarke, C.L.A., Buettcher, S.: Reciprocal rank fusion
+  outperforms condorcet and individual rank learning methods. In: Proceedings
+  of the 32nd International {ACM} {SIGIR} Conference on Research and
+  Development in Information Retrieval (2009)
+
+\bibitem{cuconasu2024power}
+Cuconasu, F., Trappolini, G., Siciliano, F., Filice, S., Freedman, K., Karnin,
+  Z., Welling, M.: The power of noise: Redefining retrieval for {RAG}. In:
+  Proceedings of the 47th International {ACM} {SIGIR} Conference on Research
+  and Development in Information Retrieval (2024)
 
 \bibitem{degroot1983comparison}
 DeGroot, M.H., Fienberg, S.E.: The comparison and evaluation of forecasters.
   The Statistician  \textbf{32}(1),  12--22 (1983). \doi{10.2307/2987588}
+
+\bibitem{demsar2006statistical}
+Dem\v{s}ar, J.: Statistical comparisons of classifiers over multiple data sets.
+  Journal of Machine Learning Research  \textbf{7},  1--30 (2006)
 
 \bibitem{donti2017task}
 Donti, P.L., Amos, B., Kolter, J.Z.: Task-based end-to-end model learning in
@@ -34,6 +58,10 @@ Donti, P.L., Amos, B., Kolter, J.Z.: Task-based end-to-end model learning in
 Elmachtoub, A.N., Grigas, P.: Smart ``predict, then optimize''. Management
   Science  \textbf{68}(1),  9--26 (2022). \doi{10.1287/mnsc.2020.3922}
 
+\bibitem{es2023ragas}
+Es, S., James, J., Espinosa-Anke, L., Schockaert, S.: {RAGAS}: Automated
+  evaluation of retrieval augmented generation (2023)
+
 \bibitem{farahmand2017value}
 Farahmand, A.M., Barreto, A., Nikovski, D.: Value-aware loss function for
   model-based reinforcement learning. In: Proceedings of the 20th International
@@ -41,10 +69,10 @@ Farahmand, A.M., Barreto, A., Nikovski, D.: Value-aware loss function for
   Learning Research, vol.~54, pp. 1486--1494. PMLR (2017),
   \url{https://proceedings.mlr.press/v54/farahmand17a.html}
 
-\bibitem{grogu2026}
-{GroGU authors}: {GroGU}: Model-specific grounding utility for retrieval.
-  \url{https://arxiv.org/abs/2601.23129} (2026), arXiv preprint
-  arXiv:2601.23129; preprint, not peer reviewed
+\bibitem{geifman2019selectivenet}
+Geifman, Y., El-Yaniv, R.: {SelectiveNet}: A deep neural network with an
+  integrated reject option. In: Proceedings of the 36th International
+  Conference on Machine Learning ({ICML}) (2019)
 
 \bibitem{guo2017calibration}
 Guo, C., Pleiss, G., Sun, Y., Weinberger, K.Q.: On calibration of modern neural
@@ -52,19 +80,29 @@ Guo, C., Pleiss, G., Sun, Y., Weinberger, K.Q.: On calibration of modern neural
   Learning. Proceedings of Machine Learning Research, vol.~70, pp. 1321--1330.
   PMLR (2017), \url{https://proceedings.mlr.press/v70/guo17a.html}
 
+\bibitem{holm1979simple}
+Holm, S.: A simple sequentially rejective multiple test procedure. Scandinavian
+  Journal of Statistics  \textbf{6}(2),  65--70 (1979)
+
 \bibitem{howard1966information}
 Howard, R.A.: Information value theory. IEEE Transactions on Systems Science
   and Cybernetics  \textbf{2}(1),  22--26 (1966)
 
-\bibitem{hubbs2020orgym}
-Hubbs, C.D., Perez, H.D., Sarwar, O., Sahinidis, N.V., Grossmann, I.E.,
-  Wassick, J.M.: Or-gym: A reinforcement learning library for operations
-  research problems (2020), \url{https://arxiv.org/abs/2008.06319}
+\bibitem{grogu2026}
+Hua, Y., et~al.: Evaluating the utility of grounding documents with
+  reference-free {LLM}-based metrics ({GroGU}).
+  \url{https://arxiv.org/abs/2601.23129} (2026), arXiv preprint
+  arXiv:2601.23129; preprint, not peer reviewed
 
 \bibitem{jarvelin2002cumulated}
 J{\"a}rvelin, K., Kek{\"a}l{\"a}inen, J.: Cumulated gain-based evaluation of
   {IR} techniques. ACM Transactions on Information Systems  \textbf{20}(4),
   422--446 (2002)
+
+\bibitem{jiang2023active}
+Jiang, Z., Xu, F.F., Araki, J., Zhao, T.: Active retrieval augmented
+  generation. In: Proceedings of the 2023 Conference on Empirical Methods in
+  Natural Language Processing ({EMNLP}) (2023)
 
 \bibitem{lambert2020objective}
 Lambert, N., Amos, B., Yadan, O., Calandra, R.: Objective mismatch in
@@ -72,6 +110,23 @@ Lambert, N., Amos, B., Yadan, O., Calandra, R.: Objective mismatch in
   Learning for Dynamics and Control. Proceedings of Machine Learning Research,
   vol.~120, pp. 761--770. PMLR (2020),
   \url{https://proceedings.mlr.press/v120/lambert20a.html}
+
+\bibitem{li2023optiguide}
+Li, B., Mellou, K., Zhang, B., Pathuri, J., Menache, I.: Large language models
+  for supply chain optimization (2023). \doi{10.48550/arXiv.2307.03875},
+  \url{https://arxiv.org/abs/2307.03875}
+
+\bibitem{liu2023lost}
+Liu, N.F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F.,
+  Liang, P.: Lost in the middle: How language models use long contexts. In:
+  Transactions of the Association for Computational Linguistics ({TACL}).
+  vol.~12, pp. 157--173 (2024)
+
+\bibitem{mallen2023trust}
+Mallen, A., Asai, A., Zhong, V., Das, R., Khashabi, D., Hajishirzi, H.: When
+  not to trust language models: Investigating effectiveness of parametric and
+  non-parametric memories. In: Proceedings of the 2023 Conference on Empirical
+  Methods in Natural Language Processing ({EMNLP}) (2023)
 
 \bibitem{mandi2022rank}
 Mandi, J., Bucarey, V., Tchomba, M.M.K., Guns, T.: Decision-focused learning:
@@ -96,11 +151,33 @@ Robertson, S.E., Walker, S.: Some simple effective approximations to the
   the 17th Annual International ACM SIGIR Conference on Research and
   Development in Information Retrieval. pp. 232--241 (1994)
 
+\bibitem{saadfalcon2023ares}
+Saad-Falcon, J., Khattab, O., Potts, C., Zaharia, M.: {ARES}: An automated
+  evaluation framework for retrieval-augmented generation systems (2023)
+
 \bibitem{salemi2024erag}
 Salemi, A., Zamani, H.: Evaluating retrieval quality in retrieval-augmented
   generation. In: Proceedings of the 47th International ACM SIGIR Conference on
   Research and Development in Information Retrieval. pp. 2395--2400. ACM
   (2024). \doi{10.1145/3626772.3657957}
+
+\bibitem{shi2023large}
+Shi, F., Chen, X., Misra, K., Scales, N., Dohan, D., Chi, E.H., Sch\"arli, N.,
+  Zhou, D.: Large language models can be easily distracted by irrelevant
+  context. In: Proceedings of the 40th International Conference on Machine
+  Learning ({ICML}). Proceedings of Machine Learning Research, vol.~202, pp.
+  31210--31227 (2023)
+
+\bibitem{smucker2007comparison}
+Smucker, M.D., Allan, J., Carterette, B.: A comparison of statistical
+  significance tests for information retrieval evaluation. In: Proceedings of
+  the 16th {ACM} Conference on Information and Knowledge Management ({CIKM})
+  (2007)
+
+\bibitem{yoran2024making}
+Yoran, O., Wolfson, T., Ram, O., Berant, J.: Making retrieval-augmented
+  language models robust to irrelevant context. In: Proceedings of the 12th
+  International Conference on Learning Representations ({ICLR}) (2024)
 
 \bibitem{zhao2021decision}
 Zhao, S., Kim, M., Sahoo, R., Ma, T., Ermon, S.: Calibrating predictions to

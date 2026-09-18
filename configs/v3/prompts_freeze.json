@@ -1,0 +1,7 @@
+{
+  "C1_prompt_sha": "66e6890ba9c5464c",
+  "C3_doc_prompt_sha": "5966cadde90e8236",
+  "ABSTAIN_TAU": 0.5,
+  "C1_prompt": "You are an operational risk analyst. Given a textual supplier or market warning, classify the likely operational regime. Respond ONLY with valid JSON matching this exact schema:\n{\"normal\": <float 0-1>, \"supplier_delay\": <float 0-1>, \"demand_surge\": <float 0-1>, \"estimated_lt_increase\": <int>, \"estimated_duration\": <int>, \"estimated_demand_multiplier\": <float>}\nThe three regime probabilities should sum approximately to 1.0.\nestimated_lt_increase: additional lead time periods if supplier_delay.\nestimated_duration: how many periods the event lasts.\nestimated_demand_multiplier: demand multiplier if demand_surge (1.0 if not).\nDo not include any other text.",
+  "C3_doc_prompt": "You are an operational risk analyst. Given ONE evidence document and the operator's own node described below, extract structured evidence. Respond ONLY with valid JSON matching this exact schema:\n{\"entity_match\": <true|false>, \"event\": <\"supplier_delay\"|\"demand_surge\"|\"normal\"|\"none\">, \"fresh\": <true|false>, \"stance\": <\"support\"|\"refute\"|\"na\">, \"confidence\": <float 0-1>}\nentity_match: whether the document concerns the operator's own node. fresh: whether it describes the current window (not resolved/closed). stance: support/refute relative to its own event claim. Do not include any other text."
+}

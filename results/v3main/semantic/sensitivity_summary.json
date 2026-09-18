@@ -1,0 +1,18 @@
+{
+ "per_model": {
+  "Qwen/Qwen3-8B-AWQ": {
+   "n_disputed": 27,
+   "rows_flipped": 91,
+   "multi_later_files": [],
+   "replication": "max|recomputed-kept minus frozen|=0.00e+00"
+  },
+  "Qwen/Qwen3-14B-AWQ": {
+   "n_disputed": 9,
+   "rows_flipped": 49,
+   "multi_later_files": [],
+   "replication": "max|recomputed-kept minus frozen|=0.00e+00"
+  }
+ },
+ "max_abs_effect_delta": 0.002121005422686048,
+ "max_abs_ci_delta": 0.0021918375871130963
+}

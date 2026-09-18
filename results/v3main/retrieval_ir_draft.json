@@ -1,0 +1,34 @@
+[
+ {
+  "system": "bm25",
+  "dev_nDCG10": 0.1208,
+  "test_nDCG10": 0.115,
+  "test_R10": 0.1365,
+  "test_R20": 0.2604,
+  "test_RR": 0.2102
+ },
+ {
+  "system": "dense",
+  "dev_nDCG10": 0.1686,
+  "test_nDCG10": 0.1754,
+  "test_R10": 0.2062,
+  "test_R20": 0.3771,
+  "test_RR": 0.2656
+ },
+ {
+  "system": "hybrid-k120",
+  "dev_nDCG10": 0.1826,
+  "test_nDCG10": 0.1817,
+  "test_R10": 0.2167,
+  "test_R20": 0.4094,
+  "test_RR": 0.2857
+ },
+ {
+  "system": "rerank-top30",
+  "dev_nDCG10": 0.2065,
+  "test_nDCG10": 0.1829,
+  "test_R10": 0.1938,
+  "test_R20": 0.3708,
+  "test_RR": 0.2812
+ }
+]

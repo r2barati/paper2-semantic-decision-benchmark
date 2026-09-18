@@ -12,6 +12,10 @@ scipy==1.13.1
 pandas==2.3.3
 scikit-learn==1.6.1
 matplotlib==3.9.0rc2
+fonttools==4.51.0            # transitive dep of matplotlib affecting PDF font
+                             # subsetting; pinned so figure builds are stable
+                             # across installs (red-team fresh-env discipline,
+                             # docs/REDTEAM_PROTOCOL.md phase 10).
 
 # --- simulator ---------------------------------------------------------
 # The multi-echelon simulator is a PUBLISHED package pinned to an exact

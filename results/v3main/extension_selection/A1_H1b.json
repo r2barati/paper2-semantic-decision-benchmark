@@ -1,0 +1,72 @@
+{
+ "selections": {
+  "C0/none": {
+   "stratum": "C0/none",
+   "S-nDCG": "rerank",
+   "S-Brier": "dense",
+   "S-J": "rerank",
+   "test-best": "dense",
+   "R_nDCG": 35.58,
+   "R_Brier": 0.0,
+   "R_J": 35.58
+  },
+  "C1/Qwen/Qwen3-8B-AWQ": {
+   "stratum": "C1/Qwen3-8B-AWQ",
+   "S-nDCG": "rerank",
+   "S-Brier": "rerank",
+   "S-J": "rerank",
+   "test-best": "rerank",
+   "R_nDCG": 0.0,
+   "R_Brier": 0.0,
+   "R_J": 0.0
+  },
+  "C1/Qwen/Qwen3-14B-AWQ": {
+   "stratum": "C1/Qwen3-14B-AWQ",
+   "S-nDCG": "rerank",
+   "S-Brier": "rerank",
+   "S-J": "rerank",
+   "test-best": "rerank",
+   "R_nDCG": 0.0,
+   "R_Brier": 0.0,
+   "R_J": 0.0
+  },
+  "C3/Qwen/Qwen3-8B-AWQ": {
+   "stratum": "C3/Qwen3-8B-AWQ",
+   "S-nDCG": "rerank",
+   "S-Brier": "rerank",
+   "S-J": "rerank",
+   "test-best": "rerank",
+   "R_nDCG": 0.0,
+   "R_Brier": 0.0,
+   "R_J": 0.0
+  },
+  "C3/Qwen/Qwen3-14B-AWQ": {
+   "stratum": "C3/Qwen3-14B-AWQ",
+   "S-nDCG": "rerank",
+   "S-Brier": "rerank",
+   "S-J": "rerank",
+   "test-best": "rerank",
+   "R_nDCG": 0.0,
+   "R_Brier": 0.0,
+   "R_J": 0.0
+  }
+ },
+ "H1b": {
+  "obs_pooled_R_nDCG": 7.12,
+  "null95_nDCG": 28.17,
+  "H1b_nDCG_holds": false,
+  "obs_pooled_R_Brier": 0.0,
+  "null95_Brier": 10.08,
+  "H1b_Brier_holds": false,
+  "holm": {
+   "nDCG": {
+    "p_raw": 1.0,
+    "p_holm": 1.0
+   },
+   "Brier": {
+    "p_raw": 1.0,
+    "p_holm": 1.0
+   }
+  }
+ }
+}

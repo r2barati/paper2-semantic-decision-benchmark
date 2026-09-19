@@ -1,0 +1,6 @@
+stratum,S-nDCG,S-Brier,S-J,test-best,R_nDCG,R_Brier,R_J
+C0/none,rerank,dense,rerank,dense,35.58,0.0,35.58
+C1/Qwen3-8B-AWQ,rerank,rerank,rerank,rerank,0.0,0.0,0.0
+C1/Qwen3-14B-AWQ,rerank,rerank,rerank,rerank,0.0,0.0,0.0
+C3/Qwen3-8B-AWQ,rerank,rerank,rerank,rerank,0.0,0.0,0.0
+C3/Qwen3-14B-AWQ,rerank,rerank,rerank,rerank,0.0,0.0,0.0

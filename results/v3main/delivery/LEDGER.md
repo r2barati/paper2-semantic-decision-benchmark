@@ -101,3 +101,29 @@ tuned constant (was +102.1∗), oracle/C0 −84.2∗. Harm is pairing-dependent
 not a pure controller artifact (oracle gains + perfect helps under both
 classes). This is the finding the red-team controller-swap demand asked for,
 reported whichever way it came out.
+
+## 10. Extension: selection-validity upgrade probe, Stage A (labeled, outside the freeze)
+
+Motivation: test whether metric-based retriever selection creates
+consequential downstream selection regret (stronger novelty claim) before
+spending on new environments/controllers. Pre-committed design
+(results/v3main/extension_selection/DESIGN.md): dev selectors (nDCG/Brier/J)
+-> freeze -> sealed-test regret; H1a primary (nDCG-vs-J, paired bootstrap
+CI must exclude 0); H1b calibration vs query-split-half null; H2
+retriever x consumer interaction vs permutation null.
+A0 action-logging replay (tools/run_actions_v3main.py, 8 shards, CPU-only,
+frozen beliefs/controller/seeds): 33,600/33,600 profits match frozen
+episodes.parquet EXACTLY (max diff 0.0) -> gate passed; per-episode
+40-period order vectors in results/v3main/extension_actions/actions.parquet.
+Action proxy (locked in advance): ADis = mean_seed mean_t |o_arm - o_NoInfo|,
+ADisRate = fraction |Δo|>0.5.
+Outcome: S-nDCG/S-J select rerank in ALL 5 strata; test-best is rerank in
+all LLM strata (R=0) and dense in C0 (R=35.58 for both selectors).
+H1a dR = 0.0 CI [0.0, 0.0] -> FAILS. H1b fails (7.12 < 28.17; Brier 0 <
+10.08). H2 HOLDS (F=6.55/7.37, perm p=0.0002): pairing matters beyond
+chance. A2 chain dissipates per interface (ret->bel rho~0.35; bel->act ~0;
+act->util ~0). Per the locked decision rule the upgrade collapses to this
+methods-note; V3 stands unchanged. No Stage B requested.
+Files: results/v3main/extension_selection/{DESIGN.md,A1_selections.csv,
+A1_H1b.json,A2_edges.parquet,A2_actions.parquet,A2_interfaces.json,
+A3_verdict.json}, tools/run_actions_v3main.py, tools/a1_selectors.py, tools/a2_edges.py, tools/a3_tests.py. Frozen matrix untouched.

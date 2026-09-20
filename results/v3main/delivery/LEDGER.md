@@ -283,3 +283,22 @@ contributions (Stages A/D0/G2A/G2-FULL(a)(b)). V3 frozen matrix untouched.
 Files: extension_g2a/{DESIGN-VHAT.md,vhat_power.json,vhat_oof.parquet,
 vhat_heads.pkl,vhat_model.json,vhat_gate.json}, tools/{vhat_power,
 vhat_train}.py.
+
+## 16. Workstream 1: dead-zone theory frozen (no computation yet)
+
+Froze results/v3main/theory/DEAD_ZONES.md: action-equivalence set D(s) as
+the zero-value object (corrected: basis chambers give affine sensitive
+regions, not zero value); zero-value theorem with induction proof over the
+frozen warning-release protocol + determinism lemma; no-order polytope as
+exact special case; boundary taxonomy (LT-rounding walls enumerable modulo
+bankers rounding; demand-RHS walls per-(t,state); censoring kinks; pipeline/
+horizon indexation); §5 regime predictions (C3 inside chambers, C1 crossing
+walls, C0 positive-sensitive); §6 empirical-map spec (decide()-only sweeps,
+overlays; success-or-bound). Tripartite structure: dead zones + sensitive
+regions + discontinuity boundaries.
+Adopted corrections for later workstreams (recorded here, specified in
+their design docs): (a) retrieval rung is "UDCG-inspired@3", never UDCG@3 —
+frozen C3 judgments define machine utility, not UDCG's annotation; (b)
+Agentick fairness lock — one fixed representation-agnostic policy adapter
+across ascii/language/state_dict, oracle for ONS normalization only.
+V3 frozen matrix untouched.

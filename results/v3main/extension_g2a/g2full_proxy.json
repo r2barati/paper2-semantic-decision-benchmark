@@ -1,0 +1,69 @@
+{
+ "screen": {
+  "entropy": {
+   "mean_rho": 0.138,
+   "CI95": [
+    -0.127,
+    0.398
+   ]
+  },
+  "margin": {
+   "mean_rho": -0.26,
+   "CI95": [
+    -0.498,
+    0.007
+   ]
+  },
+  "maxProb": {
+   "mean_rho": -0.259,
+   "CI95": [
+    -0.494,
+    0.006
+   ]
+  },
+  "priorL1": {
+   "mean_rho": -0.135,
+   "CI95": [
+    -0.42,
+    0.122
+   ]
+  },
+  "agreeXmodel_L1": {
+   "mean_rho": 0.37,
+   "CI95": [
+    0.158,
+    0.596
+   ]
+  },
+  "c1c3_L1": {
+   "mean_rho": -0.018,
+   "CI95": [
+    -0.204,
+    0.177
+   ]
+  },
+  "fd_sens": {
+   "mean_rho": -0.26,
+   "CI95": [
+    -0.565,
+    0.035
+   ]
+  }
+ },
+ "grid": [
+  0.0,
+  0.2,
+  0.24,
+  0.6
+ ],
+ "rule": {
+  "feature": "agreeXmodel_L1",
+  "orientation": ">=",
+  "threshold": 0.6,
+  "dev_gated": 75.46
+ },
+ "n_dev_clusters": 30,
+ "B": 2000,
+ "seed": 74000,
+ "frozen": true
+}

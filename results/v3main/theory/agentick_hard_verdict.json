@@ -1,0 +1,34 @@
+{
+ "H_primary": {
+  "ons_adapter": {
+   "ascii": 0.2,
+   "language": 0.2,
+   "state_dict": 0.2
+  },
+  "maxmin": 0.0,
+  "CI95": [
+   0.0,
+   0.0
+  ],
+  "HOLDS": false
+ },
+ "H_secondary": {
+  "parse_rate": {
+   "ascii": 1.0,
+   "language": 1.0,
+   "state_dict": 1.0
+  },
+  "note": "parse 100% everywhere; adapter solves 1/5 seeds per mode (different seeds: ascii/state_dict seed0, language seed2); random 0/15"
+ },
+ "mechanism": "floor-adjacent: greedy egocentric adapter rarely solves single-box Sokoban (20%/mode) regardless of representation; no detectable interface effect. Uninformative about the principle (weak adapter + n=5), not a refutation.",
+ "STOP": true,
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "replaced": [],
+ "design": "AGENTICK_HARD.md SokobanPush-only; ONS=(ret-random)/(oracle-random)"
+}

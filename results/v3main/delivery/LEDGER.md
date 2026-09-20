@@ -380,3 +380,25 @@ memory tasks where greedy is suboptimal) needs its own frozen design —
 proposed, not executed. V3 frozen matrix untouched.
 Files: theory/{AGENTICK_SPIKE.md,agentick_spike_raw.json,
 agentick_spike_verdict.json}, tools/agentick_spike.py.
+
+## 20. Agentick hard spike: STOP on floor-adjacent null (SokobanPush-only, frozen AGENTICK_HARD.md)
+
+Fixed egocentric push adapter (push-if-aligned/reposition/approach/fixed
+fallback; valid_actions only) x {ascii,language,state_dict} x easy/dense x
+seeds 0-4 (all oracle-solved, no replacements) + random floor + oracle
+normalization. Same EGO-mapping bug class as the GoToGoal script (missing
+behind/here keys) caught pre-run by probe and fixed with a frozen tie-break
+amendment (no episodes recorded before the fix).
+Outcome: adapter ONS 0.2 in ALL modes (1/5 seeds each; different seeds:
+ascii/state_dict seed0, language seed2); random 0/15; parse 100%
+everywhere. Max-min ONS = 0 -> H-primary FAILS by stop rule. Mechanism:
+FLOOR-ADJACENT, mirroring the GoToGuide ceiling from below — greedy
+egocentric pushing rarely solves even single-box Sokoban regardless of
+representation, so the spike is UNINFORMATIVE (weak adapter + n=5), not a
+refutation of the interface principle. Per the frozen rule: stop external
+validation ENTIRELY; no SequenceMemory. Agentick remains a bounded
+null/ceiling result (GoToGoal ceiling + Sokoban floor). The external-
+validity leg of the A* package is therefore carried, if at all, by future
+work with a competent fixed policy — proposed, not executed. V3 untouched.
+Files: theory/{AGENTICK_HARD.md,agentick_hard_raw.json,
+agentick_hard_verdict.json}, tools/agentick_hard.py.

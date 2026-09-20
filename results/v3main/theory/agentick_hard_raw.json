@@ -1,0 +1,232 @@
+{
+ "task": "SokobanPush-v0",
+ "difficulty": "easy",
+ "reward": "dense",
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "replaced_seeds": [],
+ "episodes": [
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "mode": "ascii",
+   "seed": 0,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "ascii",
+   "seed": 1,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "ascii",
+   "seed": 2,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "ascii",
+   "seed": 3,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "ascii",
+   "seed": 4,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "ascii",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "ascii",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "ascii",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "ascii",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "ascii",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "language",
+   "seed": 0,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "language",
+   "seed": 1,
+   "consumer": "adapter"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "mode": "language",
+   "seed": 2,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "language",
+   "seed": 3,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "language",
+   "seed": 4,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "language",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "language",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "language",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "language",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "language",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "mode": "state_dict",
+   "seed": 0,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "state_dict",
+   "seed": 1,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "state_dict",
+   "seed": 2,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "state_dict",
+   "seed": 3,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "mode": "state_dict",
+   "seed": 4,
+   "consumer": "adapter"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "state_dict",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "state_dict",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "state_dict",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "state_dict",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "mode": "state_dict",
+   "seed": 4,
+   "consumer": "random"
+  }
+ ],
+ "oracle_returns": {
+  "0": 1.0,
+  "1": 1.0,
+  "2": 1.0,
+  "3": 1.0,
+  "4": 1.0
+ }
+}

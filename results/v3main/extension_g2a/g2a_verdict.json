@@ -1,0 +1,303 @@
+{
+ "loo_dev": {
+  "C0/none": {
+   "drop0": {
+    "mean": 15.81,
+    "CI95": [
+     2.43,
+     33.22
+    ],
+    "excludes0": true,
+    "n": 40
+   },
+   "drop1": {
+    "mean": 18.08,
+    "CI95": [
+     4.94,
+     34.63
+    ],
+    "excludes0": true,
+    "n": 40
+   },
+   "drop2": {
+    "mean": 12.68,
+    "CI95": [
+     -9.34,
+     35.76
+    ],
+    "excludes0": false,
+    "n": 40
+   }
+  },
+  "C3/Qwen3-14B-AWQ": {
+   "drop0": {
+    "mean": 14.26,
+    "CI95": [
+     -10.82,
+     37.79
+    ],
+    "excludes0": false,
+    "n": 40
+   },
+   "drop1": {
+    "mean": 11.6,
+    "CI95": [
+     -11.58,
+     35.4
+    ],
+    "excludes0": false,
+    "n": 40
+   },
+   "drop2": {
+    "mean": -1.05,
+    "CI95": [
+     -24.71,
+     20.64
+    ],
+    "excludes0": false,
+    "n": 40
+   }
+  },
+  "C3/Qwen3-8B-AWQ": {
+   "drop0": {
+    "mean": -3.2,
+    "CI95": [
+     -29.49,
+     22.92
+    ],
+    "excludes0": false,
+    "n": 40
+   },
+   "drop1": {
+    "mean": -4.75,
+    "CI95": [
+     -27.52,
+     18.38
+    ],
+    "excludes0": false,
+    "n": 40
+   },
+   "drop2": {
+    "mean": -20.2,
+    "CI95": [
+     -40.03,
+     -2.28
+    ],
+    "excludes0": true,
+    "n": 40
+   }
+  }
+ },
+ "loo_test": {
+  "C0/none": {
+   "drop0": {
+    "mean": 9.06,
+    "CI95": [
+     0.4,
+     18.28
+    ],
+    "excludes0": true,
+    "n": 160
+   },
+   "drop1": {
+    "mean": 5.96,
+    "CI95": [
+     -2.76,
+     14.5
+    ],
+    "excludes0": false,
+    "n": 160
+   },
+   "drop2": {
+    "mean": 22.58,
+    "CI95": [
+     11.35,
+     33.82
+    ],
+    "excludes0": true,
+    "n": 160
+   }
+  },
+  "C3/Qwen3-14B-AWQ": {
+   "drop0": {
+    "mean": -8.99,
+    "CI95": [
+     -18.76,
+     0.87
+    ],
+    "excludes0": false,
+    "n": 160
+   },
+   "drop1": {
+    "mean": -7.88,
+    "CI95": [
+     -19.79,
+     4.51
+    ],
+    "excludes0": false,
+    "n": 160
+   },
+   "drop2": {
+    "mean": -9.11,
+    "CI95": [
+     -19.78,
+     2.29
+    ],
+    "excludes0": false,
+    "n": 160
+   }
+  },
+  "C3/Qwen3-8B-AWQ": {
+   "drop0": {
+    "mean": -6.41,
+    "CI95": [
+     -16.64,
+     4.14
+    ],
+    "excludes0": false,
+    "n": 160
+   },
+   "drop1": {
+    "mean": 0.65,
+    "CI95": [
+     -9.48,
+     10.96
+    ],
+    "excludes0": false,
+    "n": 160
+   },
+   "drop2": {
+    "mean": -1.84,
+    "CI95": [
+     -12.22,
+     8.52
+    ],
+    "excludes0": false,
+    "n": 160
+   }
+  }
+ },
+ "pilot_signal": {
+  "rule_i_any_excludes0": true,
+  "pooled_dev_means": {
+   "drop0": 8.96,
+   "drop1": 8.31,
+   "drop2": -2.86
+  },
+  "spread": 11.82,
+  "noise95": 28.74,
+  "rule_ii_spread_gt_noise": false,
+  "PROPOSE_2A1": true
+ },
+ "interventions_vs_oraclefactual": {
+  "dev/C0/none": {
+   "intervention-drop-decisive": -24.31,
+   "intervention-stale-swap": -6.79,
+   "intervention-inject-contra": -21.27,
+   "intervention-wrong-entity-swap": -27.41,
+   "intervention-irrelevant-inject": -16.95,
+   "intervention-duplicate-top": -21.06,
+   "intervention-order-reverse": 0.0,
+   "oracle-factual_d_vs_noinfo": 38.23
+  },
+  "dev/C1/Qwen3-14B-AWQ": {
+   "intervention-drop-decisive": -50.1,
+   "intervention-stale-swap": -31.24,
+   "intervention-inject-contra": -42.33,
+   "intervention-wrong-entity-swap": -70.94,
+   "intervention-irrelevant-inject": -8.59,
+   "intervention-duplicate-top": 23.31,
+   "intervention-order-reverse": -15.48,
+   "oracle-factual_d_vs_noinfo": 70.93
+  },
+  "dev/C1/Qwen3-8B-AWQ": {
+   "intervention-drop-decisive": -14.09,
+   "intervention-stale-swap": -29.98,
+   "intervention-inject-contra": -47.27,
+   "intervention-wrong-entity-swap": -60.47,
+   "intervention-irrelevant-inject": -13.92,
+   "intervention-duplicate-top": 12.11,
+   "intervention-order-reverse": -38.5,
+   "oracle-factual_d_vs_noinfo": 75.94
+  },
+  "dev/C3/Qwen3-14B-AWQ": {
+   "intervention-drop-decisive": -27.8,
+   "intervention-stale-swap": -23.18,
+   "intervention-inject-contra": -27.2,
+   "intervention-wrong-entity-swap": -44.01,
+   "intervention-irrelevant-inject": -49.93,
+   "intervention-duplicate-top": 10.18,
+   "intervention-order-reverse": 0.0,
+   "oracle-factual_d_vs_noinfo": 164.82
+  },
+  "dev/C3/Qwen3-8B-AWQ": {
+   "intervention-drop-decisive": -30.32,
+   "intervention-stale-swap": -28.76,
+   "intervention-inject-contra": -13.08,
+   "intervention-wrong-entity-swap": -61.33,
+   "intervention-irrelevant-inject": -48.85,
+   "intervention-duplicate-top": 6.63,
+   "intervention-order-reverse": 0.0,
+   "oracle-factual_d_vs_noinfo": 178.42
+  },
+  "test/C0/none": {
+   "intervention-drop-decisive": -21.59,
+   "intervention-stale-swap": -6.94,
+   "intervention-inject-contra": -20.29,
+   "intervention-wrong-entity-swap": -25.88,
+   "intervention-irrelevant-inject": -17.58,
+   "intervention-duplicate-top": -22.54,
+   "intervention-order-reverse": 0.0,
+   "oracle-factual_d_vs_noinfo": 39.32
+  },
+  "test/C1/Qwen3-14B-AWQ": {
+   "intervention-drop-decisive": -47.78,
+   "intervention-stale-swap": -30.2,
+   "intervention-inject-contra": -42.38,
+   "intervention-wrong-entity-swap": -70.36,
+   "intervention-irrelevant-inject": -6.75,
+   "intervention-duplicate-top": 24.9,
+   "intervention-order-reverse": -10.79,
+   "oracle-factual_d_vs_noinfo": 70.59
+  },
+  "test/C1/Qwen3-8B-AWQ": {
+   "intervention-drop-decisive": -16.3,
+   "intervention-stale-swap": -29.48,
+   "intervention-inject-contra": -45.06,
+   "intervention-wrong-entity-swap": -59.8,
+   "intervention-irrelevant-inject": -13.07,
+   "intervention-duplicate-top": 13.01,
+   "intervention-order-reverse": -37.37,
+   "oracle-factual_d_vs_noinfo": 74.87
+  },
+  "test/C3/Qwen3-14B-AWQ": {
+   "intervention-drop-decisive": -26.86,
+   "intervention-stale-swap": -23.18,
+   "intervention-inject-contra": -27.69,
+   "intervention-wrong-entity-swap": -42.76,
+   "intervention-irrelevant-inject": -50.27,
+   "intervention-duplicate-top": 10.43,
+   "intervention-order-reverse": 0.0,
+   "oracle-factual_d_vs_noinfo": 162.48
+  },
+  "test/C3/Qwen3-8B-AWQ": {
+   "intervention-drop-decisive": -32.29,
+   "intervention-stale-swap": -30.85,
+   "intervention-inject-contra": -14.46,
+   "intervention-wrong-entity-swap": -63.75,
+   "intervention-irrelevant-inject": -50.59,
+   "intervention-duplicate-top": 5.88,
+   "intervention-order-reverse": 0.0,
+   "oracle-factual_d_vs_noinfo": 178.92
+  }
+ },
+ "design": {
+  "B": 5000,
+  "seed": 72000,
+  "systems": [
+   "rerank"
+  ],
+  "k": 3,
+  "voi_def": "J(full)-J(minus-i) per query, mean over queries"
+ }
+}

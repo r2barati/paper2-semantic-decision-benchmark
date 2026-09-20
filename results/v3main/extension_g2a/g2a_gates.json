@@ -1,0 +1,8 @@
+{
+ "G1_max_abs_p_diff": 0.0,
+ "G1_abstain_mismatch": 0,
+ "G1_n": 600,
+ "G1_pass": true,
+ "G2_cache_misses": 0,
+ "loo_rows": 1800
+}

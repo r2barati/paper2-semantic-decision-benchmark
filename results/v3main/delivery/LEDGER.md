@@ -155,3 +155,36 @@ balanced headlines (as in Stage-A, documented). Per the locked rule, Gate-2
 may be proposed — not executed here. V3 frozen matrix untouched.
 Files: results/v3main/extension_d0/{DESIGN-D0.md,d0_tune.json,d0_verdict.json},
 tools/d0_tune_gate.py, tools/d0_eval_gate.py.
+
+## 12. Extension G2A-0: zero-LLM document-VoI (labeled, outside the freeze)
+
+Motivation: D0 proved recoverable belief-VoI with an oracle gate; G2A-0 asks
+whether individual passages carry causal value, without spending LLM calls.
+Frozen design: results/v3main/extension_g2a/DESIGN-G2A.md — VoI(doc_i) =
+J(full)−J(minus-i) on rerank k=3 x {C0, C3-8B, C3-14B}; C1 excluded (concat
+prompt changes = new calls -> 2A-1).
+Gates all passed: G1 full-set re-aggregation matches 600/600 frozen rows
+EXACTLY (max diff 0.0, abstain 0 mismatch); G2 0 cache misses (removal-only =
+hits by construction); G3 replayed full-set profits match frozen episodes
+3000/3000 EXACTLY. 1800 LOO belief rows x 5 paired seeds = 9000 LOO + 3000
+full episodes, frozen controller/protocol.
+Outcome (tools/g2a_contrast.py, B=5000 seed 72000): C0 shows positive
+position-dependent document-VoI (test drop0 +9.06 [0.40,18.28], drop2 +22.58
+[11.35,33.82], CIs exclude 0) — passages carry value for the rule consumer.
+C3 (both models) LOO VoI ~= 0, all CIs cross 0 — the provenance-weighted
+aggregation is redundant/robust at k=3; belief differences from one passage
+do not move actions (fine-grained D0 dissipation). Frozen interventions
+(oracle-factual base, precedent only): all removals/swap-ins degrade
+(drop-decisive −16..−48, wrong-entity −26..−70, contra −14..−45,
+irrelevant −7..−51, stale −7..−31); duplicate-top ~= 0 for LLM arms;
+order-reverse exactly 0.0 for C0/C3 (order-free aggregation, as designed)
+but −10.8/−37.4 for C1 — concat consumption IS order-sensitive.
+Pilot-signal rule (dev-40): FIRES via rule (i) (C0 drop0/drop1 + C3-8B
+drop2-negative CIs exclude 0; rule (ii) spread 11.82 < noise 28.74 fails).
+Per the frozen rule, the 240-call C1 dev pilot (2A-1) is PROPOSED, not
+executed: its value is specifically C1 concat passage-causality (order
+sensitivity already hints it exists), since C3 document-VoI is flat. V3
+frozen matrix untouched.
+Files: results/v3main/extension_g2a/{DESIGN-G2A.md,loo_beliefs.parquet,
+loo_episodes.parquet,g2a_gates.json,g2a_verify.json,g2a_verdict.json},
+tools/{g2a_loo,g2a_replay,g2a_contrast}.py.

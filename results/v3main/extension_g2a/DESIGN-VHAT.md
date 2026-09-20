@@ -92,3 +92,62 @@ Fail = oracle-to-deployable gap stands; no re-tuning, no second peek.
 No fresh data touched in Phase 0+1 (no generator run, no bank outcomes, no
 human labels). No SOTA language. No Agentick work. V3 + all prior verdicts
 stand untouched regardless of outcome.
+
+## 8. Resequencing amendment (2026-09-20; cost-saving ONLY)
+
+Order is now Phase 3 (train/freeze on historical labels) -> Phase 2 (build
+sealed bank ONLY if the historical feasibility gate in §9 passes) ->
+Phase 4 (confirm). This changes NOTHING about the model (§1), conformal
+rule (§2, alpha=0.1), labels (§3), confirmation (§6), or wording (§0): it
+only prevents spending ~600 LLM calls + the human gate on a model that
+fails basic historical checks. The bank is therefore created after the
+model is immutable, which strengthens the confirmatory structure.
+
+## 9. Historical feasibility gate (binding; all quantities out-of-fold or
+held-out; seeds frozen; EITHER outcome committed)
+
+Computed SOLELY from the 3000 historical LOO labels; fresh bank must not
+exist when it runs (asserted). OOF = 5-fold cluster-grouped CV predictions
+(each cluster predicted by a fit excluding it). Calibration = the frozen
+20% cluster-disjoint split with the final 80%-fit predictor.
+
+* **(i) CV correlation, positive and stable:** cluster-bootstrapped Spearman
+  between OOF Vhat and true VoI, pooled over strata, B=2000, seed 78000:
+  95% CI lower bound > 0. Stability: per-consumer point Spearman > 0 in at
+  least 4 of the 5 strata (C0, C3-8B, C3-14B, C1-8B, C1-14B).
+* **(ii) Conformal coverage ≈90%:** empirical P(V >= LCB) over calibration
+  rows must lie in [0.85, 0.95]. Coverage below means overconfident bounds;
+  above means vacuous bounds — both FAIL.
+* **(iii) OOF gating improves J, not concentrated:** apply the frozen
+  drop-iff-LCB<=0 rule with OOF predictions; pooled gated-vs-always-transmit
+  difference CI (cluster bootstrap, B=5000, seed 79000) must exclude 0 on the
+  positive side; point differences must be positive in >=4/5 strata AND
+  >=2/3 positions (reported with CIs; points carry the concentration check).
+* **BUILD-BANK iff (i) AND (ii) AND (iii) all pass.** Any fail → STOP: record
+  which sub-gate failed as the finding; no bank, no fresh calls, pivot to
+  the consumer-architecture story. The gate thresholds above are frozen here
+  and cannot be tuned after seeing results.
+
+## 10. Deployability budget (binding feature rule)
+Vhat(e,b,c) may use ONLY: (a) precomputed embeddings/ranks/texts/doc
+positions; (b) the DEPLOYED stratum's OWN full-set belief and its native
+sub-computations (C3 per-doc judgments for C3 rows; the C1/C0 posterior for
+C1/C0 rows — nothing extra); (c) analytic controller-FD features (CPU-only).
+Cross-model disagreement (needs 2 LLM calls), cross-consumer judgments, and
+ALL label-dependent quantities (nDCG/Brier/accuracy/evidence_hit/
+true_regime) are FORBIDDEN as inputs. (The failed g2full_proxy used
+cross-model disagreement; Vhat operates under this stricter budget —
+recorded as design evolution.) Fixed hyperparameters (no selection):
+HistGradientBoostingRegressor(max_iter=200, learning_rate=0.05,
+max_depth=3, l2_regularization=1.0, random_state=77000) for both heads;
+Shat sample-weighted by L1 (weight = L1 + 0.01).
+
+## 11. Single-minimum-drop restriction (frozen before any gate computation)
+
+The transmit rule is: per query, drop ONLY the minimum-LCB position iff its
+LCB <= 0, else keep full. Rationale: multi-drop kept-subsets have no
+replayed J for C1 (new concat calls would be needed), while single-drop J
+was replayed for every consumer; the restriction keeps the rule evaluable
+with zero new LLM anywhere, historically and on the fresh bank. It is the
+conservative member of the §1 family. OOF gate quantities and the fresh-bank
+confirmation use exactly this rule.

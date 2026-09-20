@@ -1,0 +1,46 @@
+{
+ "i": {
+  "CI": [
+   0.079,
+   0.168
+  ],
+  "per_consumer": {
+   "C0/none": 0.188,
+   "C1/Qwen3-14B-AWQ": 0.002,
+   "C1/Qwen3-8B-AWQ": -0.036,
+   "C3/Qwen3-14B-AWQ": 0.076,
+   "C3/Qwen3-8B-AWQ": 0.164
+  },
+  "PASS": true
+ },
+ "ii": {
+  "coverage": 0.6717,
+  "band": [
+   0.85,
+   0.95
+  ],
+  "PASS": false
+ },
+ "iii": {
+  "CI": [
+   -5.657,
+   4.801
+  ],
+  "strata_positive": 3,
+  "positions_positive": 1,
+  "strata_detail": {
+   "C0/none": -11.56,
+   "C1/Qwen3-14B-AWQ": -9.9,
+   "C1/Qwen3-8B-AWQ": 0.56,
+   "C3/Qwen3-14B-AWQ": 10.29,
+   "C3/Qwen3-8B-AWQ": 5.87
+  },
+  "position_detail": {
+   "drop0": -0.46,
+   "drop1": -2.33,
+   "drop2": 0.33
+  },
+  "PASS": false
+ },
+ "BUILD_BANK": false
+}

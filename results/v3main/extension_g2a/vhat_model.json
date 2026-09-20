@@ -1,0 +1,44 @@
+{
+ "efeats": [
+  "rank_dropped",
+  "cos_q_drop",
+  "cos_q_rem",
+  "cos_drop_rem",
+  "nrm_drop",
+  "c3w_drop",
+  "c3w_rem",
+  "c_C0",
+  "c_C1",
+  "c_C38",
+  "c_C314"
+ ],
+ "bfeats": [
+  "p0",
+  "p1",
+  "p2",
+  "entropy",
+  "margin",
+  "maxProb",
+  "priorL1",
+  "full_conf",
+  "fd_sens",
+  "c_C0",
+  "c_C1",
+  "c_C38",
+  "c_C314"
+ ],
+ "cfg": {
+  "max_iter": 200,
+  "learning_rate": 0.05,
+  "max_depth": 3,
+  "l2_regularization": 1.0,
+  "random_state": 77000
+ },
+ "alpha": 0.1,
+ "Q": 18.71391651311636,
+ "n_fit_clusters": 51,
+ "n_cal_clusters": 13,
+ "sklearn": "1.6.1",
+ "fit": "80pct clusters",
+ "calibration": "frozen 20pct, never fit"
+}

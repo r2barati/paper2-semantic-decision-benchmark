@@ -251,3 +251,35 @@ frozen.json,c1_loo_test_beliefs.parquet,c1_loo_test_episodes.parquet,
 g2f_verify.json,g2full_stage4.json,test_install_divergences_8b.json},
 tools/{g2f_proxy_screen,g2f_assemble_test,g2f_replay_test,g2f_stage4}.py,
 kaggle_kernel/p2_loo_test_{8b,14b}.py, runner loo-test-{8b,14b}.
+
+## 15. Extension VHAT: historical feasibility gate -> STOP, no bank (labeled, outside the freeze)
+
+Sequencing (DESIGN-VHAT §§8-11, frozen before execution): train/freeze Vhat
+on the 3000 historical LOO labels FIRST; build the 60-query fresh bank ONLY
+if the preregistered gate passes. Vhat(e,b,c) = dBhat(e,c) x Shat(b,c)
+(GBM heads, fixed config, consumer one-hot, deployability budget: own-belief
++ embeddings/ranks + controller-FD only; cross-model/consumer + labels
+forbidden). Conformal: split cluster-disjoint 80/20, alpha=0.1 frozen.
+Power (historical only): 64 union clusters; N=60 saturates -> bank N=60.
+Gate (all OOF/held-out, deterministic seeds): (i) PASS, barely — pooled
+Spearman CI [0.079,0.168] excludes 0; per-stratum 4/5 positive but C1-14B at
++0.002 and C1-8B at -0.036. (ii) FAIL — calibration coverage 0.672 vs band
+[0.85,0.95]; mechanism diagnosed: row residual SD (74.5) is 5x cluster-mean
+residual SD (15.0), and coverage is heteroscedastic across strata (C0 0.86 /
+C1-14B 0.85 in-band; C1-8B 0.71; C3-8B 0.54 / C3-14B 0.48) — a pooled
+cluster-mean quantile cannot cover row-level heavy-tailed VoI. (iii) FAIL —
+OOF single-minimum-drop gating pooled diff CI [-5.66,+4.80] includes 0;
+3/5 strata and 1/3 positions positive.
+BUG DISCLOSED AND FIXED: the first (iii) computation used FINAL-fit
+predictions instead of OOF (pooled CI [1.5,11.1], plus an impossible
+-4.51/-4.51 doublet across C0 and C1-14B); caught by an independent
+replicate, fixed to true OOF, rerun deterministic. The corrected numbers
+fail (iii) on the main clause, which strengthens rather than weakens the
+stop decision — reported here so the fix is auditable.
+BUILD_BANK = false. Per the frozen rule: NO fresh bank, NO new LLM calls,
+NO Agentick. The deployable-model path ends here; the paper keeps the
+diagnostic + consumer-dependent-regimes + oracle-to-deployable-gap
+contributions (Stages A/D0/G2A/G2-FULL(a)(b)). V3 frozen matrix untouched.
+Files: extension_g2a/{DESIGN-VHAT.md,vhat_power.json,vhat_oof.parquet,
+vhat_heads.pkl,vhat_model.json,vhat_gate.json}, tools/{vhat_power,
+vhat_train}.py.

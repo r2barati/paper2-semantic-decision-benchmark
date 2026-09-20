@@ -360,3 +360,23 @@ alignment x sequential value (exploratory, labeled). V3 frozen matrix
 untouched.
 Files: theory/{LADDER_SPEC.md,ladder_tables.json,ladder_verdict.json},
 tools/ladder.py.
+
+## 19. Agentick spike: STOP on ceiling (GoToGoal-only, frozen AGENTICK_SPIKE.md)
+
+Fixed adapter (egocentric greedy + fixed fallback; info['valid_actions']
+only) x {ascii,language,state_dict} x easy/dense x seeds 0-4 + random floor
++ oracle normalization. ONS = (ret-random)/(oracle-random) per installed
+scoring. Env: isolated py3.12 venv, agentick @github main 2026-09-20,
+CPU-only (~40 episodes); env never committed.
+Outcome: adapter return 1.0 in ALL modes x seeds (parse 100% everywhere);
+oracle 1.0; random 0.6. ONS = 1.0 everywhere -> max-min = 0, H-primary
+FAILS by stop rule. Mechanism: CEILING, not refutation — greedy goal
+approach is optimal on open-room GoToGoal-easy from every representation,
+so the spike is UNINFORMATIVE about the interface principle (cannot
+distinguish no-effect from too-easy-task/adapter). No SokobanPush/
+SequenceMemory; bounded external generality stands as: not yet tested
+beyond a trivial task. A harder spike (medium difficulty and/or planning/
+memory tasks where greedy is suboptimal) needs its own frozen design —
+proposed, not executed. V3 frozen matrix untouched.
+Files: theory/{AGENTICK_SPIKE.md,agentick_spike_raw.json,
+agentick_spike_verdict.json}, tools/agentick_spike.py.

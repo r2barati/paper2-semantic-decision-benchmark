@@ -1,0 +1,26 @@
+{
+ "H_primary": {
+  "ons_adapter": {
+   "ascii": 1.0,
+   "language": 1.0,
+   "state_dict": 1.0
+  },
+  "maxmin": 0.0,
+  "CI95": [
+   0.0,
+   0.0
+  ],
+  "HOLDS": false
+ },
+ "H_secondary": {
+  "parse_rate": {
+   "ascii": 1.0,
+   "language": 1.0,
+   "state_dict": 1.0
+  },
+  "note": "parse 100% everywhere; ONS identical -> no detectable interface effect at this difficulty"
+ },
+ "mechanism": "ceiling: greedy adapter optimal (1.0) in all modes x seeds; oracle 1.0; random floor 0.6. Uninformative about the principle (cannot distinguish no-effect from too-easy-task).",
+ "STOP": true,
+ "design": "AGENTICK_SPIKE.md GoToGoal-only; seeds 0-4; ONS=(ret-random)/(oracle-random) per installed scoring"
+}

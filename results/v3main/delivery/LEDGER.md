@@ -217,3 +217,37 @@ Files: extension_g2a/{DESIGN-G2A1.md,loo_sets_frozen.json,c1_loo_beliefs.
 parquet,c1_loo_episodes.parquet,g2a1_verify.json,g2a1_verdict.json},
 tools/{g2a1_assemble,g2a1_replay,g2a1_verdict}.py,
 kaggle_kernel/p2_loo_{8b,14b}.py, runner JOBS loo-pilot-{8b,14b}.
+
+## 14. Extension G2-FULL: C1 test document-VoI + deployable proxy (labeled, outside the freeze)
+
+Design (frozen DESIGN-G2FULL.md BEFORE any test work): cluster unit
+sha(text+docset) (63 test clusters), (a) Holm-6, (b) within-query consumer
+permutation, (c) frozen-gate pooled dJ CI>0 AND beats max{nDCG,S-Brier,S-J,
+always-transmit} upstream baselines. Proxy frozen on dev BEFORE test calls
+(g2full_proxy.json: agreeXmodel_L1>=0.6, dev gated +75.5, committed 81b4cb4).
+Test: 960 C1 calls (480/model, 0 fails, D=189 distinct contexts/model:
+63 clusters x 3), 378 payloads (102 new + identical-dups per model, 3
+divergent-dup first-wins patched with logged file), 0 overwrites otherwise.
+G3-analog 1600/1600 exact. Single Stage-4 outcomes touch.
+BUG DISCLOSED AND FIXED: first stage4 run mixed dev rows into the (b) pivot
+(2A-0 replay covers dev+test), yielding NaN maxmin with p=0.0; fixed by
+test-only filter + rerun before any interpretation. No thresholds changed.
+Outcome: (a) HOLDS — 14B/drop1 +21.94 [+10.43,+34.11] Holm 0.0; 14B/drop2
++12.81 [+2.32,+23.91] Holm 0.078; dev-predicted cells replicate (dev +37.7/
+-16.4 -> test +21.9/-13.0). (b) HOLDS at drop1 (p=0.0002) and drop2 (p=0.0),
+not drop0 (p=0.21). Regime table: C0 positive (+6..+23), C3/8B ~=0
+(-6..+0.6), C1/8B negative (-4..-13), C1/14B positive (+5..+22) — the
+qualitatively different value regimes, now formal. Adopted wording:
+"document-level operational value is consumer-dependent", not "determined".
+(c) FAILS — frozen gate transmits 8/160 test queries (disagreement
+distribution shifted vs dev); pooled -0.61 [-9.85,+6.95]; diff-vs-best CIs
+cross 0 in both strata (numerically +17.8 each, correctly unclaimed).
+Per the frozen rule the finding is the ORACLE-TO-DEPLOYABLE GAP: Brier-gate
+(D0, +77) and disagreement-gate (dev, +75) prove transmissible value exists,
+but the label-free proxy does not transfer its threshold. NO AGENTICK.
+V3 frozen matrix untouched.
+Files: extension_g2a/{DESIGN-G2FULL.md,g2full_proxy.json,loo_sets_test_
+frozen.json,c1_loo_test_beliefs.parquet,c1_loo_test_episodes.parquet,
+g2f_verify.json,g2full_stage4.json,test_install_divergences_8b.json},
+tools/{g2f_proxy_screen,g2f_assemble_test,g2f_replay_test,g2f_stage4}.py,
+kaggle_kernel/p2_loo_test_{8b,14b}.py, runner loo-test-{8b,14b}.

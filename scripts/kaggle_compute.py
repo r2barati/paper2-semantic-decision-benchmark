@@ -357,6 +357,34 @@ JOBS = {
         "dest_dir": "runs/v3main_loo",
         "verify": "loopilot14b",
     },
+    "loo-test-8b": {
+        "slug": "paper2-v3-loo-test-8b",
+        "title": "Paper2 v3 loo test 8b",
+        "script": "kaggle_kernel/p2_loo_test_8b.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "paper2-v3lootest-inputs",
+        "dataset_title": "paper2-v3lootest-inputs",
+        "dataset_dir": "kaggle/inputs_loo_test",
+        "outputs": ["cache_loo_test_8b.zip",
+                    "manifest_test_8b.json"],
+        "dest_dir": "runs/v3main_lootest",
+        "verify": "lootest8b",
+    },
+    "loo-test-14b": {
+        "slug": "paper2-v3-loo-test-14b",
+        "title": "Paper2 v3 loo test 14b",
+        "script": "kaggle_kernel/p2_loo_test_14b.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "paper2-v3lootest-inputs",
+        "dataset_title": "paper2-v3lootest-inputs",
+        "dataset_dir": "kaggle/inputs_loo_test",
+        "outputs": ["cache_loo_test_14b.zip",
+                    "manifest_test_14b.json"],
+        "dest_dir": "runs/v3main_lootest",
+        "verify": "lootest14b",
+    },
 }
 
 POLL_SECONDS = 120
@@ -524,7 +552,9 @@ def cmd_fetch(job):
       "qwen14probe": _verify_qwen14probe,
       "qwen14beliefs": _verify_qwen14beliefs,
       "loopilot8b": _verify_loopilot8b,
-      "loopilot14b": _verify_loopilot14b}[job["verify"]](dest, job)
+      "loopilot14b": _verify_loopilot14b,
+      "lootest8b": _verify_lootest8b,
+      "lootest14b": _verify_lootest14b}[job["verify"]](dest, job)
     # install into runs/ (only after verification passes)
     (ROOT / job["dest_dir"]).mkdir(parents=True, exist_ok=True)
     for name in job["outputs"]:
@@ -812,18 +842,19 @@ def _verify_phi4beliefs(dest, job):
     print("verify: phi4 shard cache ok")
 
 
-def _verify_loopilot(dest, job, model, revision):
+def _verify_loopilot(dest, job, model, revision, scope="c1-loo-dev40-rerank-k3",
+                     n_calls=120, inputs_dir="kaggle/inputs_loo",
+                     queries_file="queries_dev40.jsonl", sets_file="loo_sets.json",
+                     sets_key="dev"):
     import json as _j
     import random as _random
     import zipfile as _zip
-    mname = ("pilot_manifest_8b.json" if model.endswith("8B-AWQ")
-             else "pilot_manifest_14b.json")
-    assert mname in job["outputs"], (mname, job["slug"])
+    mname = next(n for n in job["outputs"] if n.endswith(".json"))
     man = _j.loads((dest / mname).read_text())
     print("pilot manifest:", {k: v for k, v in man.items() if k != "failures"})
     assert man["model"] == model, man
     assert man["revision"] == revision, man
-    assert man["scope"] == "c1-loo-dev40-rerank-k3", man
+    assert man["scope"] == scope, man
     assert man["c1_sha"] == "66e6890ba9c5464c", man
     assert man["tau"] == 0.5, man
     assert man["seal"] == "no qrels attached; guard passed", man
@@ -831,22 +862,21 @@ def _verify_loopilot(dest, job, model, revision):
         frozen = _sha(ROOT / "src" / f)[:16]
         assert man["src_snap_sha"][f] == frozen, (f, man["src_snap_sha"][f], frozen)
     print("verify: kernel src_snap byte-identical to frozen src")
-    assert man["n_llm_calls"] == 120, man
+    assert man["n_llm_calls"] == n_calls, man
     assert man["n_fail"] == 0, man
-    # Pilot subtlety (verified locally, 2026-09-20): dev-40 contains duplicate
-    # query texts with identical rerank sets (e.g. v3-q013/v3-q077), and the C1
-    # user string carries no entity_node, so 120 (qid,pos) invocations map to
-    # 90 distinct cache keys (30 in-run cache hits). Recompute D locally.
+    # Duplicate-context subtlety (dev-40: 120 invocations -> D=90 keys; test
+    # count likewise recomputed): the C1 user string carries no entity_node.
     import hashlib as _hl
     _docs = {}
     for _line in open(ROOT / "data" / "v3" / "corpus.jsonl"):
         _dd = _j.loads(_line)
         _docs[_dd["_id"]] = _dd["text"]
-    _spec = _j.loads(open(ROOT / "kaggle" / "inputs_loo" / "loo_sets.json").read())
+    _spec = _j.loads(open(ROOT / inputs_dir / sets_file).read())
     _qs = {}
-    for _line in open(ROOT / "kaggle" / "inputs_loo" / "queries_dev40.jsonl"):
+    for _line in open(ROOT / inputs_dir / queries_file):
         _qq = _j.loads(_line)
         _qs[_qq["_id"]] = _qq["text"]
+    assert set(_qs) == set(_spec[sets_key]) == set(_spec["sets"]), "inputs split mismatch"
     _keys = set()
     for _qid in sorted(_spec["sets"]):
         for _pos in ("drop0", "drop1", "drop2"):
@@ -856,10 +886,8 @@ def _verify_loopilot(dest, job, model, revision):
             _ks = (f"{model}||66e6890ba9c5464c||"
                    f"{_hl.sha256(_user.encode()).hexdigest()[:16]}")
             _keys.add(_hl.sha256(_ks.encode()).hexdigest()[:16] + ".json")
-    print(f"pilot distinct-key recompute: D={len(_keys)} (120 invocations)")
-    zname = ("cache_loo_dev_8b.zip" if model.endswith("8B-AWQ")
-             else "cache_loo_dev_14b.zip")
-    assert zname in job["outputs"], (zname, job["slug"])
+    print(f"distinct-key recompute: D={len(_keys)} ({n_calls} invocations)")
+    zname = next(n for n in job["outputs"] if n.endswith(".zip"))
     with _zip.ZipFile(dest / zname) as z:
         names = z.namelist()
         assert len(names) == len(_keys) == man["n_cache_files"], \
@@ -875,6 +903,24 @@ def _verify_loopilot(dest, job, model, revision):
 def _verify_loopilot8b(dest, job):
     _verify_loopilot(dest, job, "Qwen/Qwen3-8B-AWQ",
                      "4da05a8edb55c6046cce958586c33b61da07bb79")
+
+
+def _verify_lootest8b(dest, job):
+    _verify_loopilot(dest, job, "Qwen/Qwen3-8B-AWQ",
+                     "4da05a8edb55c6046cce958586c33b61da07bb79",
+                     scope="c1-loo-test160-rerank-k3", n_calls=480,
+                     inputs_dir="kaggle/inputs_loo_test",
+                     queries_file="queries_loo.jsonl",
+                     sets_file="loo_sets_test.json", sets_key="test")
+
+
+def _verify_lootest14b(dest, job):
+    _verify_loopilot(dest, job, "Qwen/Qwen3-14B-AWQ",
+                     "31c69efc29464b6bb0aee1398b5a7b50a99340c3",
+                     scope="c1-loo-test160-rerank-k3", n_calls=480,
+                     inputs_dir="kaggle/inputs_loo_test",
+                     queries_file="queries_loo.jsonl",
+                     sets_file="loo_sets_test.json", sets_key="test")
 
 
 def _verify_loopilot14b(dest, job):

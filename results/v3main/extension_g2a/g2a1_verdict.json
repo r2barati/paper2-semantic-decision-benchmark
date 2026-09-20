@@ -1,0 +1,165 @@
+{
+ "cells": {
+  "Qwen3-8B-AWQ/drop0": {
+   "l1": {
+    "mean": 0.333,
+    "CI95": [
+     0.21,
+     0.473
+    ]
+   },
+   "adis": {
+    "mean": 0.395,
+    "CI95": [
+     0.26,
+     0.537
+    ]
+   },
+   "voi": {
+    "mean": 7.52,
+    "CI95": [
+     -34.758,
+     52.095
+    ]
+   },
+   "fire_a_voi_excl0": false,
+   "fire_b_adis_gt0": true
+  },
+  "Qwen3-8B-AWQ/drop1": {
+   "l1": {
+    "mean": 0.193,
+    "CI95": [
+     0.12,
+     0.278
+    ]
+   },
+   "adis": {
+    "mean": 0.238,
+    "CI95": [
+     0.141,
+     0.343
+    ]
+   },
+   "voi": {
+    "mean": 1.347,
+    "CI95": [
+     -24.642,
+     28.285
+    ]
+   },
+   "fire_a_voi_excl0": false,
+   "fire_b_adis_gt0": true
+  },
+  "Qwen3-8B-AWQ/drop2": {
+   "l1": {
+    "mean": 0.135,
+    "CI95": [
+     0.085,
+     0.2
+    ]
+   },
+   "adis": {
+    "mean": 0.167,
+    "CI95": [
+     0.086,
+     0.256
+    ]
+   },
+   "voi": {
+    "mean": -16.381,
+    "CI95": [
+     -34.013,
+     -1.015
+    ]
+   },
+   "fire_a_voi_excl0": true,
+   "fire_b_adis_gt0": true
+  },
+  "Qwen3-14B-AWQ/drop0": {
+   "l1": {
+    "mean": 0.2,
+    "CI95": [
+     0.13,
+     0.275
+    ]
+   },
+   "adis": {
+    "mean": 0.24,
+    "CI95": [
+     0.146,
+     0.341
+    ]
+   },
+   "voi": {
+    "mean": 17.716,
+    "CI95": [
+     -8.234,
+     43.889
+    ]
+   },
+   "fire_a_voi_excl0": false,
+   "fire_b_adis_gt0": true
+  },
+  "Qwen3-14B-AWQ/drop1": {
+   "l1": {
+    "mean": 0.182,
+    "CI95": [
+     0.102,
+     0.273
+    ]
+   },
+   "adis": {
+    "mean": 0.26,
+    "CI95": [
+     0.148,
+     0.393
+    ]
+   },
+   "voi": {
+    "mean": 37.669,
+    "CI95": [
+     6.683,
+     73.671
+    ]
+   },
+   "fire_a_voi_excl0": true,
+   "fire_b_adis_gt0": true
+  },
+  "Qwen3-14B-AWQ/drop2": {
+   "l1": {
+    "mean": 0.18,
+    "CI95": [
+     0.13,
+     0.235
+    ]
+   },
+   "adis": {
+    "mean": 0.26,
+    "CI95": [
+     0.176,
+     0.346
+    ]
+   },
+   "voi": {
+    "mean": 5.967,
+    "CI95": [
+     -21.02,
+     32.924
+    ]
+   },
+   "fire_a_voi_excl0": false,
+   "fire_b_adis_gt0": true
+  }
+ },
+ "FIRE": true,
+ "fire_cells": [
+  "Qwen3-8B-AWQ/drop2",
+  "Qwen3-14B-AWQ/drop1"
+ ],
+ "design": {
+  "B": 5000,
+  "seed": 73000,
+  "n_dev": 40,
+  "test": "sealed, untouched"
+ }
+}

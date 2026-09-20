@@ -188,3 +188,32 @@ frozen matrix untouched.
 Files: results/v3main/extension_g2a/{DESIGN-G2A.md,loo_beliefs.parquet,
 loo_episodes.parquet,g2a_gates.json,g2a_verify.json,g2a_verdict.json},
 tools/{g2a_loo,g2a_replay,g2a_contrast}.py.
+
+## 13. Extension G2A-1: C1 LOO dev pilot, 240 calls (labeled, outside the freeze)
+
+Question (frozen DESIGN-G2A1.md): does removing individual passages causally
+change C1 belief/action/utility enough to justify full document-VoI work?
+Scope: dev-40 x rerank k=3 x C1 x {8B,14B} x LOO{drop0,1,2} = 240 calls.
+Kernels paper2-v3-loo-pilot-{8b,14b} (pinned models/revisions, frozen vLLM
+flags/patch/prompts, dev-only inputs, seal guard passed in-kernel); fetched +
+verified (manifest pins, src snap byte-identical, 120 invocations/model,
+0 fails, key-recompute D=90/model).
+Pilot subtlety (benchmark property, not a defect): dev-40 holds duplicate
+query texts with identical rerank sets (e.g. v3-q013/v3-q077); the C1 user
+string carries no entity_node, so 120 invocations = 90 distinct contexts
+(30 in-run cache hits, same dedup the frozen matrix has). All 180 payloads
+carry the usual extra estimates that frozen consume_c1 ignores. Installed
+180 files with 0 overwrites; parsed under byte-identical C1 normalization.
+Replay (dev x 5 paired seeds): G3-analog gate 400/400 exact. Levels per
+(model x position), B=5000: belief L1 shifts 0.13-0.33 (all CI>0), ADis
+0.17-0.40 (all CI>0). J-VoI: 14B/drop1 +37.67 [+6.68,+73.67] (rank-2 passage
+destroys value — misleading evidence) and 8B/drop2 -16.38 [-34.01,-1.02]
+(rank-3 passage carries value); other 4 cells cross 0.
+Continuation gate: FIRES (2 cells meet (a) J-VoI excl-0 AND (b) ADis>0).
+Per the frozen rule this PROPOSES (not executes) full C1 document-VoI
+(test-160, 960 calls) + deployable criticality proxy. Test stayed sealed;
+D0/2A-0 verdicts unreopened. V3 frozen matrix untouched.
+Files: extension_g2a/{DESIGN-G2A1.md,loo_sets_frozen.json,c1_loo_beliefs.
+parquet,c1_loo_episodes.parquet,g2a1_verify.json,g2a1_verdict.json},
+tools/{g2a1_assemble,g2a1_replay,g2a1_verdict}.py,
+kaggle_kernel/p2_loo_{8b,14b}.py, runner JOBS loo-pilot-{8b,14b}.

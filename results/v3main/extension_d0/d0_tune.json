@@ -1,0 +1,123 @@
+{
+ "strata": {
+  "C0/none": {
+   "S-J": "rerank",
+   "dev_means": {
+    "bm25": -6.92,
+    "dense": -9.05,
+    "hybrid": -14.25,
+    "rerank": 22.81
+   },
+   "S-J_dev_mean": 22.81,
+   "arm_on": true,
+   "arm_dev_gated": 22.81,
+   "feat_t": 0.2,
+   "feat_on": true,
+   "feat_dev_gated": 99.69,
+   "feat_candidates": {
+    "0.1": 66.4799,
+    "0.2": 99.6899,
+    "0.3": 92.7697,
+    "0.4": 92.7697,
+    "0.5": 92.7697
+   }
+  },
+  "C1/Qwen/Qwen3-8B-AWQ": {
+   "S-J": "rerank",
+   "dev_means": {
+    "bm25": -152.66,
+    "dense": -140.69,
+    "hybrid": -163.47,
+    "rerank": -7.45
+   },
+   "S-J_dev_mean": -7.45,
+   "arm_on": false,
+   "arm_dev_gated": 0.0,
+   "feat_t": 0.3,
+   "feat_on": true,
+   "feat_dev_gated": 63.34,
+   "feat_candidates": {
+    "0.1": 52.466,
+    "0.2": 62.417,
+    "0.3": 63.336,
+    "0.4": 12.069,
+    "0.5": -7.446
+   }
+  },
+  "C1/Qwen/Qwen3-14B-AWQ": {
+   "S-J": "rerank",
+   "dev_means": {
+    "bm25": -134.53,
+    "dense": -108.65,
+    "hybrid": -132.0,
+    "rerank": 2.64
+   },
+   "S-J_dev_mean": 2.64,
+   "arm_on": true,
+   "arm_dev_gated": 2.64,
+   "feat_t": 0.1,
+   "feat_on": true,
+   "feat_dev_gated": 80.92,
+   "feat_candidates": {
+    "0.1": 80.917,
+    "0.2": 80.917,
+    "0.3": 77.699,
+    "0.4": 33.864,
+    "0.5": 2.64
+   }
+  },
+  "C3/Qwen/Qwen3-8B-AWQ": {
+   "S-J": "rerank",
+   "dev_means": {
+    "bm25": -72.36,
+    "dense": -25.78,
+    "hybrid": -73.55,
+    "rerank": 27.93
+   },
+   "S-J_dev_mean": 27.93,
+   "arm_on": true,
+   "arm_dev_gated": 27.93,
+   "feat_t": 0.3,
+   "feat_on": true,
+   "feat_dev_gated": 118.76,
+   "feat_candidates": {
+    "0.1": 111.8014,
+    "0.2": 117.415,
+    "0.3": 118.7632,
+    "0.4": 102.2041,
+    "0.5": 80.8515
+   }
+  },
+  "C3/Qwen/Qwen3-14B-AWQ": {
+   "S-J": "rerank",
+   "dev_means": {
+    "bm25": -76.27,
+    "dense": -59.75,
+    "hybrid": -79.51,
+    "rerank": 32.96
+   },
+   "S-J_dev_mean": 32.96,
+   "arm_on": true,
+   "arm_dev_gated": 32.96,
+   "feat_t": 0.3,
+   "feat_on": true,
+   "feat_dev_gated": 104.71,
+   "feat_candidates": {
+    "0.1": 103.5124,
+    "0.2": 103.5124,
+    "0.3": 104.7119,
+    "0.4": 96.7451,
+    "0.5": 77.416
+   }
+  }
+ },
+ "grid": [
+  0.1,
+  0.2,
+  0.3,
+  0.4,
+  0.5
+ ],
+ "tau_arm": 0,
+ "k": 3
+}

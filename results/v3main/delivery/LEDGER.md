@@ -127,3 +127,31 @@ methods-note; V3 stands unchanged. No Stage B requested.
 Files: results/v3main/extension_selection/{DESIGN.md,A1_selections.csv,
 A1_H1b.json,A2_edges.parquet,A2_actions.parquet,A2_interfaces.json,
 A3_verdict.json}, tools/run_actions_v3main.py, tools/a1_selectors.py, tools/a2_edges.py, tools/a3_tests.py. Frozen matrix untouched.
+
+## 11. Extension D0: Gate-1 belief-VoI (labeled, outside the freeze)
+
+Motivation: Stage-A showed value dissipates at bel→act and selectors agree
+(H1a dR=0). D0 tests one decision-aware interface: a belief gate transmitting
+the posterior iff expected action-value effect is positive, else NoInfo.
+Frozen design: results/v3main/extension_d0/DESIGN-D0.md — VoI in utility
+space (ADis mediator only), belief-VoI vs document-VoI boundary, Head-B
+primary with C(b)=E[J(posterior)−J(NoInfo prior)], Brier feature (confidence
+constant for C0/C1; evidence_hit degenerate 0 on dev), grid t in
+{0.10..0.50}, all choices on dev-40, test-160 touched once.
+Tune (dev-only, tools/d0_tune_gate.py): S-J=rerank all 5 strata; frozen
+t={C0:0.2, C1-8B:0.3, C1-14B:0.1, C3-8B:0.3, C3-14B:0.3}; dev gated means
++63..+119 (vs arm means −7..+33).
+Eval (single test touch, tools/d0_eval_gate.py, B=5000 seed 71000):
+PRIMARY HOLDS — pooled Head-B gated ΔJ=+77.3 [62.8,92.0]; arm-gate
++0.03 [−22.0,22.2] fails. Per-stratum gated +62..+97, all Holm p=0.0.
+Transmit rates 35–52% test (dev 40–57%). Always-transmit S-J pooled ≈−4.3
+plain-mean, so the gate beats both proxies (nDCG/J agree: rerank everywhere).
+Mechanistic read as pre-registered: transmission, not acquisition, was the
+bottleneck. Caveats (binding): Brier uses true-regime labels — this is an
+oracle-quality gate proving transmissible belief-VoI exists, NOT a deployable
+policy and NOT document-causal; plain-mean selection metric deviates from
+balanced headlines (as in Stage-A, documented). Per the locked rule, Gate-2
+(document-VoI with new ablation beliefs) is now scientifically justified and
+may be proposed — not executed here. V3 frozen matrix untouched.
+Files: results/v3main/extension_d0/{DESIGN-D0.md,d0_tune.json,d0_verdict.json},
+tools/d0_tune_gate.py, tools/d0_eval_gate.py.

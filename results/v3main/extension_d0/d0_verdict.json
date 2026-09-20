@@ -1,0 +1,77 @@
+{
+ "primary_HeadB_feat": {
+  "obs_pooled_dJ": 77.3,
+  "CI95": [
+   62.82,
+   92.01
+  ],
+  "holds": true
+ },
+ "secondary_arm": {
+  "obs_pooled_dJ": 0.03,
+  "CI95": [
+   -21.95,
+   22.24
+  ],
+  "holds": false
+ },
+ "per_stratum": {
+  "C0/none": {
+   "feat_t": 0.2,
+   "obs_gated_dJ": 79.29,
+   "CI95": [
+    63.31,
+    95.65
+   ],
+   "p_onesided": 0.0,
+   "p_holm": 0.0
+  },
+  "C1/Qwen/Qwen3-8B-AWQ": {
+   "feat_t": 0.3,
+   "obs_gated_dJ": 61.77,
+   "CI95": [
+    47.49,
+    75.88
+   ],
+   "p_onesided": 0.0,
+   "p_holm": 0.0
+  },
+  "C1/Qwen/Qwen3-14B-AWQ": {
+   "feat_t": 0.1,
+   "obs_gated_dJ": 65.78,
+   "CI95": [
+    50.94,
+    81.08
+   ],
+   "p_onesided": 0.0,
+   "p_holm": 0.0
+  },
+  "C3/Qwen/Qwen3-8B-AWQ": {
+   "feat_t": 0.3,
+   "obs_gated_dJ": 96.74,
+   "CI95": [
+    78.59,
+    115.55
+   ],
+   "p_onesided": 0.0,
+   "p_holm": 0.0
+  },
+  "C3/Qwen/Qwen3-14B-AWQ": {
+   "feat_t": 0.3,
+   "obs_gated_dJ": 82.9,
+   "CI95": [
+    65.87,
+    100.4
+   ],
+   "p_onesided": 0.0,
+   "p_holm": 0.0
+  }
+ },
+ "design": {
+  "B": 5000,
+  "seed": 71000,
+  "k": 3,
+  "n_test": 160,
+  "metric": "plain-mean per-query dJ vs NoInfo; pooled=mean of stratum means"
+ }
+}

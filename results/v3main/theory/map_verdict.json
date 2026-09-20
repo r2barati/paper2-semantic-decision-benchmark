@@ -1,0 +1,43 @@
+{
+ "H1_dead": {
+  "dead_C3": 0.7996,
+  "dead_C1": 0.8078,
+  "diff_CI95": [
+   -0.0118,
+   -0.0051
+  ],
+  "HOLDS": false
+ },
+ "H2_cross": {
+  "cross_C1": 0.1459,
+  "cross_C3": 0.1679,
+  "diff_CI95": [
+   -0.0308,
+   -0.0132
+  ],
+  "HOLDS": false
+ },
+ "H3_C0pos": {
+  "pos_frac_C0": 0.1718,
+  "CI95": [
+   0.1639,
+   0.1795
+  ],
+  "HOLDS": false
+ },
+ "dev_dead_frac": {
+  "C0": 0.8104,
+  "C1-8B": 0.8085,
+  "C1-14B": 0.821,
+  "C3-8B": 0.7963,
+  "C3-14B": 0.8
+ },
+ "design": {
+  "tol": 1e-06,
+  "grid": 861,
+  "states": 120,
+  "B": 2000,
+  "unit": "query",
+  "primary": "test-160"
+ }
+}

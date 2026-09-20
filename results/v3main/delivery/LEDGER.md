@@ -302,3 +302,32 @@ frozen C3 judgments define machine utility, not UDCG's annotation; (b)
 Agentick fairness lock — one fixed representation-agnostic policy adapter
 across ascii/language/state_dict, oracle for ONS normalization only.
 V3 frozen matrix untouched.
+
+## 17. Workstream 1 map: FROZEN H1/H2/H3 ALL FAIL (labeled, outside the freeze)
+
+Sweep (tools/map_sweep.py): 15 NoInfo trajectories x 8 periods = 120 states
+x 861-node lattice = 103k decide() calls, CPU-only, zero LLM. Harvest gate
+15/15 exact. Map is alive (prior-order>0 in 87.5% states; ~14 distinct
+actions/state) — not degenerate.
+Frozen verdict (tools/map_overlay.py, MAP_SPEC.md, query bootstrap):
+H1 dead_C3=0.800 vs dead_C1=0.808, diff CI [-0.0118,-0.0051] (excludes 0 in
+the WRONG direction); H2 cross_C1=0.146 vs cross_C3=0.168, diff CI
+[-0.031,-0.013] (wrong direction); H3 pos_frac_C0=0.172, CI [0.164,0.180]
+(<< 0.5). All three FAIL as frozen.
+Mechanism diagnosed (exploratory, on frozen sweep tables — verdict stands):
+(a) period-drowning — grid dead-fraction is 1.00 at t=0..15 and t=30, 0.01
+at t=20, 0.35 at t=25; pooling over all 120 states buries decision-active
+periods; (b) at active states (t=20,25) dead fractions are C0 0.25 / C1
+0.23 / C3 0.19-0.20 — same ordering, so drowning is not the whole story;
+(c) action magnitudes |order(post)-order(prior)| at active states are
+near-identical across consumers (means 2.06-2.53, P90 5.0-6.2) — neither
+dead-fractions nor response magnitudes separate C3-flat from C1-mixed.
+POST-HOC refined hypothesis (labeled as such, NOT tested): D(s) determines
+WHETHER value can flow (gating), while sign/magnitude needs belief-truth
+alignment x sensitivity — C3 gated regardless of correctness (flat), C1
+transmitted with correctness-dependent sign (mixed), C0 transmitted +
+directionally correct (positive). Requires its own preregistered test
+(e.g. correctness-conditioned response analysis); the map tables are frozen
+for it. V3 frozen matrix untouched.
+Files: theory/{MAP_SPEC.md,map_states.parquet,map_orders.parquet,
+map_verify.json,map_verdict.json}, tools/{map_sweep,map_overlay}.py.

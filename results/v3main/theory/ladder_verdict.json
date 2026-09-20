@@ -1,0 +1,23 @@
+{
+ "R1R2_strong": [],
+ "R1R2_weak": [
+  "bm25_vs_dense"
+ ],
+ "C0/none_R3R5_strong": [],
+ "C0/none_R3R5_weak": [
+  "bm25_vs_dense",
+  "bm25_vs_hybrid",
+  "dense_vs_hybrid"
+ ],
+ "C1/Qwen3-8B-AWQ_R3R5_strong": [],
+ "C1/Qwen3-8B-AWQ_R3R5_weak": [],
+ "C1/Qwen3-14B-AWQ_R3R5_strong": [],
+ "C1/Qwen3-14B-AWQ_R3R5_weak": [],
+ "C3/Qwen3-8B-AWQ_R3R5_strong": [],
+ "C3/Qwen3-8B-AWQ_R3R5_weak": [
+  "dense_vs_rerank",
+  "hybrid_vs_rerank"
+ ],
+ "C3/Qwen3-14B-AWQ_R3R5_strong": [],
+ "C3/Qwen3-14B-AWQ_R3R5_weak": []
+}

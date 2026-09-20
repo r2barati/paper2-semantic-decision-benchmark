@@ -331,3 +331,32 @@ directionally correct (positive). Requires its own preregistered test
 for it. V3 frozen matrix untouched.
 Files: theory/{MAP_SPEC.md,map_states.parquet,map_orders.parquet,
 map_verify.json,map_verdict.json}, tools/{map_sweep,map_overlay}.py.
+
+## 18. Workstream 2: five-rung ladder (frozen LADDER_SPEC.md; zero new calls)
+
+R1 nDCG@3 (recomputed) -> R2 UDCG-inspired@3 (frozen C3 judgments, signed
+gain + discount + ideal norm; 8B primary) -> R3 Brier (frozen) -> R4
+rerank positional VoI (REUSED frozen verdicts; per-system VoI beyond rerank
+does not exist — stated limitation) -> R5 test dJ (frozen). R2 coverage
+gate: 0 misses, 0 IDCG<=0 cases. Rankings over {bm25,dense,hybrid,rerank},
+query bootstrap B=2000, strong reversals (CI-excl-0 both rungs, opposite
+signs) vs weak (point flips).
+Findings (theory/ladder_tables.json + ladder_verdict.json): ZERO strong
+reversals anywhere — no CI-confirmed sign flip between adjacent rungs.
+Levels diverge while ranks mostly hold: R1 spreads 0.068-0.114 but R2
+saturates 0.974-0.998 (LLM judges qrel-irrelevant docs highly useful);
+R2 annotator-dependence is itself severe (8B-vs-14B machine-utility rho
+0.139). Within C1, R3 and R5 rankings are IDENTICAL
+(rerank>hybrid>dense>bm25; tau35 CI [0.667,1.0]) — better retrieval orders
+beliefs orders J monotonically; consumer-dependence lives BETWEEN consumers
+(C1 all-negative J vs C0 mixed vs C3 rerank-positive), not within C1's
+ladder. C0 shows the sharpest rung tension (R2-vs-R3 tau CI [-1.0,-0.333];
+R3 rank dense-first vs R5 hybrid-first, weak flips only). C3 R3 nearly flat
+(0.26-0.29, ranks shuffle) while R5 separates rerank (+7/+12) from the rest
+(-26..-67) — belief quality does not resolve what J separates. R5 here are
+plain-mean dJ (metric-consistent across rungs; balanced headlines differ,
+referenced). Interpretive lens per spec: transmission/sensitivity x
+alignment x sequential value (exploratory, labeled). V3 frozen matrix
+untouched.
+Files: theory/{LADDER_SPEC.md,ladder_tables.json,ladder_verdict.json},
+tools/ladder.py.

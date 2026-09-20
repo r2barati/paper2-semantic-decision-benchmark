@@ -121,3 +121,22 @@ theoretical claims: equivalence is over ACTIONS, never bases.
 No globally-piecewise-constant policy claim; no belief-only dead zones;
 no SOTA/model language; no Agentick work; no manuscript prose. This note
 is mechanism, not remedy.
+
+## 9. Status revision (2026-09-20; after the §6 map, LEDGER §17)
+
+The zero-value theorem (§3) SURVIVES — it is a proved conditional, and no
+map result contradicts it. But dead-zone occupancy DOES NOT explain the
+consumer regimes: frozen H1–H3 all failed, two with tight CIs in the wrong
+direction, and response magnitudes are near-identical across consumers.
+The manuscript must say this explicitly: it rules out the simple hypothesis
+that C3 is flat merely because it stays in dead zones more often.
+Emerging (EXPLORATORY, untested, not a claim) tripartite decomposition:
+
+ΔJ ≈ transmission/sensitivity × belief–truth alignment × sequential value,
+
+i.e. decision invariance is SUFFICIENT for zero value but not the dominant
+explanation of observed consumer dependence; operational value additionally
+depends on whether transmitted belief changes are directionally aligned
+with the true decision-relevant state. Any confirmatory test of this
+decomposition needs its own preregistered design; the ladder (Workstream 2)
+may use it as an interpretive lens only.

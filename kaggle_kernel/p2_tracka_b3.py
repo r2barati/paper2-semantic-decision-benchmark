@@ -2,7 +2,7 @@
 
 Mirrors tools/run_controllerB_v3main.py _work exactly (same beliefs, paired
 seeds, warning protocol; only the fixed policy class differs from the main
-sim, per the labeled controller-swap extension). Driven by shard_pilot.json.
+sim, per the labeled controller-swap extension). Scale-up shard b3 (random); template-generated.
 NO qrels attached (beliefs carry no labels; hard abort if seen).
 Outputs: episodes_tracka_pilot.parquet + shard_manifest.json
 """
@@ -49,9 +49,9 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 
-SHARD_FILE = "shard_pilot.json"
-OUT_EPISODES = "episodes_tracka_pilot.parquet"
-OUT_MANIFEST = "shard_manifest.json"
+SHARD_FILE = "shard_b3.json"
+OUT_EPISODES = "episodes_tracka_b3.parquet"
+OUT_MANIFEST = "manifest_tracka_b3.json"
 
 
 def find_input(name):

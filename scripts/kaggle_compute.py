@@ -398,6 +398,104 @@ JOBS = {
                     "shard_manifest.json"],
         "dest_dir": "runs/v3main_tracka",
         "verify": "trackasim",
+        "shard_spec": "shard_pilot.json",
+        "gate": "full-overlap",
+    },
+    "tracka-sim-b1": {
+        "slug": "paper2-tracka-sim-b1",
+        "title": "Paper2 tracka sim b1",
+        "script": "kaggle_kernel/p2_tracka_b1.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_b1.parquet",
+                    "manifest_tracka_b1.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+        "shard_spec": "shard_b1.json",
+        "gate": "sample-5pct",
+    },
+    "tracka-sim-b2": {
+        "slug": "paper2-tracka-sim-b2",
+        "title": "Paper2 tracka sim b2",
+        "script": "kaggle_kernel/p2_tracka_b2.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_b2.parquet",
+                    "manifest_tracka_b2.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+        "shard_spec": "shard_b2.json",
+        "gate": "sample-5pct",
+    },
+    "tracka-sim-b3": {
+        "slug": "paper2-tracka-sim-b3",
+        "title": "Paper2 tracka sim b3",
+        "script": "kaggle_kernel/p2_tracka_b3.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_b3.parquet",
+                    "manifest_tracka_b3.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+        "shard_spec": "shard_b3.json",
+        "gate": "sample-5pct",
+    },
+    "tracka-sim-b4": {
+        "slug": "paper2-tracka-sim-b4",
+        "title": "Paper2 tracka sim b4",
+        "script": "kaggle_kernel/p2_tracka_b4.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_b4.parquet",
+                    "manifest_tracka_b4.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+        "shard_spec": "shard_b4.json",
+        "gate": "sample-5pct",
+    },
+    "tracka-sim-b5": {
+        "slug": "paper2-tracka-sim-b5",
+        "title": "Paper2 tracka sim b5",
+        "script": "kaggle_kernel/p2_tracka_b5.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_b5.parquet",
+                    "manifest_tracka_b5.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+        "shard_spec": "shard_b5.json",
+        "gate": "sample-5pct",
+    },
+    "tracka-sim-b6": {
+        "slug": "paper2-tracka-sim-b6",
+        "title": "Paper2 tracka sim b6",
+        "script": "kaggle_kernel/p2_tracka_b6.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_b6.parquet",
+                    "manifest_tracka_b6.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+        "shard_spec": "shard_b6.json",
+        "gate": "sample-5pct",
     },
     "agentick-probe": {
         "slug": "paper2-agentick-probe",
@@ -958,50 +1056,86 @@ def _verify_loopilot14b(dest, job):
 
 
 def _verify_trackasim(dest, job):
-    """Pilot CPU-sim shard verification (frozen 2026-09-21).
+    """Track A CPU-sim shard verification (frozen 2026-09-21).
     Discrete outputs + identifiers: EXACT equality. Floating profits:
-    preregistered tolerance |diff| <= 1e-6 AND relative <= 1e-9 vs local
-    frozen episodes. Never loosened post-hoc."""
+    preregistered tolerance |diff| <= 1e-6 AND relative <= 1e-9. Never
+    loosened post-hoc. Gate modes: full-overlap (pilot: vs 100-row local
+    re-run) or sample-5pct (scale shards: seeded 5% local re-run)."""
     import json as _j
     import pandas as _pd
-    man = _j.loads((dest / "shard_manifest.json").read_text())
+    ep_name = next(n for n in job["outputs"] if n.endswith(".parquet"))
+    mf_name = next(n for n in job["outputs"] if n.endswith(".json"))
+    man = _j.loads((dest / mf_name).read_text())
     print("shard manifest:", {k: v for k, v in man.items() if k != "input_hashes"})
     assert man["controller"] == "BeliefBaseStock", man
     assert man["seal"] == "no qrels attached; guard passed", man
     assert man["completed"] == man["total"] > 0, man
     assert man["seeds"] == [60000 + i for i in range(5)], man
-    assert man["artifact"] == "episodes_tracka_pilot.parquet", man
+    assert man["artifact"] == ep_name, man
     for m, v in (("numpy", "1.26.4"), ("pandas", "2.3.3"), ("pyarrow", "21.0.0"),
                  ("scipy", "1.13.1")):
         assert man["dep_versions"][m] == v, (m, man["dep_versions"])
-    spec = _j.loads((ROOT / "kaggle" / "inputs_tracka" / "shard_pilot.json").read_text())
-    assert man["config_hash"] == _sha(ROOT / "kaggle" / "inputs_tracka" / "shard_pilot.json"), man
+    spec = _j.loads((ROOT / "kaggle" / "inputs_tracka" / job["shard_spec"]).read_text())
+    assert man["config_hash"] == _sha(
+        ROOT / "kaggle" / "inputs_tracka" / job["shard_spec"]), man
     assert man["shard_id"] == spec["shard_id"], man
     for f in ("controller_basestock.py", "env.py", "events.py", "metrics.py",
               "interpreter.py", "sim_eval_v3main.py"):
         frozen = _sha(ROOT / "src" / f)[:64]
         assert man["input_hashes"][f] == frozen, (f,)
-    df = _pd.read_parquet(dest / "episodes_tracka_pilot.parquet")
+    df = _pd.read_parquet(dest / ep_name)
     assert len(df) == man["total"], (len(df), man["total"])
     assert set(df["controller"].unique()) == {"BeliefBaseStock"}, df["controller"].unique()
     assert (df["k"] == 3).all() and (df["rung"] == "belief").all()
-    # profit gate vs FRESH LOCAL re-run at current HEAD (ground truth for
-    # cross-machine identity). NOT vs sim_controllerB/episodesB.parquet:
-    # that frozen file appends reruns with disagreeing profits for identical
-    # keys (4296/7200 key-groups differ by up to 621; recorded as integrity
-    # finding, frozen file untouched). Local rerun: tools/tracka_local_rerun.py
-    loc = _pd.read_parquet(ROOT / "runs" / "v3main_tracka" / "pilot_local_rerun.parquet")
+    # identifier coverage: spec cells x queries x seeds, exactly
     key = ["system", "consumer", "model", "query_id", "seed"]
-    assert len(loc) == 100 and not loc.duplicated(subset=key).any(), len(loc)
-    mg = df.merge(loc[key + ["profit"]], on=key, suffixes=("", "_local"))
-    assert len(mg) == len(df), "identifier mismatch: Kaggle/local keys differ"
+    assert not df.duplicated(subset=key).any(), "duplicate Kaggle keys"
+    want = {(c["system"], c["consumer"], c["model"], q, s)
+            for c in spec["cells"] for q in spec["queries"] for s in spec["seeds"]}
+    assert set(map(tuple, df[key].astype(str).values.tolist())) == \
+        set(map(lambda t: tuple(map(str, t)), want)), "identifier coverage mismatch"
+    if job["gate"] == "full-overlap":
+        loc = _pd.read_parquet(ROOT / "runs" / "v3main_tracka" / "pilot_local_rerun.parquet")
+        assert len(loc) == 100 and not loc.duplicated(subset=key).any(), len(loc)
+        ref = loc
+    elif job["gate"] == "sample-5pct":
+        # Seeded 5% sample (min 50 rows) re-run locally at HEAD; same tolerance.
+        import sys as _s
+        _s.path.insert(0, str(ROOT))
+        _s.path.insert(0, str(ROOT / "tools"))
+        from run_controllerB_v3main import _work as _bw
+        bel = _pd.concat([_pd.read_parquet(
+            ROOT / "results" / "v3main" / f"beliefs_{mm}.parquet")
+            for mm in ("Qwen_Qwen3-8B-AWQ", "Qwen_Qwen3-14B-AWQ")],
+            ignore_index=True)
+        rng = __import__("numpy").random.default_rng(12345)
+        idx = rng.choice(len(df), size=max(50, len(df) // 20), replace=False)
+        samp = df.iloc[idx]
+        rows = []
+        for _, r in samp.iterrows():
+            b = bel[(bel["system"] == r["system"]) & (bel["consumer"] == r["consumer"]) &
+                    (bel["model"] == r["model"]) & (bel["k"] == 3) &
+                    (bel["query_id"] == r["query_id"])]
+            assert len(b) >= 1, (r["system"], r["consumer"], r["model"], r["query_id"])
+            b = b.iloc[0]
+            probs = (b["p_normal"], b["p_supplier_delay"], b["p_demand_surge"])
+            rows.append(_bw(("belief", r["system"], r["consumer"], r["model"],
+                             r["query_id"], r["true_regime"], probs, r["seed"])))
+        ref = _pd.DataFrame(rows)
+        print(f"sample gate: re-ran {len(ref)} rows locally", flush=True)
+    else:
+        raise SystemExit(f"unknown gate {job['gate']}")
+    mg = df.merge(ref[key + ["profit"]].drop_duplicates(subset=key),
+                  on=key, suffixes=("", "_local"))
+    assert len(mg) == (len(df) if job["gate"] == "full-overlap" else len(ref)), \
+        "identifier mismatch on gate join"
     d = (mg["profit"] - mg["profit_local"]).abs()
     rel = d / mg["profit_local"].abs().clip(lower=1e-12)
     bad = ((d > 1e-6) | (rel > 1e-9)).sum()
-    print(f"profit gate: n={len(mg)} max_abs={d.max():.2e} max_rel={rel.max():.2e} "
-          f"violations={bad}")
+    print(f"profit gate ({job['gate']}): n={len(mg)} max_abs={d.max():.2e} "
+          f"max_rel={rel.max():.2e} violations={bad}")
     assert bad == 0, f"{bad} tolerance violations (frozen tol: 1e-6 abs + 1e-9 rel)"
-    print("verify: tracka sim pilot ok")
+    print("verify: tracka sim shard ok")
 
 
 def _verify_agentickprobe(dest, job):

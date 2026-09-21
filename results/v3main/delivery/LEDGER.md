@@ -456,3 +456,18 @@ the vacuous-bound + no-utility failures).
 (d) Agentick Kaggle probe: COMPATIBLE (git present, pinned source install,
 GoToGoal x 3 modes + oracle run, 0.29 min). Dose-response offload viable;
 kept local until pilot pattern proven (now proven).
+
+## 23. Track A Kaggle scale-up VERIFIED (6 shards, 24k eps, CPU-only, GPU quota untouched)
+
+Base-stock x {dense, hybrid, random, inject-contra, stale-swap, drop-decisive}
+x 5 strata x k=3 x 160 test queries x 5 seeds (4000 eps/shard) via template-
+generated kernels (tools/gen_tracka_shards.py) + per-shard JOBS entries +
+seeded-5% local-rerun sample gates (seed 12345, min 50 rows, frozen tol).
+All 6 shards: structural + manifest + identifier-coverage checks pass;
+sample gates 200 rows each, max_abs ~1e-12, 0 violations everywhere.
+Debugged en route (recorded, no tolerance touched): dataset version
+propagation race (canary re-push), C0 twin rows across belief files
+(mirrors load_beliefs_dedup; pilot unaffected, C1-only). Max 5 concurrent
+CPU sessions observed (b6 queued behind) — the "maximum safe" bound.
+Pilot (100/100 exact) + scale (1200/1200 sampled exact) = cross-machine
+CPU-sim identity PROVEN at ~25k episodes.

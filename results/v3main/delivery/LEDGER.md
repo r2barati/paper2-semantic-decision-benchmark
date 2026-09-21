@@ -402,3 +402,26 @@ validity leg of the A* package is therefore carried, if at all, by future
 work with a competent fixed policy — proposed, not executed. V3 untouched.
 Files: theory/{AGENTICK_HARD.md,agentick_hard_raw.json,
 agentick_hard_verdict.json}, tools/agentick_hard.py.
+
+## 21. Two-track freeze: Step-0 autopsy + DESIGN-TRACKA + DESIGN-VHAT2 (no computation)
+
+Step0 (STEP0_AUTOPSY.md): F1 residual dominance (98% after stratum+position;
+query largest marginal 8.9%); F2 zero-inflation split (C0 71% exact-0 vs C3
+~0%; tails carry 94% SS); F3 heteroscedastic conformal failure (row SD 74.5
+vs cluster-mean 15.0; per-stratum Q needs 24-49 vs pooled 18.7); F4
+threshold collapse (dev-90th -> test-95th; 97% non-selective drops);
+F5 cross-stratum independence (same evidence, near-independent labels;
+sign flips). Pooled-Q failure described as structural ON THESE DATA (no
+general impossibility language).
+Track A (DESIGN-TRACKA.md): internal-robustness matrix (3 confirmatory
+contrast families w/ frozen interaction estimands, rest descriptive) +
+Agentick dose-response (authored BFS, forbidden-reads checklist, k in
+{full,3,1,0}, monotonic test, planner gate >=80% over 10 seeds, modest
+causal-interface claim) + protocol packaging. Zero new LLM.
+Track B (DESIGN-VHAT2.md): "cluster-conformal Vhat2 repair" (Mondrian
+considered-and-rejected with n=13 math); factored GBM + position one-hots
++ Shat-on-dBhat; corrected one-sided cluster-max chain
+(S_c=max(Vhat-V), finite-sample quantile, alpha=0.1); B2 = development-only
+(coverage >=0.85, selectivity band, gated-J CI). Untouched bank is the only
+confirmatory path. Bidirectional data/claim firewall frozen.
+Files: theory/{STEP0_AUTOPSY,DESIGN-TRACKA,DESIGN-VHAT2}.md.

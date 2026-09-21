@@ -471,3 +471,25 @@ propagation race (canary re-push), C0 twin rows across belief files
 CPU sessions observed (b6 queued behind) — the "maximum safe" bound.
 Pilot (100/100 exact) + scale (1200/1200 sampled exact) = cross-machine
 CPU-sim identity PROVEN at ~25k episodes.
+
+## 24. Agentick dose-response: principle CONFIRMED externally (frozen DESIGN-TRACKA A2)
+
+Authored fixed policies (Sokoban BFS push-planner; SeqMem record-latch +
+revisit; identical rule per task across modes; valid_actions only) x
+{ascii, language, state_dict} x dose k in {full,3,1,0} (radius masking of
+parsed entities) x 10 oracle-solved seeds per task (zero replacements) +
+random floor + oracle normalization. Competence gate 10/10 both tasks.
+CPU-only, isolated venv, never committed.
+Outcome: monotone ONS degradation with masking in full-parse modes —
+Sokoban ascii/state 1.00 -> 0.40 (deg CI [0.3,0.9]) -> 0.00/0.00 (CIs
+[1.0,1.0]); SeqMem ascii 0.90/state 1.00 -> 0.00 at every masked level
+(CIs exclude 0). Language flat 0.00 at ALL doses both tasks (parse 100%
+— interface-partiality, not parser failure). Per DESIGN A2: dose effect
+is primary (slopes, not linearity); cross-format is secondary (level
+shift). H-primary HOLDS on both tasks. External validity leg now reads:
+interface information causally alters sequential value under fixed policy,
+in two independent sequential domains — the inventory consumer-dependence
+finding generalizes as an interface principle, with representation format
+acting through information content available to a fixed consumer.
+V3 frozen matrix untouched.
+Files: theory/agentick_dose_{raw,verdict}.json, tools/agentick_dose.py.

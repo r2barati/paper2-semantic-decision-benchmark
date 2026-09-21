@@ -1,0 +1,2782 @@
+{
+ "tasks": [
+  "SokobanPush-v0",
+  "SequenceMemory-v0"
+ ],
+ "modes": [
+  "ascii",
+  "language",
+  "state_dict"
+ ],
+ "doses": [
+  "full",
+  3,
+  1,
+  0
+ ],
+ "reward": "dense",
+ "episodes": [
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SokobanPush-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 3,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 1,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": 0,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 3,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 1,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": 0,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 3,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 1,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 0,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 1,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 2,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 3,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 4,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 5,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 6,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 7,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 8,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 1.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": 0,
+   "seed": 9,
+   "consumer": "policy"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "ascii",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "language",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 0,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 1,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 2,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 3,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 4,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 5,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 6,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 7,
+   "consumer": "random"
+  },
+  {
+   "return": 0.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 8,
+   "consumer": "random"
+  },
+  {
+   "return": 1.0,
+   "parse_rate": 0.0,
+   "task": "SequenceMemory-v0",
+   "mode": "state_dict",
+   "dose": "full",
+   "seed": 9,
+   "consumer": "random"
+  }
+ ],
+ "competence": {
+  "SokobanPush-v0": {
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "replaced": [],
+   "full_parse_solves": 10,
+   "gate_pass": true
+  },
+  "SequenceMemory-v0": {
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "replaced": [],
+   "full_parse_solves": 10,
+   "gate_pass": true
+  }
+ },
+ "oracle_returns": {
+  "SokobanPush-v0": {
+   "0": 1.0,
+   "1": 1.0,
+   "2": 1.0,
+   "3": 1.0,
+   "4": 1.0,
+   "5": 1.0,
+   "6": 1.0,
+   "7": 1.0,
+   "8": 1.0,
+   "9": 1.0
+  },
+  "SequenceMemory-v0": {
+   "0": 1.0,
+   "1": 1.0,
+   "2": 1.0,
+   "3": 1.0,
+   "4": 1.0,
+   "5": 1.0,
+   "6": 1.0,
+   "7": 1.0,
+   "8": 1.0,
+   "9": 1.0
+  }
+ }
+}

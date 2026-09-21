@@ -425,3 +425,34 @@ considered-and-rejected with n=13 math); factored GBM + position one-hots
 (coverage >=0.85, selectivity band, gated-J CI). Untouched bank is the only
 confirmatory path. Bidirectional data/claim firewall frozen.
 Files: theory/{STEP0_AUTOPSY,DESIGN-TRACKA,DESIGN-VHAT2}.md.
+
+## 22. Track A Kaggle pilot VERIFIED + integrity finding + Track B2 outcome
+
+(a) Kaggle CPU-sim pilot (BeliefBaseStock x bm25/rerank x C1-8B x 10 test
+queries x 5 seeds = 100 eps) verified end-to-end after 5 kernel versions:
+flat dataset attach (basename matching + package reconstruct), exact pinned
+deps (numpy 1.26.4/pandas 2.3.3/pyarrow 21.0.0/scipy 1.13.1/sklearn 1.6.1;
+stock resolver keeps numpy>=2 and stale sys.modules shadows reinstalls --
+both fixed), spawn-safe top-level worker, self-describing-record hash
+circularity fixed. Profit gate vs fresh local HEAD re-run (100 eps):
+n=100 max_abs=4.55e-13 max_rel=3.66e-16 violations=0 (frozen tol 1e-6 abs +
+1e-9 rel, never loosened). Cross-machine CPU-sim path PROVEN; scale-up
+authorized on this pattern with per-shard 5% local-rerun sample gates.
+GPU quota untouched (gpu=False throughout).
+(b) INTEGRITY FINDING (pre-existing, frozen file untouched):
+results/v3main/sim_controllerB/episodesB.parquet (committed at a3e2652)
+appends reruns with disagreeing profits for identical keys (4296/7200 key-
+groups differ by up to 621). Published utilityB.json groupby-means therefore
+mix the runs. Flagged for the manuscript threats section; no frozen file
+altered. Pilot gate deliberately compares against a fresh HEAD re-run, not
+this file.
+(c) Track B2 (vhat2, local): (i) PASS (pooled rho CI [0.094,0.191], 4/5
+strata); (ii) PASS-vacuous (coverage 1.0 via max-residual Q=278.97);
+(iii) FAIL (selectivity 1.0 outside [0.05,0.95]; pooled diff CI
+[-6.685,3.453]). BUILD_BANK_PROPOSAL false. Per frozen DESIGN-VHAT2: no
+untouched-bank confirmation is proposed; claim ceiling stays development-
+only. The separated clauses worked as designed (validity pass did not mask
+the vacuous-bound + no-utility failures).
+(d) Agentick Kaggle probe: COMPATIBLE (git present, pinned source install,
+GoToGoal x 3 modes + oracle run, 0.29 min). Dose-response offload viable;
+kept local until pilot pattern proven (now proven).

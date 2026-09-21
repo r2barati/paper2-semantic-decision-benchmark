@@ -385,6 +385,33 @@ JOBS = {
         "dest_dir": "runs/v3main_lootest",
         "verify": "lootest14b",
     },
+    "tracka-sim-pilot": {
+        "slug": "paper2-tracka-sim-pilot",
+        "title": "Paper2 tracka sim pilot",
+        "script": "kaggle_kernel/p2_tracka_sim.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-tracka-sim-inputs",
+        "dataset_title": "paper2-tracka-sim-inputs",
+        "dataset_dir": "kaggle/inputs_tracka",
+        "outputs": ["episodes_tracka_pilot.parquet",
+                    "shard_manifest.json"],
+        "dest_dir": "runs/v3main_tracka",
+        "verify": "trackasim",
+    },
+    "agentick-probe": {
+        "slug": "paper2-agentick-probe",
+        "title": "Paper2 agentick probe",
+        "script": "kaggle_kernel/p2_agentick_probe.py",
+        "gpu": False,
+        "internet": True,
+        "dataset_slug": "paper2-agentick-inputs",
+        "dataset_title": "paper2-agentick-inputs",
+        "dataset_dir": "kaggle/inputs_agentick",
+        "outputs": ["agentick_probe.json"],
+        "dest_dir": "runs/v3main_agentick",
+        "verify": "agentickprobe",
+    },
 }
 
 POLL_SECONDS = 120
@@ -554,7 +581,9 @@ def cmd_fetch(job):
       "loopilot8b": _verify_loopilot8b,
       "loopilot14b": _verify_loopilot14b,
       "lootest8b": _verify_lootest8b,
-      "lootest14b": _verify_lootest14b}[job["verify"]](dest, job)
+      "lootest14b": _verify_lootest14b,
+      "trackasim": _verify_trackasim,
+      "agentickprobe": _verify_agentickprobe}[job["verify"]](dest, job)
     # install into runs/ (only after verification passes)
     (ROOT / job["dest_dir"]).mkdir(parents=True, exist_ok=True)
     for name in job["outputs"]:
@@ -926,6 +955,64 @@ def _verify_lootest14b(dest, job):
 def _verify_loopilot14b(dest, job):
     _verify_loopilot(dest, job, "Qwen/Qwen3-14B-AWQ",
                      "31c69efc29464b6bb0aee1398b5a7b50a99340c3")
+
+
+def _verify_trackasim(dest, job):
+    """Pilot CPU-sim shard verification (frozen 2026-09-21).
+    Discrete outputs + identifiers: EXACT equality. Floating profits:
+    preregistered tolerance |diff| <= 1e-6 AND relative <= 1e-9 vs local
+    frozen episodes. Never loosened post-hoc."""
+    import json as _j
+    import pandas as _pd
+    man = _j.loads((dest / "shard_manifest.json").read_text())
+    print("shard manifest:", {k: v for k, v in man.items() if k != "input_hashes"})
+    assert man["controller"] == "BeliefBaseStock", man
+    assert man["seal"] == "no qrels attached; guard passed", man
+    assert man["completed"] == man["total"] > 0, man
+    assert man["seeds"] == [60000 + i for i in range(5)], man
+    assert man["artifact"] == "episodes_tracka_pilot.parquet", man
+    for m, v in (("numpy", "1.26.4"), ("pandas", "2.3.3"), ("pyarrow", "21.0.0"),
+                 ("scipy", "1.13.1")):
+        assert man["dep_versions"][m] == v, (m, man["dep_versions"])
+    spec = _j.loads((ROOT / "kaggle" / "inputs_tracka" / "shard_pilot.json").read_text())
+    assert man["config_hash"] == _sha(ROOT / "kaggle" / "inputs_tracka" / "shard_pilot.json"), man
+    assert man["shard_id"] == spec["shard_id"], man
+    for f in ("controller_basestock.py", "env.py", "events.py", "metrics.py",
+              "interpreter.py", "sim_eval_v3main.py"):
+        frozen = _sha(ROOT / "src" / f)[:64]
+        assert man["input_hashes"][f] == frozen, (f,)
+    df = _pd.read_parquet(dest / "episodes_tracka_pilot.parquet")
+    assert len(df) == man["total"], (len(df), man["total"])
+    assert set(df["controller"].unique()) == {"BeliefBaseStock"}, df["controller"].unique()
+    assert (df["k"] == 3).all() and (df["rung"] == "belief").all()
+    # profit gate vs FRESH LOCAL re-run at current HEAD (ground truth for
+    # cross-machine identity). NOT vs sim_controllerB/episodesB.parquet:
+    # that frozen file appends reruns with disagreeing profits for identical
+    # keys (4296/7200 key-groups differ by up to 621; recorded as integrity
+    # finding, frozen file untouched). Local rerun: tools/tracka_local_rerun.py
+    loc = _pd.read_parquet(ROOT / "runs" / "v3main_tracka" / "pilot_local_rerun.parquet")
+    key = ["system", "consumer", "model", "query_id", "seed"]
+    assert len(loc) == 100 and not loc.duplicated(subset=key).any(), len(loc)
+    mg = df.merge(loc[key + ["profit"]], on=key, suffixes=("", "_local"))
+    assert len(mg) == len(df), "identifier mismatch: Kaggle/local keys differ"
+    d = (mg["profit"] - mg["profit_local"]).abs()
+    rel = d / mg["profit_local"].abs().clip(lower=1e-12)
+    bad = ((d > 1e-6) | (rel > 1e-9)).sum()
+    print(f"profit gate: n={len(mg)} max_abs={d.max():.2e} max_rel={rel.max():.2e} "
+          f"violations={bad}")
+    assert bad == 0, f"{bad} tolerance violations (frozen tol: 1e-6 abs + 1e-9 rel)"
+    print("verify: tracka sim pilot ok")
+
+
+def _verify_agentickprobe(dest, job):
+    import json as _j
+    rep = _j.loads((dest / "agentick_probe.json").read_text())
+    print("agentick probe:", {k: v for k, v in rep.items() if k != "modes"})
+    assert rep.get("commit") == "279fe5f34a35196ba3904550f911d5c8ade3c7c7", rep
+    if not rep.get("compatible"):
+        raise SystemExit(f"agentick incompatible: {rep.get('reason')}")
+    assert set(rep.get("modes", {})) == {"ascii", "language", "state_dict"}, rep
+    print("verify: agentick probe compatible")
 
 
 def cmd_test(job):

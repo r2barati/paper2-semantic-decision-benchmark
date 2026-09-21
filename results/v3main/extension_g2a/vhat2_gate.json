@@ -1,0 +1,57 @@
+{
+ "i": {
+  "CI": [
+   0.094,
+   0.191
+  ],
+  "per_stratum": {
+   "C0/none": 0.251,
+   "C1/Qwen3-8B-AWQ": 0.028,
+   "C1/Qwen3-14B-AWQ": -0.087,
+   "C3/Qwen3-8B-AWQ": 0.128,
+   "C3/Qwen3-14B-AWQ": 0.123
+  },
+  "strata_positive": 4,
+  "PASS": true
+ },
+ "ii": {
+  "coverage": 1.0,
+  "threshold": 0.85,
+  "Q_rank": [
+   13,
+   13
+  ],
+  "PASS": true
+ },
+ "iii": {
+  "selectivity": 1.0,
+  "selectivity_band": [
+   0.05,
+   0.95
+  ],
+  "QOOF": 278.9723,
+  "QOOF_rank": [
+   59,
+   64
+  ],
+  "CI": [
+   -6.685,
+   3.453
+  ],
+  "strata_detail": {
+   "C0/none": -2.92,
+   "C1/Qwen3-8B-AWQ": 8.72,
+   "C1/Qwen3-14B-AWQ": -14.61,
+   "C3/Qwen3-8B-AWQ": -3.8,
+   "C3/Qwen3-14B-AWQ": 3.47
+  },
+  "position_detail": {
+   "drop0": -3.19,
+   "drop1": -1.35,
+   "drop2": -1.32
+  },
+  "PASS": false
+ },
+ "BUILD_BANK_PROPOSAL": false,
+ "claim_ceiling": "development-only evidence; a pass PROPOSES untouched-bank confirmation, never confirmatory"
+}

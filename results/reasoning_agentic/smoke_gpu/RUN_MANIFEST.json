@@ -1,0 +1,49 @@
+{
+  "experiment": "EXP-P2-REASONING-AGENTIC-v1",
+  "stage": "gpu_smoke",
+  "kernel": "kaggle_kernel/p2_reasoning_smoke.py",
+  "kernel_version": 5,
+  "model": "Qwen/Qwen3-8B-AWQ",
+  "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+  "infrastructure_exception_I1": "internet=True (PyPI + HF Hub only; arms do zero network calls)",
+  "mechanical_fixes": [
+    "F-1 raw/parsed/text-hash capture",
+    "F-2 query logging",
+    "F-3 runtime diagnostics",
+    "F-4 checkpoint resume",
+    "F-5 shard id+text only",
+    "F-6 prompt SHA cross-check",
+    "S-1 pins vllm==0.11.0/openai==2.48.0/transformers==4.57.6",
+    "S-2 served+HF identity",
+    "S-3 network policy log",
+    "M-1 fail-fast server-death check",
+    "M-2 eager-dict belief_of fix",
+    "M-3 raw capture on failure"
+  ],
+  "prompt_shas": {
+    "A0": "b7918df675b8dfb3dcd5eea23b1e443dd808ed45854f6fb1cd132864a1f41929",
+    "A1": "379767ac619e2b0f1f82ef10c670d7a56c2c6a00c3c3a227f1c850ae7484e459",
+    "A2": "be27b4e5c2534197923b70433254139809211942f595f5df9df88b812a195f05",
+    "R0": "6ea1d37eb07e924a1aa9e807ea7f84c2910717bd559269373de9c86f949ceeef",
+    "A3H": "5aed22a9ee2717c4c9bdc3b905939d8be15ac23b23570b82b09e7f932fa7ca12",
+    "A3S": "6efdcf47a051cb69e73771264a08c7993973412205cb0b569b8a3b11b12abe7a"
+  },
+  "dataset": "kaggle/inputs_reasoning",
+  "gates": {
+    "G1_zero_parse_failures": "PASS",
+    "G2_zero_schema_failures": "PASS",
+    "G3_prob_vectors_sum_to_one": "PASS",
+    "G0_prompt_freeze": "PASS",
+    "G4_retrieval_budgets": "PASS",
+    "G5_leakage_seal": "PASS",
+    "G6_infer_once_per_warning": "PASS",
+    "G7_controller_parity": "PASS",
+    "G8_deterministic_replay": "PASS",
+    "G9_pathwise_hook": "PASS",
+    "G10_checkpoint_resume": "PASS"
+  },
+  "details": {
+    "prompt_sha_match": true,
+    "worst_replay_diff": 0.0
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "artifact_shas": {
+    "FINAL_BANK_V2.json": "27f1307dba25ef3fcbc5c4f8cb823c98df293671be1bc25738b328144d426979",
+    "TEST_SEAL.json": "32cd5f1822582cd74ca825c34943608cfe4ec405f117ab71a7e2de3ac3f90476",
+    "config_frozen.json": "fc3dd55c3a58e32630b889aeba397e6fc2fc98225eb0579dbf912935de232b7a",
+    "corpus.jsonl": "fb6228f32db37b72d62f60e977d269522a655baa95dcc0ee3605fd5cb7539382",
+    "dev2_shard.json": "cdcb3b343c8ce14d9ac056894a3c569cee175cb56ad3429eb481d6c4a9f90b36",
+    "smoke_shard.json": "5a8f87ba840cf4b192d93d9b0770f0593892b65be39665ecdc52ded372317c4e"
+  },
+  "code_shas": {
+    "experiments/reasoning_agentic/agent.py": "a04711c93123c503e76604037fad81c66c9b90cbf1aeddff2eeafec5a053349f",
+    "experiments/reasoning_agentic/arms.py": "2badb21c34c144818cf6d72b52eb7c937888e6cae6f310fdf4b1a43358db9e15",
+    "experiments/reasoning_agentic/evaluate.py": "cee8570e3d161b28679a417c2b9e2bdd2b1b433a347905672fd536efc5366813",
+    "experiments/reasoning_agentic/prompts.py": "f3ad521a405dea7eb4b793cf520d547ca1d0d3779ddd5328cd9de9adabc3d34e",
+    "experiments/reasoning_agentic/retriever.py": "753f40e584eb3ecd0f826544e46a97e3d56165db30a08c9afb41afeff5b8f3c0",
+    "experiments/reasoning_agentic/run_inference.py": "adbde8a5ed44d6ef4ab0921f893d94358fe9e1f0798414fd47183c20f0e3396b",
+    "experiments/reasoning_agentic/run_simulation.py": "905b768ff04407a68668f11c645d0fc41d42badad435eb7ae86bc11bd1e3aea5",
+    "experiments/reasoning_agentic/stats.py": "47cac9d53da04607b740f82dc12dce5180d9007fd32188e487ba3a69af56de1b",
+    "kaggle_kernel/p2_reasoning_smoke.py": "63c238e9d336e585e69e97addaf5e236268977441034fa11e55aee2b483864d5",
+    "scripts/run_reasoning_dev_pilot.py": "21b12a90cd815037ed9b09207e5cd91b772facdc88e762521ea869389d1daff7",
+    "scripts/smoke_reasoning_local.py": "8f653192d6e3aee355d55169f5ebb6f8c6f8f6baa2cddfc3a3aefec3762195925",
+    "scripts/verify_reasoning_gpu_smoke.py": "c827e2668f00a195d6d9843e0dea89611a79a0e10d7feca1e7ee4b0b1cbdd7d3",
+    "tests/test_final_reasoning_bank.py": "7f76838933ac062d1fc24249540918e9ed6a6834b48a27625f46072c81b8f0aa"
+  },
+  "experiment": "EXP-P2-REASONING-AGENTIC-v1.1",
+  "kernel_note": "script hash identical since the dev2 push (v5 gate run); kernel version numbers on Kaggle differ, code does not",
+  "stage": "freeze"
+}

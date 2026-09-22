@@ -1,0 +1,28 @@
+{
+  "warnings": [
+    {
+      "warning_id": "cd_clear_1",
+      "text": "URGENT: Our primary warehouse is shutting down for maintenance starting period 20. Lead times will increase from 4 to 8 periods for approximately 10 periods. Plan inventory accordingly."
+    },
+    {
+      "warning_id": "cd_moderate_1",
+      "text": "Supplier update: Some disruption expected around period 20. Lead times may increase significantly \u2014 possibly doubling. Duration unclear but likely several weeks."
+    },
+    {
+      "warning_id": "cs_clear_1",
+      "text": "CONFIRMED: Major client contract signed. Starting period 20, demand will increase from 8 to 14 units per period. This elevated demand is expected to persist for 10 periods. Ensure adequate stock levels."
+    },
+    {
+      "warning_id": "cs_moderate_1",
+      "text": "Sales pipeline update: A large opportunity is closing. If it comes through around period 20, demand could jump significantly above current levels. Exact volume uncertain."
+    },
+    {
+      "warning_id": "cn_clear_1",
+      "text": "STATUS UPDATE: All supply chain operations running normally. No disruptions expected in the next 20 periods. Lead times stable at 4 periods. Demand forecast unchanged at 8 units per period."
+    },
+    {
+      "warning_id": "cn_moderate_1",
+      "text": "Routine update: Operations continuing as expected. Minor seasonal fluctuations possible but nothing material. Lead times and demand remain at normal levels."
+    }
+  ]
+}

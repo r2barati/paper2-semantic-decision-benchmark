@@ -1,0 +1,37 @@
+{
+  "track": "EXP-P2-REASONING-AGENTIC-v1",
+  "stage": "dev_pilot",
+  "dev_warnings": 12,
+  "seeds": [
+    62100,
+    62101,
+    62102,
+    62103,
+    62104,
+    62105,
+    62106,
+    62107,
+    62108,
+    62109,
+    62110,
+    62111,
+    62112,
+    62113,
+    62114
+  ],
+  "arms": [
+    "A0",
+    "A1",
+    "A2",
+    "R0",
+    "A3",
+    "NoInfo",
+    "RuleBased",
+    "PerfectSemantic"
+  ],
+  "episodes": 1440,
+  "llm_calls_new": 0,
+  "llm_calls_reused": 84,
+  "gate_G_pathwise_theorem": "PASS",
+  "elapsed_s": 357.8
+}

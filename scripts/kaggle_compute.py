@@ -510,6 +510,34 @@ JOBS = {
         "dest_dir": "runs/v3main_agentick",
         "verify": "agentickprobe",
     },
+    "reasoning-smoke": {
+        "slug": "paper2-reasoning-smoke",
+        "title": "Paper2 reasoning smoke",
+        "script": "kaggle_kernel/p2_reasoning_smoke.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "paper2-reasoning-inputs",
+        "dataset_title": "paper2-reasoning-inputs",
+        "dataset_dir": "kaggle/inputs_reasoning",
+        "outputs": ["cache_reasoning_smoke.zip",
+                    "smoke_manifest.json"],
+        "dest_dir": "runs/reasoning_agentic",
+        "verify": "reasoningsmoke",
+    },
+    "reasoning-devpilot": {
+        "slug": "paper2-reasoning-devpilot",
+        "title": "Paper2 reasoning devpilot",
+        "script": "kaggle_kernel/p2_reasoning_smoke.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "paper2-reasoning-dev2-inputs",
+        "dataset_title": "paper2-reasoning-dev2-inputs",
+        "dataset_dir": "kaggle/inputs_reasoning_dev2",
+        "outputs": ["cache_reasoning_smoke.zip",
+                    "smoke_manifest.json"],
+        "dest_dir": "runs/reasoning_agentic_dev2",
+        "verify": "reasoningsmoke",
+    },
 }
 
 POLL_SECONDS = 120
@@ -681,7 +709,8 @@ def cmd_fetch(job):
       "lootest8b": _verify_lootest8b,
       "lootest14b": _verify_lootest14b,
       "trackasim": _verify_trackasim,
-      "agentickprobe": _verify_agentickprobe}[job["verify"]](dest, job)
+      "agentickprobe": _verify_agentickprobe,
+      "reasoningsmoke": _verify_reasoningsmoke}[job["verify"]](dest, job)
     # install into runs/ (only after verification passes)
     (ROOT / job["dest_dir"]).mkdir(parents=True, exist_ok=True)
     for name in job["outputs"]:
@@ -1147,6 +1176,34 @@ def _verify_agentickprobe(dest, job):
         raise SystemExit(f"agentick incompatible: {rep.get('reason')}")
     assert set(rep.get("modes", {})) == {"ascii", "language", "state_dict"}, rep
     print("verify: agentick probe compatible")
+
+
+def _verify_reasoningsmoke(dest, job):
+    """GPU smoke fetch gate: zero failures, budgets exact, prompt SHAs match frozen DEV."""
+    import json as _j
+    import zipfile as _zf
+    man = _j.loads((dest / "smoke_manifest.json").read_text())
+    assert man["n_failures"] == 0, man["failures"]
+    assert man["gate_zero_parse_failures"] == "PASS", man
+    assert man["budgets"] == {"A0": 0, "A1": 0, "A2": 0, "R0": 1, "A3": 2}, man["budgets"]
+    assert man["n_warnings"] == 6, man
+    sys.path.insert(0, str(ROOT))
+    from experiments.reasoning_agentic.prompts import prompt_hashes
+    frozen = prompt_hashes()
+    got = man["prompt_shas"]
+    for k, h in (("A0", "A0_DIRECT_SYS"), ("A1", "A1_DELIB_SYS"), ("A2", "A2_VERIFY_SYS"),
+                 ("R0", "R0_SYNTH_SYS"), ("A3H", "A3_HYPO_SYS"), ("A3S", "A3_SYNTH_SYS")):
+        assert got[k] == frozen[h], (k, got[k], frozen[h])
+    for row in man["call_logs"]:
+        cap = {"A0": 0, "A1": 0, "A2": 0, "R0": 1, "A3": 2}[row["arm"]]
+        if row["arm"] == "A3":
+            assert 1 <= row["retrieval_calls"] <= cap, row
+        else:
+            assert row["retrieval_calls"] == cap, row
+    with _zf.ZipFile(dest / "cache_reasoning_smoke.zip") as z:
+        keys = {n[:-5] for n in z.namelist() if n.endswith(".json")}
+    assert len(keys) == 30, keys  # 6 warnings x 5 arms
+    print(f"verify: reasoning smoke ok ({len(keys)} beliefs, 0 failures, prompts match frozen DEV)")
 
 
 def cmd_test(job):

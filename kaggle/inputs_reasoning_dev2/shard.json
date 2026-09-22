@@ -1,0 +1,28 @@
+{
+  "warnings": [
+    {
+      "warning_id": "cd_moderate_2",
+      "text": "We have been notified of potential delays from our main distributor. Starting around period 20, deliveries could take longer than usual. The extent of the delay has not been fully communicated yet."
+    },
+    {
+      "warning_id": "cd_vague_1",
+      "text": "There are rumblings in the supply chain that things might slow down in the coming weeks. Nothing confirmed yet but worth keeping an eye on."
+    },
+    {
+      "warning_id": "cs_moderate_2",
+      "text": "Market signals suggest a demand uptick beginning mid-quarter. Customer inquiries are up. We may see order volumes increase by 50 to 80 percent for several weeks."
+    },
+    {
+      "warning_id": "cs_vague_1",
+      "text": "Market conditions look favorable. Consumer sentiment is rising and there are early signs of increased purchasing activity. No specific forecast changes yet."
+    },
+    {
+      "warning_id": "cn_moderate_2",
+      "text": "Weekly status: All systems nominal. Supplier relationships stable. No changes to delivery schedules reported. Standard planning assumptions should hold."
+    },
+    {
+      "warning_id": "cn_vague_1",
+      "text": "Things are generally quiet on the supply front. Nothing unusual to report at this time. We will keep you posted if anything changes."
+    }
+  ]
+}

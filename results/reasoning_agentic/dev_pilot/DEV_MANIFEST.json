@@ -1,0 +1,60 @@
+{
+  "dev_seeds": [
+    62100,
+    62101,
+    62102,
+    62103,
+    62104,
+    62105,
+    62106,
+    62107,
+    62108,
+    62109,
+    62110,
+    62111,
+    62112,
+    62113,
+    62114
+  ],
+  "dev_selection_rule": "{clear_1, moderate_1, moderate_2, vague_1} per regime prefix (cd/cs/cn), frozen before inference",
+  "dev_warning_ids": [
+    "cd_clear_1",
+    "cd_moderate_1",
+    "cd_moderate_2",
+    "cd_vague_1",
+    "cn_clear_1",
+    "cn_moderate_1",
+    "cn_moderate_2",
+    "cn_vague_1",
+    "cs_clear_1",
+    "cs_moderate_1",
+    "cs_moderate_2",
+    "cs_vague_1"
+  ],
+  "model": {
+    "id": "Qwen/Qwen3-8B-AWQ",
+    "revision": "4da05a8edb55c6046cce958586c33b61da07bb79"
+  },
+  "prior_use_finding": "results/phase6/confirmation_template_manifest.json + regime_summary.csv confirm Exp-C ran all 36 templates; the 24 are held-out-for-this-track, not untouched",
+  "prompt_shas": {
+    "A0_DIRECT_SYS": "b7918df675b8dfb3dcd5eea23b1e443dd808ed45854f6fb1cd132864a1f41929",
+    "A1_DELIB_SYS": "379767ac619e2b0f1f82ef10c670d7a56c2c6a00c3c3a227f1c850ae7484e459",
+    "A2_VERIFY_SYS": "be27b4e5c2534197923b70433254139809211942f595f5df9df88b812a195f05",
+    "A3_HYPO_SYS": "5aed22a9ee2717c4c9bdc3b905939d8be15ac23b23570b82b09e7f932fa7ca12",
+    "A3_SYNTH_SYS": "6efdcf47a051cb69e73771264a08c7993973412205cb0b569b8a3b11b12abe7a",
+    "R0_SYNTH_SYS": "6ea1d37eb07e924a1aa9e807ea7f84c2910717bd559269373de9c86f949ceeef"
+  },
+  "retriever": {
+    "algorithm": "in-repo-BM25",
+    "b": 0.75,
+    "k1": 1.5,
+    "top_k": 3
+  },
+  "stage": "dev_pilot",
+  "test_bank": {
+    "n": 24,
+    "sha256": "32cd5f1822582cd74ca825c34943608cfe4ec405f117ab71a7e2de3ac3f90476",
+    "status": "held-out for this track; IDs sealed in local-only TEST_SEAL.json (IDs withheld: cd/cs/cn prefixes leak regime structure)"
+  },
+  "track": "EXP-P2-REASONING-AGENTIC-v1"
+}

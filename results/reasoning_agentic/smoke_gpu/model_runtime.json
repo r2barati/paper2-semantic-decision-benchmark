@@ -1,0 +1,46 @@
+{
+  "infra": {
+    "vllm_pin": "vllm==0.11.0",
+    "vllm_resolved": "0.11.0",
+    "openai_pin": "openai==2.48.0",
+    "openai_resolved": "2.48.0",
+    "transformers_resolved": "4.57.6",
+    "max_model_len": 4096,
+    "gpu_mem_util": 0.9,
+    "quantization": "awq",
+    "network_policy": "allowlisted infrastructure only: PyPI (pinned: vllm==0.11.0, openai==2.48.0, transformers==4.57.6) + Hugging Face Hub (model weight retrieval). openai==2.48.0) + Hugging Face Hub (model weight retrieval). Experiment arms A0/A1/A2/R0/A3 perform zero network calls; all LLM traffic targets local vLLM http://localhost:8000 only.",
+    "infra_exception_I1": "internet=True (see DESIGN \u00a79)"
+  },
+  "runtime": {
+    "gpu": {
+      "torch_cuda": true,
+      "device_name": "Tesla T4",
+      "device_count": 2,
+      "total_mem_GB": 15.64
+    },
+    "peak_mem": {
+      "peak_alloc_GB": 0.0
+    },
+    "vllm_pid": 78,
+    "vllm_startup_s": 195.0199475288391,
+    "health_polls": 14,
+    "served": {
+      "served_models": [
+        "Qwen/Qwen3-8B-AWQ"
+      ]
+    },
+    "hf_cache": {
+      "status": "error",
+      "error": "ImportError(\"cannot import name 'scan_cache' from 'huggingface_hub' (/usr/local/lib/python3.12/dist-packages/huggingface_hub/__init__.py)\")"
+    },
+    "latency_s": {
+      "n": 42,
+      "mean": 30.597239897364663,
+      "p50": 30.13651406764984,
+      "p95": 52.806765019893646,
+      "max": 64.96321725845337
+    },
+    "n_truncated": 0,
+    "elapsed_s": 1664.434443950653
+  }
+}

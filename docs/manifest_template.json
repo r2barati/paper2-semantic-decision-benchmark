@@ -1,0 +1,14 @@
+{
+  "generating_commit": "<full 40-char SHA, e.g. acae1fa...>",
+  "config_hash": "<sha of frozen config file(s)>",
+  "input_hashes": {
+    "<artifact path>": "<sha256>"
+  },
+  "seeds": "<explicit list or range, e.g. 3100-3129>",
+  "bootstrap_seed": "<int or null>",
+  "command": "<exact generating command>",
+  "data_split": "<DEV|TEST>",
+  "analysis_type": "<confirmatory|exploratory>",
+  "status": "<ACTIVE|FROZEN|SUPERSEDED|INVALIDATED>",
+  "notes": "<gate results, integrity flags, supersession pointer>"
+}

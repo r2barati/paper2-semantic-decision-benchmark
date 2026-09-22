@@ -1,0 +1,130 @@
+# Job registry — active compute jobs (mirror, not source of truth)
+# Source of truth for execution: scripts/kaggle_compute.py JOBS.
+# This file is an organizational pointer created Phase 1; do not edit JOBS here.
+# Track-B/VHAT2 is local-only by firewall design (no Kaggle entry).
+
+jobs:
+  - job: tracka-sim-pilot
+    slug: paper2-tracka-sim-pilot
+    script: kaggle_kernel/p2_tracka_sim.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_pilot.parquet, shard_manifest.json]
+    verify: trackasim
+    shard_spec: shard_pilot.json
+    gate: full-overlap
+    manifest: runs/v3main_tracka/shard_manifest.json
+
+  - job: tracka-sim-b1
+    slug: paper2-tracka-sim-b1
+    script: kaggle_kernel/p2_tracka_b1.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_b1.parquet, manifest_tracka_b1.json]
+    verify: trackasim
+    shard_spec: shard_b1.json
+    gate: sample-5pct
+    manifest: runs/v3main_tracka/manifest_tracka_b1.json
+
+  - job: tracka-sim-b2
+    slug: paper2-tracka-sim-b2
+    script: kaggle_kernel/p2_tracka_b2.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_b2.parquet, manifest_tracka_b2.json]
+    verify: trackasim
+    shard_spec: shard_b2.json
+    gate: sample-5pct
+    manifest: runs/v3main_tracka/manifest_tracka_b2.json
+
+  - job: tracka-sim-b3
+    slug: paper2-tracka-sim-b3
+    script: kaggle_kernel/p2_tracka_b3.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_b3.parquet, manifest_tracka_b3.json]
+    verify: trackasim
+    shard_spec: shard_b3.json
+    gate: sample-5pct
+    manifest: runs/v3main_tracka/manifest_tracka_b3.json
+
+  - job: tracka-sim-b4
+    slug: paper2-tracka-sim-b4
+    script: kaggle_kernel/p2_tracka_b4.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_b4.parquet, manifest_tracka_b4.json]
+    verify: trackasim
+    shard_spec: shard_b4.json
+    gate: sample-5pct
+    manifest: runs/v3main_tracka/manifest_tracka_b4.json
+
+  - job: tracka-sim-b5
+    slug: paper2-tracka-sim-b5
+    script: kaggle_kernel/p2_tracka_b5.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_b5.parquet, manifest_tracka_b5.json]
+    verify: trackasim
+    shard_spec: shard_b5.json
+    gate: sample-5pct
+    manifest: runs/v3main_tracka/manifest_tracka_b5.json
+
+  - job: tracka-sim-b6
+    slug: paper2-tracka-sim-b6
+    script: kaggle_kernel/p2_tracka_b6.py
+    dataset_slug: paper2-tracka-sim-inputs
+    dataset_dir: kaggle/inputs_tracka
+    dest_dir: runs/v3main_tracka
+    outputs: [episodes_tracka_b6.parquet, manifest_tracka_b6.json]
+    verify: trackasim
+    shard_spec: shard_b6.json
+    gate: sample-5pct
+    manifest: runs/v3main_tracka/manifest_tracka_b6.json
+
+  - job: agentick-probe
+    slug: paper2-agentick-probe
+    script: kaggle_kernel/p2_agentick_probe.py
+    dataset_slug: paper2-agentick-inputs
+    dataset_dir: kaggle/inputs_reasoning
+    dest_dir: runs/v3main_agentick
+    outputs: [agentick_probe.json]
+    verify: agentickprobe
+    manifest: runs/v3main_agentick/agentick_probe.json
+
+  - job: reasoning-smoke
+    slug: paper2-reasoning-smoke
+    script: kaggle_kernel/p2_reasoning_smoke.py
+    dataset_slug: paper2-reasoning-inputs
+    dataset_dir: kaggle/inputs_reasoning
+    dest_dir: runs/reasoning_agentic
+    outputs: [cache_reasoning_smoke.zip, smoke_manifest.json]
+    verify: reasoningsmoke
+    manifest: runs/reasoning_agentic/smoke_manifest.json
+
+local_only:
+  - job: track-b-vhat2
+    code: tools/vhat2_train.py
+    inputs:
+      - data/v3/splits/splits.json
+      - results/v3main/sim/episodes.parquet
+      - results/v3main/beliefs_Qwen_Qwen3-8B-AWQ.parquet
+      - results/v3main/beliefs_Qwen_Qwen3-14B-AWQ.parquet
+      - kaggle/inputs_loo/
+      - kaggle/inputs_loo_test/
+      - runs/v3main/qwen3emb_main_vectors.npz
+      - results/v3main/extension_g2a/loo_*.parquet
+      - results/v3main/extension_g2a/c1_loo_*.parquet
+      - results/v3main/extension_g2a/vhat_oof.parquet
+    outputs:
+      - results/v3main/extension_g2a/vhat2_oof.parquet
+      - results/v3main/extension_g2a/vhat2_heads.pkl
+      - results/v3main/extension_g2a/vhat2_model.json
+      - results/v3main/extension_g2a/vhat2_gate.json
+    note: Local-only by firewall design; no Kaggle JOBS entry.

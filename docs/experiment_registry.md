@@ -1,0 +1,55 @@
+# Experiment registry
+
+One row per experiment. Two independent dimensions (do not conflate):
+
+- `lifecycle_status`: `ACTIVE` / `FROZEN` / `EXPLORATORY` / `SUPERSEDED` / `INVALIDATED`
+- `evidence_status`: `CONFIRMATORY` / `CONFIRMATORY WITH STATED LIMITATION` /
+  `REPLICATED` / `VALID EXPLORATORY` / `POST-HOC / HYPOTHESIS-GENERATING` /
+  `COMPUTED BUT NOT YET VALIDATED` / `INTEGRITY-FLAGGED` / `FAILED EXPERIMENT` /
+  `INVALIDATED` / `DESIGN ONLY`
+
+Authoritative counts: `docs/ACCOUNTING.md`. Authoritative numbers:
+`SCIENTIFIC_LEDGER.md` (R/C/M/S) and `results/v3main/delivery/LEDGER.md` (V3).
+Status pointers: `experiments/ACTIVE_README.md`, `results/FROZEN_README.md`,
+`results/SUPERSEDED_README.md`, `results/INVALIDATED_README.md`.
+
+## Frozen benchmark family (v2.0)
+
+| ID | hypothesis | lifecycle | evidence | design commit | code | inputs | seeds | outputs | result | claim | citable? |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| C (Phase 7 controlled) | Cheap TF-IDF + probability quality vs text-free operation | FROZEN | CONFIRMATORY WITH STATED LIMITATION (Rule, Cal direction); POST-HOC (Argmax, Shuffled) | v2.0 2026-09-07 (`39e311e` adds controls) | `src/experiment_phase7.py`, `src/classical_baseline.py`, `src/notext_controls.py` | train 18 warnings → test 36 held-out; dev 2500–2509 for Tuned | 20 (2000–2019), 720 worlds, 8640 eps | `results/phase7_classical_baseline/` (`experiment_manifest.json`, `aggregate_sivr.csv`) | Rule +205.74 SIVR 0.779 Holm; Argmax 0.773; Cal 0.338; Fold 0.154; Shuffled −0.062 ns | Accuracy/calibration ≠ value; label-only can beat probabilities | Rule + Cal direction yes, with fixed-controller/synthetic/3-family limits |
+| M (Phase 8B multi-echelon) | Held-out wording + complexity transfer, no leakage | FROZEN | CONFIRMATORY WITH STATED LIMITATION | v2.0 repair `39e311e` (controls post-hoc) | `src/experiment_phase8b.py`, `src/gym_adapter.py` | 24 held-out cs/cn; `gym-invmgmt==0.2.1` Serial L[0,4,4] mu10×2 T30 | 30 (3100–3129) disjoint, dev 3200–3229, 720 worlds, 8640 eps | `results/phase8b_gym_confirmation/` (`seed_manifest.json`, `linguistic_split_manifest.json`, `notext_tuning.json`) | Rule +100.97 SIVR 1.198 Holm; Const/Tuned 1.10; Oracle ref; gpt-4o 0.797 (balanced Holm, prior n.s.) | Transfer across language + dynamics; reference not bound (SIVR>1) | Yes, with SIVR>1 disclaimer + synthetic limits |
+| S (Phase 9A supply-side) | Cross-mechanism transfer (demand→capacity) | FROZEN | CONFIRMATORY WITH STATED LIMITATION (Const comparator); INTEGRITY-FLAGGED (all-template Rule); POST-HOC (test-only) | `3de16d9` + v2.0 repair | `src/experiment_phase9a.py`, `src/gym_adapter9.py`, `src/capacity_drop_templates.py` | 16 templates (9 train + 7 test); divergent C90→30 | 30 (4000–4029), dev 4200–4229, 480 worlds, 5760 eps | `results/phase9a_capacity_confirmation/` + `correction_audit/phase9a_test_templates_only.csv` | Const +391.53 SIVR 3.473 Holm; all-template Rule 1.006 (train-contaminated); test-only Rule 0.476, Cal 0.027, Shuffled 0.359 | Fixed-mapping transfer; text-free dominance falsifies broad claim | Const yes as comparator; test-only exploratory |
+| B (Phase 9B boundary) | One-factor robustness, descriptive | FROZEN | VALID EXPLORATORY | v2.0 pairing fix | `src/experiment_phase9b.py` | 6 variants (short/long lead, backlog-off, low/high noise) | 10 (4100–4109), 160 worlds, 7680 eps | `results/phase9b_robustness/` (`cross_variant_comparison.csv`) | baseline/high/low VALID (+97–+116); long/lost/short NEGATIVE OIV † | Boundary map 3/6 hold | Descriptive only; ratios need † + signed guard |
+| R (retrieval) | nDCG predicts utility; same ranking both consumers | FROZEN | VALID EXPLORATORY (interaction/oracle/reversal); COMPUTED BUT NOT YET VALIDATED (corr) | Created `39e311e` post-hoc, no pre-reg | `src/experiment_retrieval.py`, `src/retrieval.py`, `src/warning_corpus.py` | per-episode pools (2 own + 10 wrong-entity + 3 stale + 9 routine), k1/3/5 | 30 (5000–5029), 30 worlds, 3240 eps | `results/retrieval/` (`retrieval_summary.csv`, `retrieval_episodes.csv`, `rank_agreement.csv`, `frozen_embeddings.json`; no manifest) | k3 Rule +11–+48 vs Cal −74–−1; oracle +60.6/+69.0 both; reversal 0.00 vs 0.33 | Same evidence flips sign by consumer | Exploratory; synthetic + one-family limits |
+
+## V3 frozen matrix
+
+| ID | hypothesis | lifecycle | evidence | design commit | code | inputs | seeds | outputs | result | claim | citable? |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| v3_main | Q1–Q7 + P1–P3: relevance→belief→utility chain | FROZEN | CONFIRMATORY WITH STATED LIMITATION (retrieval test, Q2, Q3 cells, Q4 artifact, Q5 pattern, sim C1-harm + oracle-value, gaps); VALID EXPLORATORY (Q1 direction, Q6 parity, Q7 wrong-signed, gym, n.s. cells) | `configs/v3/FINAL_FREEZE.md` 2026-09-14; squash `a3e2652` 2026-09-18 | `src/beliefs_v3main.py`, `src/consumers_v3.py` (C0/C1/C3), `src/arms_v3.py`, `src/sim_eval_v3main.py`, `src/semantic_analysis_v3main.py` | `data/v3/` 200Q/4000D dev40/test160; prompts C1 66e6890b C3 5966cadd | sim 60000–60004 (108k); gym same 5 (107k); B5000 + Holm105 | `results/v3main/belief_manifest.json` (2×12600) → `semantic/` → `sim/` → `gym/` → `delivery/LEDGER.md` | nDCG 0.115/0.175/0.182/0.183; Q3 3/10 Holm C0-vs-LLM; Q4 +0.36–0.42; sim C1 −109 vs C3 −21 vs C0 −12, oracle +75–178, 71/105 Holm | Consumer-dependence + chain dissipation + control dominance | With open human-qrel gate stated; single bank; N≈137 |
+
+## V3 extensions (own DESIGN + seeds + Holm; never pooled into frozen matrix)
+
+| ID | hypothesis | lifecycle | evidence | design commit | code | inputs | seeds | outputs | result | claim | citable? |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| D0 | Transmissible belief-VoI exists (oracle-gated) | EXPLORATORY | CONFIRMATORY WITH STATED LIMITATION (pooled only); DESIGN ONLY (Gate-2) | same-commit `7de9843` | `tools/d0_tune_gate.py`, `tools/d0_eval_gate.py` | dev-40 tune → test-160 single touch | sim 60000–60004 replay | `extension_d0/d0_verdict.json` | pooled +77.3 [62.8,92.0] HOLDS; arm-gate FAILS; p=0.0 invalid | Existence-proof, not a policy | Pooled CI only |
+| G2A-0 | Zero-LLM positional VoI; C3 flat | EXPLORATORY | CONFIRMATORY WITH STATED LIMITATION | same-commit `03fc334` | `tools/g2a_loo.py`, `g2a_replay.py`, `g2a_contrast.py` | rerank k3 × C0/C3 | 600/600 exact, 3000/3000 replay | `extension_g2a/g2a_verdict.json` | C0 drop2 +22.58 [11.35,33.82]; C3 all cross 0 | C0 positional VoI | k3-rerank-only |
+| G2A-1 | C1 LOO VoI on dev | ACTIVE | CONFIRMATORY WITH STATED LIMITATION (dev only) | same-commit `6f5d338` | `kaggle_kernel/p2_loo_8b.py`, `p2_loo_14b.py` | dev40 sealed test; 240 calls | dev only, 400/400 exact | `runs/v3main_loo/` + `g2a1_verdict.json` | FIRE (14B/drop1 +37.67) | Dev signal only | Dev only |
+| G2FULL | (a)(b) doc-VoI; (c) deployable gap | FROZEN | CONFIRMATORY WITH STATED LIMITATION ((a)(b) + (c) as null) | proxy+design `81b4cb4` BEFORE test `4f22378` | `tools/g2f_proxy_screen.py`, `g2f_replay_test.py`, `g2f_stage4.py` | dev proxy frozen → test 960 calls, 63 clusters | 1600/1600 exact | `extension_g2a/g2full_stage4.json` | (a) +21.94 Holm0.0; (b) p0.0002; (c) −0.61 FAILS | Existence, not method | p=0.0 invalid; CIs valid |
+| VHAT/VHAT2 | Label-free VoI prediction → bank? | ACTIVE (VHAT2) | FAILED EXPERIMENT (bounded null) | VHAT `3a1b854→0d3c6b2`; VHAT2 `23202c1→083d7aa` | `tools/vhat_train.py`, `vhat2_train.py` | 3000 LOO labels, 80/20 calib | cluster CV | `extension_g2a/vhat_gate.json` (BUILD_BANK:false), `vhat2_gate.json` | Deployable path ends | Null only |
+| Controller-B | Same beliefs, different controller | EXPLORATORY | INTEGRITY-FLAGGED (numbers); VALID EXPLORATORY (hypothesis) | No design doc | `tools/run_controllerB_v3main.py`, `src/controller_basestock.py` | frozen beliefs, 9 arms | 16.8k eps | `sim_controllerB/episodesB.parquet` + `utilityB.json` | BM25/C1 flipped vs main | Pairing-dependence hypothesis | Numbers unusable per `LEDGER §22b` |
+| selective | C3-abstain→NoInfo rescue? | EXPLORATORY | VALID EXPLORATORY | No design | `tools/run_selective_v3main.py` | frozen C3 abstain flags | 20k eps | `sim_selective/selective_utility.json` | Descriptive | No rescue claim | No gate |
+| actions/selection | A0 fidelity; selectors; A2 edges | EXPLORATORY | REPLICATED (A0 exact; H2); POST-HOC (H1a/H1b nulls); VALID EXPLORATORY (A2) | same-commit `e106238` | `tools/run_actions_v3main.py`, `a1/a2/a3_*.py` | 7 sys × 5 cons × k3 × 160 × 5 | B5000/perms | `extension_actions/`, `extension_selection/` | H1a dR0 FAILS; H2 F6.55 p0.0002 HOLDS | Bounded nulls + fidelity | — |
+| map/dead-zone | Occupancy explains C3-flat? | EXPLORATORY | CONFIRMATORY WITH STATED LIMITATION (theorem); POST-HOC (H1–H3 nulls) | Theory `847a0a4`; spec+verdict `b3b2991` | `tools/map_sweep.py` (120×861), `map_overlay.py` | 15 traj × 8 periods × 861 lattice | 15/15 exact | `theory/DEAD_ZONES.md`, `map_verdict.json` (H1–H3 false wrong-direction) | Theorem survives; occupancy refuted | Refined hypothesis design-only |
+| ladder R1–R5 | 5-rung frozen-data chain | EXPLORATORY | POST-HOC / HYPOTHESIS-GENERATING | same-commit `bd4993f` | `tools/ladder.py` | frozen C3 judgments, zero new LLM | n=4 systems | `theory/ladder_tables.json`, `ladder_verdict.json` (zero strong reversals; R2 saturated) | Descriptive | Low power |
+| TrackA | A1 matrix + dose + packaging | ACTIVE | REPLICATED (infra 24.1k); DESIGN ONLY (claims) | `DESIGN-TRACKA.md` `23202c1` → scale `6b0e936` | `tools/gen_tracka_shards.py`, `kaggle_kernel/p2_tracka*.py` | 6 shards × 5 strata × k3 × 160 × 5 | manifests completed==total, gates ~1e-12 | `runs/v3main_tracka/*.parquet` (unanalyzed; no `extension_tracka` verdict) | Infra proven | Robustness not executed |
+| Agentick | Bounds; interface causality | EXPLORATORY | FAILED EXPERIMENT (spikes); COMPUTED BUT NOT YET VALIDATED (dose) | Spikes same-commit; dose `23202c1→acae1fa` | `tools/agentick_spike.py`, `agentick_hard.py`, `agentick_dose.py` | n=5 STOP; dose 2 tasks×3 modes×10 seeds | parse 100%; competence 10/10 | `theory/agentick_*.json` (ceiling 1.0 / floor 0.2; dose monotone, language flat) | Bounds; dose provisional (no CIs, unpinned env) | Dose needs CI audit |
+| reasoning A0–A3 | A1−A0/A2−A1/R0−A2/A3−R0 | ACTIVE | FAILED EXPERIMENT (smoke) + DESIGN ONLY (contrasts) | No freeze (DESIGN + harness untracked) | `experiments/reasoning_agentic/*`, `kaggle_kernel/p2_reasoning_smoke.py` | 6 DEV warnings (test sealed) | 0 calls, 6 `KeyError('probabilities')` | `artifacts/.../smoke_manifest.json`; no results dir | Harness bug | No contrast citable |
+
+## Superseded (phenomena preserved in corrected tables; numbers not citable)
+
+| ID | lifecycle | evidence | pointer |
+|---|---|---|---|
+| Phase5 / 5.5 / 6 | SUPERSEDED | REPLICATED (phenomena) + INVALIDATED (numbers) | OIV direction, LLM gradient 4o≫mini≫3.5, regime-dependence → cite C/M |
+| Phase8A pilot | SUPERSEDED | VALID EXPLORATORY (pilot) + INVALIDATED (TFIDF=Perfect, fill `R/D`, CIs) | Surge gain + Normal-underperformance → cite 8B |

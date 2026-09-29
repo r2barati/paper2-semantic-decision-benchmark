@@ -1,0 +1,52 @@
+schema_version: 1
+amendment_id: sem2act-v5-kaggle-backend-v3-adia-reference
+status: blocked-before-canary
+effective_utc: 2026-09-26T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+parent_backend_amendment: versions/sem2act-v5/amendments/kaggle_backend_v2.yaml
+scope: execution-environment-only
+scientific_protocol_unchanged: true
+
+purpose: >-
+  Reuse the submission pattern of the locally verified ADIA GPU kernel after
+  resolving account identity and the Kaggle runtime-image mismatch. This
+  amendment is prospective only and has not authorized a result-bearing job.
+
+reference:
+  kernel: rezabarati2/adia-gpu-probe
+  result_sha256: 076d0d9c230c4a5ef333141a89f387df2796de0ad9a90ecad4e190d23e382685
+  observed_cuda: true
+  observed_device: Tesla T4
+  observed_torch: 2.10.0+cu128
+  submission_client: kagglesdk.ApiSaveKernelRequest
+  kernel_type: script
+  is_private: true
+  enable_gpu: true
+  machine_shape: historically_unset
+  enable_internet: false
+  dataset_source: rezabarati2/adia-structural-break-work
+  id_field: absent; req.slug only
+
+activation_requirements:
+  - siavashsimin independently demonstrates a usable GPU in a fresh Kaggle web-UI notebook with a manually selected accelerator
+  - if the UI canary fails, Kaggle is ineligible for v5 and no further SDK/CLI debugging is permitted
+  - a fresh non-expired credential for the ADIA owner rezabarati2 is required only if the ADIA submission mechanism itself is to be reproduced
+  - metadata pull or equivalent server-side confirmation of the reference submission fields
+  - only after GPU entitlement passes, an explicit prospective decision on using Kaggle's observed default runtime torch 2.10.0+cu128 versus installing and verifying the Sem2Act pinned torch 2.7.1+cu126
+  - new non-lockbox canary under the activated owner and runtime lock
+  - canary must pass actual CUDA allocation, device, package, and smoke gates
+  - no qrels, credentials, or private annotations in uploaded inputs
+
+current_blockers:
+  - current_token_owner: siavashsimin
+  - adia_reference_owner: rezabarati2
+  - independent_ui_entitlement_canary: pending
+  - current_token_cannot_read_private_adia_kernel: true
+  - v2_sdk_and_cli_canaries: CUDA unavailable
+  - v2_result_execution: blocked
+  - scientific_protocol_change: false
+
+failure_policy: >-
+  Do not launch a result-bearing job while any activation requirement is
+  unresolved. Do not alter prompts, models, decoding, controllers, inputs,
+  qrels, or analysis based on infrastructure observations.

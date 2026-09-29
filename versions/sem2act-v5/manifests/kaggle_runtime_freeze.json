@@ -1,0 +1,27 @@
+{
+  "amendment_sha256": "fcf42657d4112119992c1a8e9afdde48e825afc17eddc8f47c9f6bdf1734384a",
+  "failure_policy": "Any quota, lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed.",
+  "frozen_utc": "2026-09-26T06:27:06.136484+00:00",
+  "lock_id": "sem2act-v5-kaggle-runtime-v2",
+  "lock_sha256": "08ece6cb58895df945dfeeae1f052f5f5f6fb5177178fbd80fbb9b00bd4658b9",
+  "manifest_id": "sem2act-v5-kaggle-runtime-freeze-v2",
+  "no_result_dependent_runtime_changes": true,
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "protocol_sha256": "05d2d30a74b263839028bebff9e59d24957ca2d72a45183109dc5adeb3025328",
+  "schema_version": 1,
+  "smoke_fixture_policy": {
+    "is_lockbox_query": false,
+    "must_be_hashed_before_model_execution": true,
+    "path": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"
+  },
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "source_contract_sha256": {
+    "scripts/freeze_v5_kaggle_runtime.py": "f0a4a60f9b30f29f92c8c8ee717fb807f137ca9c525900dcfa709b61c5478b26",
+    "scripts/kaggle_compute.py": "cc5d6145123dac6ea2ceea127306fcc908345c985f33c6d2afefe605a03a49da",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_canary.py": "a011eb0f05edcb72453cc56dd3699983ac5765fc61e1e938f7107ddcb91b27d8",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_consumer.py": "28eb7eec18249aa659dea7f106fa37cb6fae1c1a603f2cd17bdbe45d7e26f41a",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_qwen_consumer.py": "9929685f74c25b84d39c47389f31dee4485f38511f3153d1f2230e2de5743f2a",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py": "6fef44d32c1c391f8e6923ddf8f8dca168fa32e5c68094f6d3ab2e99a7ffd713"
+  },
+  "status": "prospective-before-result-bearing-execution"
+}

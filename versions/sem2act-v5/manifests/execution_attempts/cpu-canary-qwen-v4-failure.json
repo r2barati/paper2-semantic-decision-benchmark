@@ -1,0 +1,31 @@
+{
+  "downloaded_output_files": {
+    "preflight_manifest.json": {
+      "bytes": 337,
+      "sha256": "4c99a038818d772914521ee3c8f33159b4293d449cbfb1dc653bda37b19f85a4"
+    },
+    "sem2act-v5-cpu-preflight-qwen.log": {
+      "bytes": 1930,
+      "sha256": "71919dbe42b18540cf1e5ec574bd0f9cece2c38eb503458285c839e87669985c"
+    }
+  },
+  "family": "qwen",
+  "kaggle_kernel_version": 4,
+  "manifest_id": "sem2act-v5-kaggle-cpu-qwen-v4-failure",
+  "qrels_read": false,
+  "reason": "CalledProcessError: Command '['git', '-C', '/kaggle/working/llama.cpp', 'rev-parse', 'HEAD']' returned non-zero exit status 128.",
+  "remote_manifest": {
+    "error": "CalledProcessError: Command '['git', '-C', '/kaggle/working/llama.cpp', 'rev-parse', 'HEAD']' returned non-zero exit status 128.",
+    "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+    "qrels_read": false,
+    "result_bearing_execution_started": false,
+    "schema_version": 1,
+    "status": "failed",
+    "wall_seconds": 76.566
+  },
+  "remote_manifest_sha256": "4c99a038818d772914521ee3c8f33159b4293d449cbfb1dc653bda37b19f85a4",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "failed-after-source-copy-before-model-load"
+}

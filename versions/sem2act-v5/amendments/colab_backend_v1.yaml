@@ -1,0 +1,46 @@
+schema_version: 1
+amendment_id: sem2act-v5-colab-backend-v1
+status: approved-prospective-before-result-bearing-execution
+effective_utc: 2026-09-29T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: execution-environment-only
+approval: user instruction dated 2026-09-29
+scientific_protocol_unchanged: true
+operator: Muse
+reason_for_amendment: >-
+  Colab is an explicitly supported alternate GPU route. Its reported runtime is
+  different from the Kaggle lock and must be identified and checked rather than
+  inherited silently.
+
+platform:
+  provider: Google Colab
+  operator: Muse
+  machine: NVIDIA Tesla T4
+  vram_gib: 15
+  gpu_count: 1
+  device: cuda:0
+  internet: true
+  qrel_free_inputs_only: true
+  account_identity: record provider account/profile alias in run provenance; never record credentials
+
+runtime_policy:
+  python: "3.12 required; fresh preflight must verify"
+  torch: "2.11.0+cu128"
+  torch_cuda_runtime: "12.8"
+  transformers: "4.57.6"
+  image_policy: >-
+    Accept only the reported exact Colab torch image. Do not install, upgrade,
+    or downgrade torch in the notebook. If torch, CUDA runtime, Python, T4
+    identity, or package pins differ, stop and report to Codex.
+  provenance: record full package versions, CUDA driver/runtime, GPU identity/memory, Colab account alias, runtime start time, and SHA; never export secret values.
+
+pilot_policy:
+  smallest_pilot: the same fixed 20-query reranker shard used by Kaggle and Moon
+  result_use: operational feasibility only; exclude from inference and analysis
+  stop_after_pilot: true
+  no_parallel_backend_fallback_after_scoring_starts: true
+  full_240_query_stage_requires_codex_review: true
+
+failure_policy: >-
+  Runtime or data mismatch stops before scoring. Do not substitute a Colab
+  image, torch/CUDA version, model, data bundle, or experiment parameter.

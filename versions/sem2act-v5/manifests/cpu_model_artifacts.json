@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "manifest_id": "sem2act-v5-cpu-model-artifacts-v1",
+  "status": "pending-non-result-preflight",
+  "engine_commit": "9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69",
+  "quantization_type": "Q4_K_M",
+  "conversion_script_sha256": null,
+  "quantizer_binary_sha256": null,
+  "models": {
+    "qwen": {
+      "model_id": "Qwen/Qwen3-8B-AWQ",
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "tokenizer_revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "filename": "qwen3-8b.Q4_K_M.gguf",
+      "path": null,
+      "sha256": null
+    },
+    "llama": {
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "tokenizer_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "filename": "llama-3.1-8b-instruct.Q4_K_M.gguf",
+      "path": null,
+      "sha256": null
+    },
+    "mistral": {
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "tokenizer_revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "filename": "mistral-7b-instruct-v0.3.Q4_K_M.gguf",
+      "path": null,
+      "sha256": null
+    }
+  },
+  "failure_policy": "Missing or mismatched artifact hashes block the CPU runtime freeze and all result-bearing execution."
+}

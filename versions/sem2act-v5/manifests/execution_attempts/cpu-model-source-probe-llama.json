@@ -1,0 +1,26 @@
+{
+  "created_utc": "2026-09-27T03:38:22.668538+00:00",
+  "family": "llama",
+  "files": {
+    "kernel-metadata.json": {
+      "bytes": 423,
+      "sha256": "8b6f70450862e547671f0d0ea8ff09e9512fd9291a17f809b2b9d32cdc609c20"
+    },
+    "source_probe_config.json": {
+      "bytes": 612,
+      "sha256": "4e0306a014662663f2478e6722d20e69f61ae1540f8008e0cf173ed00c395723"
+    },
+    "source_probe_job.py": {
+      "bytes": 4201,
+      "sha256": "9874cbec9e0bee68684c1f9a033a0c0ea8ffdfd0b22d5a9caf09372cc80734f5"
+    }
+  },
+  "kernel_source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct/2",
+  "package_dir": "/var/folders/3y/02p_tc4x2nqdqm60b9051qvr0000gn/T/sem2act-v5-source-probe-llama-rqg56x0e",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-source-probe-llama",
+  "source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct",
+  "status": "submitted-non-result-source-probe"
+}

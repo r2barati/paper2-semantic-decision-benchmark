@@ -1,0 +1,20 @@
+{
+  "family": "mistral",
+  "gguf_sha256": null,
+  "kaggle_kernel_id": "siavashsimin/sem2act-v5-cpu-preflight-mistral",
+  "kaggle_kernel_version": 1,
+  "manifest_id": "sem2act-v5-kaggle-cpu-mistral-canary-v1-failure",
+  "qrels_read": false,
+  "reason": "Pinned engine dataset was not found at its default mount path; the job attempted the prohibited fallback clone and failed DNS before model load.",
+  "remote_error": "CalledProcessError: Command '['git', 'clone', '--filter=blob:none', '--branch', 'b11194', 'https://github.com/ggml-org/llama.cpp', '/kaggle/working/llama.cpp']' returned non-zero exit status 128.",
+  "remote_log": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/mistral-v1/canary.log",
+  "remote_log_sha256": "c52c02acbbf3d0f6886553244e5559e0c2daa74be206e71769fe3fd62962acb6",
+  "remote_manifest": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/mistral-v1/preflight_manifest.json",
+  "remote_manifest_sha256": "e34ed08e5cf8797b9b3a9fe6e8218a88ff75cfb90e43673ba7ad2da4007e9d16",
+  "remote_status": "failed",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-mistral",
+  "source_snapshot_sha256": null,
+  "status": "failed-non-result-canary"
+}

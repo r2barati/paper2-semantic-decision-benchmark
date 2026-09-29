@@ -1,0 +1,32 @@
+\begin{table}[t]
+\caption{Experiments~M (held-out multi-echelon transfer, demand surge) and~S
+(supply-side capacity drop). Rows are grouped as text-free controls, text
+interpreters, degraded-text controls, and the oracle-belief reference. $J_w$ is
+the balanced weighted return and $\Delta J$ the paired effect against NoInfo,
+with crossed bootstrap intervals. The dev-tuned no-text row is the one every
+interpreter must beat, and in both experiments most do not.}
+\label{tab:transfers}
+\centering\footnotesize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}l rrl rrl@{}}
+\toprule
+ & \multicolumn{3}{c}{Experiment~M} & \multicolumn{3}{c}{Experiment~S} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Information source & $J_w$ & $\Delta J$ & 95\% CI & $J_w$ & $\Delta J$ & 95\% CI \\
+\midrule
+NoInfo (prior) & 467.7 & +0.0 & [+0, +0] & 1333.6 & +0.0 & [+0, +0] \\
+Constant $p_{\mathrm{event}}=0$ & 381.2 & -86.5 & [-93, -80] & 1166.7 & -166.9 & [-167, -167] \\
+Constant $p_{\mathrm{event}}=0.5$ & 501.1 & +33.3 & [+32, +35] & 1333.6 & +0.0 & [+0, +0] \\
+Constant $p_{\mathrm{event}}=1$ & 560.4 & +92.7 & [+90, +96] & 1725.1 & +391.5 & [+387, +396] \\
+\textbf{No-text (dev-tuned)} & 560.4 & +92.7 & [+90, +96] & 1725.1 & +391.5 & [+387, +396] \\
+\midrule
+RuleBased & 568.7 & +101.0 & [+95, +106] & 1447.0 & +113.4 & [+39, +183] \\
+TF--IDF (single) & 516.2 & +48.5 & [+36, +59] & 1362.8 & +29.2 & [-4, +68] \\
+TF--IDF (calib., isotonic) & 530.2 & +62.5 & [+5, +96] & 1372.9 & +39.3 & [-73, +131] \\
+GPT-4o & 534.9 & +67.1 & [+29, +87] & 1372.6 & +38.9 & [-39, +85] \\
+\midrule
+TF--IDF cal.\ (label only) & 523.5 & +55.8 & [-23, +89] & 1392.0 & +58.4 & [-73, +115] \\
+TF--IDF cal.\ (shuffled) & 451.1 & -16.6 & [-66, +52] & 1415.2 & +81.6 & [-64, +258] \\
+Perfect-semantic ref. & 552.0 & +84.3 & [+77, +91] & 1446.3 & +112.7 & [+109, +116] \\
+\bottomrule
+\end{tabular}
+\end{table}

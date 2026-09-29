@@ -1,0 +1,148 @@
+{
+  "amendment": "versions/sem2act-v5/amendments/colab_backend_v1.yaml",
+  "decoding": {
+    "do_sample": false,
+    "max_new_tokens": 256,
+    "num_beams": 1,
+    "seed": 0,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "failure_policy": "Any quota, lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed.",
+  "lock_id": "sem2act-v5-colab-runtime-v1",
+  "models": {
+    "llama": {
+      "attention_backend": "eager",
+      "backend": "transformers",
+      "batch_size": 1,
+      "device_map": {
+        "": "cuda:0"
+      },
+      "do_sample": false,
+      "dtype": "float16",
+      "max_context_tokens": 4096,
+      "max_input_tokens": 3840,
+      "max_new_tokens": 256,
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "num_beams": 1,
+      "quantization": {
+        "bnb_4bit_compute_dtype": "float16",
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_use_double_quant": true,
+        "load_in_4bit": true,
+        "method": "bitsandbytes"
+      },
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "tokenizer_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "use_cache": true
+    },
+    "mistral": {
+      "attention_backend": "eager",
+      "backend": "transformers",
+      "batch_size": 1,
+      "device_map": {
+        "": "cuda:0"
+      },
+      "do_sample": false,
+      "dtype": "float16",
+      "max_context_tokens": 4096,
+      "max_input_tokens": 3840,
+      "max_new_tokens": 256,
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "num_beams": 1,
+      "quantization": {
+        "bnb_4bit_compute_dtype": "float16",
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_use_double_quant": true,
+        "load_in_4bit": true,
+        "method": "bitsandbytes"
+      },
+      "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "tokenizer_revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "use_cache": true
+    },
+    "qwen": {
+      "attention_backend": "TRITON_ATTN",
+      "backend": "vllm",
+      "batch_size": 1,
+      "device_map": {
+        "cpu_offload_gb": 0,
+        "device": "cuda:0",
+        "tensor_parallel_size": 1
+      },
+      "dtype": "float16",
+      "enable_thinking": false,
+      "enforce_eager": true,
+      "gpu_memory_utilization": 0.85,
+      "max_context_tokens": 4096,
+      "max_num_batched_tokens": 4096,
+      "max_num_seqs": 1,
+      "model_id": "Qwen/Qwen3-8B-AWQ",
+      "quantization": {
+        "method": "awq"
+      },
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "tokenizer_revision": "4da05a8edb55c6046cce958586c33b61da07bb79"
+    },
+    "reranker": {
+      "attention_backend": "eager",
+      "backend": "transformers",
+      "batch_size": 32,
+      "device_map": {
+        "": "cuda:0"
+      },
+      "dtype": "float16",
+      "max_context_tokens": 1024,
+      "model_id": "Qwen/Qwen3-Reranker-0.6B",
+      "quantization": {
+        "method": "none"
+      },
+      "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "tokenizer_revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473"
+    }
+  },
+  "platform": {
+    "account_identity_policy": "Record the Colab account/profile alias in run provenance; do not store credentials.",
+    "available_gpu_memory_gib": 15,
+    "device": "cuda:0",
+    "gpu_count": 1,
+    "internet": true,
+    "machine": "NVIDIA Tesla T4",
+    "operator": "Muse",
+    "provider": "Google Colab",
+    "qrel_free_inputs_only": true,
+    "result_bearing_policy": "The 20-query operational pilot only; full 240-query execution remains gated on Codex review of the pilot report."
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "runtime": {
+    "cpu_offload": false,
+    "cuda": "12.8 (torch runtime; also record driver separately)",
+    "cuda_required": true,
+    "package_install_policy": "Do not replace or silently inherit a changed Colab torch image. Require exact torch/runtime; pin and record transformers before model load.",
+    "provider_image_policy": "The operator-reported current Colab image is explicitly accepted only when torch==2.11.0+cu128 and torch.version.cuda==12.8; mismatch stops. Do not silently downgrade/upgrade torch.",
+    "python": "3.12 (must be freshly verified; otherwise stop)",
+    "runtime_versions_recorded": [
+      "python",
+      "torch",
+      "torch.version.cuda",
+      "transformers",
+      "CUDA driver",
+      "GPU name/count/memory"
+    ],
+    "torch": "2.11.0+cu128",
+    "torch_dtype": "float16",
+    "transformers": "4.57.6"
+  },
+  "schema_version": 1,
+  "smoke_fixture": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+  "source_contract": [
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py",
+    "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+    "versions/sem2act-v5/manifests/colab_runtime_lock_v1.json",
+    "scripts/freeze_v5_colab_runtime.py",
+    "scripts/verify_v5_rerank_inputs.py",
+    "scripts/colab_v5_preflight.py"
+  ],
+  "status": "prospective-before-result-bearing-execution"
+}

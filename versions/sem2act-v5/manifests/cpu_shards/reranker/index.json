@@ -1,0 +1,24 @@
+{
+  "coverage": "exactly disjoint and exhaustive over the 240-query reranker keyspace",
+  "expected_total_queries": 240,
+  "manifest_id": "sem2act-v5-cpu-reranker-shards-v1",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "schema_version": 1,
+  "shard_count": 12,
+  "shards": [
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-000.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-001.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-002.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-003.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-004.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-005.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-006.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-007.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-008.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-009.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-010.json",
+    "versions/sem2act-v5/manifests/cpu_shards/reranker/shard-011.json"
+  ],
+  "stage": "reranker",
+  "status": "planned-before-result-bearing-execution"
+}

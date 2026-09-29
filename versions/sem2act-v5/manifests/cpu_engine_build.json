@@ -1,0 +1,33 @@
+{
+  "binaries": {
+    "llama-quantize": {
+      "path": "/private/tmp/sem2act-llama.cpp-v11194/build/bin/llama-quantize",
+      "sha256": "3626ead10c3018b8bb45db18ddf5d4b05b0dcbf7080cad3b13bab521bcc7aa40"
+    },
+    "llama-server": {
+      "path": "/private/tmp/sem2act-llama.cpp-v11194/build/bin/llama-server",
+      "sha256": "88e8738d07ec42722f6c99233bfe15cd48b25ecc523e8d1cc288353e522aa3ab"
+    }
+  },
+  "build_flags": [
+    "-DGGML_NATIVE=OFF",
+    "-DGGML_OPENMP=ON",
+    "-DGGML_CUDA=OFF",
+    "-DGGML_METAL=OFF",
+    "-DGGML_VULKAN=OFF",
+    "-DGGML_SYCL=OFF",
+    "-DLLAMA_BUILD_SERVER=ON",
+    "-DLLAMA_BUILD_TOOLS=ON"
+  ],
+  "build_root": "/private/tmp/sem2act-llama.cpp-v11194/build",
+  "commit": "9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69",
+  "engine_root": "/private/tmp/sem2act-llama.cpp-v11194",
+  "manifest_id": "sem2act-v5-cpu-engine-build-v1",
+  "openmp_root": "/usr/local/Cellar/libomp/22.1.1",
+  "recorded_utc": "2026-09-26T18:18:55.063676+00:00",
+  "repository": "https://github.com/ggml-org/llama.cpp",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "status": "pass-before-model-conversion",
+  "tag": "b11194"
+}

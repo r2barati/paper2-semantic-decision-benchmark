@@ -1,0 +1,66 @@
+schema_version: 1
+amendment_id: sem2act-v5-moon-cpu-reranker-v1
+status: approved-prospective-before-moon-host-preflight
+effective_utc: 2026-09-29T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+parent_backend_amendment: versions/sem2act-v5/amendments/cpu_backend_v1.yaml
+scope: execution-environment-only
+approval: user instruction dated 2026-09-29
+scientific_protocol_unchanged: true
+reason_for_amendment: >-
+  Authorize an isolated CPU reranker pilot on the TMU moon server using the
+  reported 16-vCPU host. The 16-thread setting is authorized only when the
+  non-lockbox canary is repeatable at both 4 and 16 threads and produces the
+  same fixture ranking under both settings.
+
+platform:
+  provider: TMU moon CPU server
+  operator: OpenCode
+  accelerator: CPU only
+  reported_vcpu: 16
+  reported_memory_gib: 62
+  expected_visible_avx2: false
+  expected_visible_avx512: false
+  cache_and_build_storage: verified node-local filesystem only
+  home_nfs_for_cache_or_build: prohibited
+  qrel_free_inputs_only: true
+
+runtime:
+  model_id: Qwen/Qwen3-Reranker-0.6B
+  revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+  dtype: float32
+  batch_size: 1
+  threads: 16
+  threads_batch: 16
+  torch_num_interop_threads: 1
+  torch: 2.7.1+cpu
+  transformers: 4.57.6
+  python: "3.12"
+  quantization: none
+  device: cpu
+  deterministic_repeat_required: true
+  cross_thread_fixture_ranking_must_match_4_vs_16: true
+
+pilot:
+  shard_manifest: versions/sem2act-v5/manifests/cpu_shards/reranker/shard-000.json
+  query_ids: [v5-lb-q0001, v5-lb-q0002, v5-lb-q0003, v5-lb-q0004, v5-lb-q0005, v5-lb-q0006, v5-lb-q0007, v5-lb-q0008, v5-lb-q0009, v5-lb-q0010, v5-lb-q0011, v5-lb-q0012, v5-lb-q0013, v5-lb-q0014, v5-lb-q0015, v5-lb-q0016, v5-lb-q0017, v5-lb-q0018, v5-lb-q0019, v5-lb-q0020]
+  candidate_depth: 50
+  pairs: 1000
+  purpose: operational feasibility only; do not inspect relevance metrics or use pilot output in final analysis
+  stop_after_pilot: true
+  resume_policy: >-
+    Preserve the pilot output as provenance. Any later confirmatory run starts
+    in a clean output directory and reruns the full 240-query keyspace.
+
+not_authorized:
+  - CPU consumer generation on Moon
+  - changing the frozen AWQ model or substituting a GGUF conversion
+  - using the old Mac host preflight as a Moon profile
+
+preflight:
+  required: [exact_host_profile, 16_visible_vcpus, at_least_48_gib_memory, at_least_20_gib_node_local_free_space, masked_avx2_and_avx512, exact_runtime_versions, reranker_fixture_repeat_equality_at_4_and_16_threads, identical_fixture_ranking_at_4_and_16_threads]
+  stop_on_any_mismatch: true
+
+failure_policy: >-
+  Any host, storage, package, model, input hash, deterministic-repeat, or output
+  schema mismatch stops. Do not tune thread count or change scientific inputs.

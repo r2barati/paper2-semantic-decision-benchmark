@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "fixture_id": "sem2act-v5-runtime-smoke-v1",
+  "purpose": "non-result-bearing model load, tokenization, schema, and CUDA smoke",
+  "query_id": "runtime-smoke-q0000",
+  "query_text": "Assess the current operational risk for the Northwind distribution node during this planning window.",
+  "entity_node": "Northwind distribution node",
+  "documents": [
+    {
+      "doc_id": "runtime-smoke-d0001",
+      "text": "Northwind supplier bulletin: inbound replenishment is delayed by four periods because of a current port disruption."
+    },
+    {
+      "doc_id": "runtime-smoke-d0002",
+      "text": "Northwind operations note: customer orders remain within the normal seasonal range for this planning window."
+    },
+    {
+      "doc_id": "runtime-smoke-d0003",
+      "text": "Northwind market brief: a current promotion is associated with a possible demand increase at nearby outlets."
+    }
+  ],
+  "expected": {
+    "reranker": "finite_yes_no_score",
+    "C1": ["normal", "supplier_delay", "demand_surge", "estimated_lt_increase", "estimated_duration", "estimated_demand_multiplier"],
+    "C3": ["entity_match", "event", "fresh", "stance", "confidence"]
+  }
+}

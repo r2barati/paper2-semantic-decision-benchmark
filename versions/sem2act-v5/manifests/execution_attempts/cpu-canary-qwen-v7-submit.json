@@ -1,0 +1,35 @@
+{
+  "created_utc": "2026-09-27T04:36:32.219477+00:00",
+  "engine_source_archive_sha256": "bc351a39f7a2c68f0e9827f86d0185c4ec7617be29493c4f8d349ecf41bbcbc6",
+  "engine_source_dataset": "siavashsimin/sem2act-v5-llama-cpp-b11194-source",
+  "engine_source_dataset_version": 2,
+  "engine_source_tree_sha256": "1bbfb63c28543063eadf2d55b9e74f63866d4d7d3fbfe448bab4a2d6e08a84e8",
+  "family": "qwen",
+  "files": {
+    "canary_config.json": {
+      "bytes": 1348,
+      "sha256": "44c2a8f8d7dba4f9fa80a1984f3089a805dff358898d742228cb2f7b22238763"
+    },
+    "canary_job.py": {
+      "bytes": 27913,
+      "sha256": "d65833e51d039a9d421f2385c6c513830f8bbcc8a7977fa0900f0add3ce1ca66"
+    },
+    "kernel-metadata.json": {
+      "bytes": 460,
+      "sha256": "d904a0b06b88cecc050670cbe7904db9e46f03925cafed0ce46e863dbad7a5f7"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "kaggle_kernel_version": 7,
+  "manifest_id": "sem2act-v5-kaggle-cpu-qwen-canary-v7-submit",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "submitted-non-result-canary"
+}

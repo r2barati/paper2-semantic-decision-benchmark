@@ -1,0 +1,25 @@
+{
+  "attempt_id": "v5-rerank-submit-2026-09-25T044128.525746+0000",
+  "dataset": "rezabarati2/sem2act-v5-rerank-inputs",
+  "dataset_manifest": "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
+  "dataset_manifest_sha256": "486c9763aa29d6000620bac9762cf9d5b261833226fc8bbddc5a96c138bbee24",
+  "effect": "no remote job started; no result-bearing execution occurred",
+  "error": "Maximum weekly GPU quota of 30.00 hours reached.",
+  "job": "v5-rerank",
+  "kernel_sha256": "771c2759a17e9c55e32ed17b9c88d40d7ba0f4466cbbdf4d918f957e37e3b858",
+  "policy": "stop before backend amendment; no protocol/model/prompt changes",
+  "post_reset_api_rejection": true,
+  "post_submit_status_check": {
+    "http_status": 404,
+    "interpretation": "no remote kernel session exists",
+    "kernel_slug": "sem2act-v5-rerank",
+    "status": "not-found"
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "quota_source_of_truth": "Kaggle account UI",
+  "quota_ui_capacity_confirmed": true,
+  "schema_version": 1,
+  "started": false,
+  "submitted": false,
+  "timestamp_utc": "2026-09-25T04:41:28.525746+00:00"
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "attempt_id": "v5-canary-direct-2026-09-26T062300Z",
+  "job": "v5-canary-direct",
+  "kernel": "siavashsimin/sem2act-v5-canary-direct",
+  "kernel_version": 1,
+  "backend_amendment_at_submission": "sem2act-v5-kaggle-backend-v2",
+  "status": "remote-error",
+  "result_bearing": false,
+  "remote_status": "KernelWorkerStatus.ERROR",
+  "submission_mode": "kaggle-cli-v2 --accelerator NvidiaTeslaT4",
+  "observed_log": "CUDA is unavailable",
+  "diagnosis": "A fresh private kernel with both machine_shape metadata and the explicit CLI accelerator override still received no CUDA device.",
+  "outputs_fetched": false,
+  "result_jobs_unlocked": false,
+  "recorded_utc": "2026-09-26T06:24:00Z"
+}

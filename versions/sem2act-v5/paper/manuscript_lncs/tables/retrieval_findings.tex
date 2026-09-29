@@ -1,0 +1,46 @@
+\begin{table}[t]
+\caption{Experiment~R. How much of a ranking's value belongs to the ranking?
+Left: the retriever~$\times$~consumer interaction at $k=3$ --- the difference
+between the two consumers' paired effects for the same ranking. Every
+interaction changes sign, so no single number describes what a ranking is
+worth. Right: within each consumer, how often ranking quality orders two
+systems the way realised utility does, and how strongly the two correlate
+across episodes.}
+\label{tab:consumerdep}
+\centering\small
+\begin{tabular}{@{}l rrr c@{}}
+\toprule
+System & RuleBased $\Delta J$ & Calibrated $\Delta J$ & Interaction & Sign flip \\
+\midrule
+Random & +11.6 & -49.8 & +61.4 & \checkmark \\
+BM25 & +14.9 & -74.3 & +89.2 & \checkmark \\
+TF--IDF cosine & +25.8 & -61.1 & +86.9 & \checkmark \\
+Dense (MiniLM) & +48.4 & -1.5 & +49.9 & \checkmark \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+
+\centering\small
+\begin{tabular}{@{}l rrrr@{}}
+\toprule
+Consumer & Reversal rate & Kendall $\tau_b$ & Pearson $r$ & Spearman $\rho$ \\
+\midrule
+RuleBased & 0.00 (0/6) & +1.00 & +0.372 & +0.392 \\
+Calibrated TF--IDF & 0.33 (2/6) & +0.33 & +0.382 & +0.367 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+
+\centering\small
+\begin{tabular}{@{}l rrr@{}}
+\toprule
+Dense retrieval at budget $k$ & $k=1$ & $k=3$ & $k=5$ \\
+\midrule
+nDCG@$k$ & 0.556 & 0.617 & 0.691 \\
+RuleBased $\Delta J$ & +21.3 & +48.4 & +46.0 \\
+Calibrated TF--IDF $\Delta J$ & -69.3 & -1.5 & -18.9 \\
+\bottomrule
+\end{tabular}
+\end{table}

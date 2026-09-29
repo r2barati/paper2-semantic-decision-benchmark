@@ -1,0 +1,119 @@
+schema_version: 1
+experiment_id: v5-confirmation-package
+version_id: sem2act-v5
+status: frozen-before-lockbox-generation
+parent_protocol: versions/sem2act-v4/protocol/model_family.yaml
+freeze_rule: "After protocol_hash is recorded, no design change is permitted in response to results."
+
+lockbox:
+  n_queries: 240
+  regime_balance: {supplier_delay: 80, demand_surge: 80, normal: 80}
+  generation_seed: 20260925
+  new_entity_count: 48
+  query_id_format: "v5-lb-q{:04d}"
+  document_id_format: "v5-lb-d{:06d}"
+  simulation_seeds: [61000, 61001, 61002, 61003, 61004, 61005, 61006, 61007, 61008, 61009, 61010, 61011, 61012, 61013, 61014, 61015, 61016, 61017, 61018, 61019]
+  overlap_gate: "normalized query/document text and entity/supplier identifiers have zero overlap with v3/v4"
+  qrels_private: true
+  model_input_qrels: false
+
+provenance_validation:
+  entrypoint: versions/sem2act-v5/experiments/lockbox/provenance_validate.py
+  required_before_model_execution: true
+  label_scale: [0, 1, 2, 3]
+  independent_from_qrel_generation: true
+  gate:
+    weighted_kappa_min: 0.60
+    exact_agreement_min: 0.60
+    within_one_grade_min: 0.90
+  failure_policy: "Any failed metric invalidates the lockbox; freeze the failure and never repair qrels."
+
+consumers:
+  primary:
+    id: Qwen/Qwen3-8B-AWQ
+    revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+  cross_family:
+    - id: meta-llama/Llama-3.1-8B-Instruct
+      revision: resolved_at_preflight
+    - id: mistralai/Mistral-7B-Instruct-v0.3
+      revision: resolved_at_preflight
+  systems_primary: [NoInfo, BM25, Rerank, Oracle]
+  consumers_primary: [C1, C3]
+  cross_family_systems: [Rerank, Oracle]
+  cross_family_consumers: [C1, C3]
+  k: 3
+  temperature: 0
+  top_p: 1.0
+  prompt_policy: "Semantically identical C1/C3 prompts with model-specific chat wrapper only."
+  quantization_policy: "If required, identical bitsandbytes 4-bit configuration for both official checkpoints."
+  failure_policy: "Failed official access or exact-schema preflight excludes the model; no third-party substitution."
+
+controllers:
+  belief_dependent:
+    - id: CausalOptimizer
+      source: src.env:CausalOptimizer
+    - id: BeliefBaseStock
+      source: src.controller_basestock:BeliefBaseStock
+  evidence_insensitive:
+    - id: WorstCaseBaseStock
+      source: versions/sem2act-v5/experiments/controllers.py:WorstCaseBaseStock
+      interpretation: "Safety control; excluded from retrieval/controller-effect multiplicity family."
+  controller_effect_family:
+    estimand: "delta_J_vs_NoInfo"
+    arms: [BM25, Rerank, Oracle]
+    consumers: [C1, C3]
+    controllers: [CausalOptimizer, BeliefBaseStock]
+    holm_family: "six effects per belief-dependent controller"
+
+selective_consumption:
+  rule: "c(b)=1-H(b)/log(3); b_used=c(b)*b+(1-c(b))*b_prior"
+  prior: frozen_NoInfo_prior
+  systems: [Rerank]
+  consumers: [C1, C3]
+  controller: CausalOptimizer
+  holm_family: "two selective-versus-always-consume contrasts"
+
+persistence:
+  timing:
+    primary_release_t: 12
+    secondary_release_t: 0
+  continuation_horizons: [1, 5, 10, 20, 40]
+  environment_conditions: [persistent, reset_diagnostic]
+  primary:
+    model: Qwen/Qwen3-8B-AWQ
+    system: Rerank
+    baseline: NoInfo
+    consumer: C1
+    controller: CausalOptimizer
+    k: 3
+  delta_definition: |
+    Delta J_{a,T} = J_{Rerank,a,T} - J_{NoInfo,a,T},
+    a in {persistent, reset}.
+  interaction_definition: |
+    I_{40,1} =
+    [Delta J_{40} - Delta J_{1}]_{persistent}
+    - [Delta J_{40} - Delta J_{1}]_{reset}.
+  primary_null: "H0: I_40_1 = 0"
+  bootstrap: "paired crossed-bootstrap distribution of I_40_1"
+  interpretation: "Positive I_40_1 means persistence amplifies the Rerank-versus-NoInfo effect relative to reset; the sign of Delta J determines whether that amplification is benefit or harm."
+  secondary: "C3, Oracle, and release t=0 are secondary diagnostics."
+  reporting: [cumulative_delta_J_T, per_period_delta_J_T_over_T, I_40_1]
+  reset_definition: "Restore the matched evidence-release inventory/pipeline state before each one-step rollout while preserving aligned hidden regime and demand draw."
+
+statistics:
+  bootstrap_replicates: 5000
+  bootstrap_seed: 42
+  weighting_primary: balanced
+  uncertainty_unit: query_and_seed_paired
+  cross_family_holm_family: "eight model-difference contrasts: two new families x four system-consumer cells"
+  no_result_dependent_reruns: true
+
+outputs:
+  root: versions/sem2act-v5/results
+  runtime_root: versions/sem2act-v5/runtime
+  required_manifests:
+    - manifests/protocol_freeze.json
+    - manifests/lockbox_freeze.json
+    - manifests/provenance_validation.json
+    - manifests/model_preflight.json
+    - manifests/RESULT_MANIFEST.json

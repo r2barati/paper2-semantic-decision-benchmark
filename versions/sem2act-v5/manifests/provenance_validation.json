@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "experiment_id": "v5-lockbox-provenance",
+  "n_pairs": 3840,
+  "metrics": {
+    "weighted_kappa": 1.000000000000011,
+    "exact": 1.0,
+    "within_one": 1.0
+  },
+  "confusion_matrix_constructed_rows_provenance_columns": [
+    [
+      1680,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      720,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      720,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      720
+    ]
+  ],
+  "gate": {
+    "weighted_kappa": 0.6,
+    "exact": 0.6,
+    "within_one": 0.9
+  },
+  "passed": true,
+  "qrels_unchanged": true,
+  "source": "versions/sem2act-v5/experiments/lockbox/provenance_validate.py",
+  "source_sha256": "26cd9dd4154ef1b3f59f97f61607fcd6fd4158f613c933141e86d29b812c010d",
+  "labels_sha256": "2828a5e1acbc227ca3dd127f3c5dd798066c42202b89d66dc12a32a1984bda46",
+  "failure_policy": "failed gate invalidates lockbox; qrels are never repaired"
+}

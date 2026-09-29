@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "experiment_id": "v5-model-preflight",
+  "status": "gpu-probe-pending",
+  "qrels_read": false,
+  "lockbox_manifest_sha256": "609229009d6780c9f96304179c19d7d45336e5fd44922819b333e20d856713be",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "cross_family_models": [
+    {
+      "id": "meta-llama/Llama-3.1-8B-Instruct",
+      "revision": "resolved_at_gpu_preflight"
+    },
+    {
+      "id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "revision": "resolved_at_gpu_preflight"
+    }
+  ],
+  "prompt_shas": {
+    "C1": "66e6890ba9c5464c",
+    "C3": "5966cadde90e8236"
+  },
+  "quantization": {
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_compute_dtype": "float16",
+    "bnb_4bit_use_double_quant": true
+  },
+  "reranker_inputs": {
+    "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+    "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+    "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+  },
+  "lockbox_status": "frozen-provenance-passed",
+  "failure_policy": "A failed exact-schema preflight excludes that official model without substitution."
+}

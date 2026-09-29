@@ -1,0 +1,30 @@
+{
+  "amendment_sha256": "4cc1299f441b1645d28398ef29c35d3188b6b39724af11091cf247dab7a3749d",
+  "failure_policy": "Any quota, lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed.",
+  "frozen_utc": "2026-09-29T09:05:54.180147+00:00",
+  "lock_id": "sem2act-v5-kaggle-runtime-v3",
+  "lock_sha256": "df2618f13337b37d59ae4e21cda4eb3423569190869db27614b651f07234ca6b",
+  "manifest_id": "sem2act-v5-kaggle-runtime-freeze-v3",
+  "no_result_dependent_runtime_changes": true,
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "protocol_sha256": "05d2d30a74b263839028bebff9e59d24957ca2d72a45183109dc5adeb3025328",
+  "schema_version": 1,
+  "smoke_fixture_policy": {
+    "is_lockbox_query": false,
+    "must_be_hashed_before_model_execution": true,
+    "path": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"
+  },
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "source_contract_sha256": {
+    "scripts/freeze_v5_kaggle_runtime.py": "ef1b8f6eed1d54095d220ef472a12db526edf1cb3b5acfe4025993bc9a68e3b3",
+    "scripts/kaggle_compute.py": "06ba1f124eefec70fb32f9d24649de811557a331a6e1578caa0438940ee8c157",
+    "scripts/verify_v5_rerank_inputs.py": "b6fcc26d2131db487fc8e1dfc53796db78b5f6d494db869349e0a16d1db2a54c",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_canary.py": "9dfbced1d3cc5921ae053b200e22afec125cbc355c8b6f7dd78d81f6997625ef",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_consumer.py": "5657b4efc9af9e3cfadde931ca8b5e8b15c4e2469fa455abb7a9668cba0fa5ba",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_qwen_consumer.py": "ef1e410ac4b7b12a1cc4d51f35dcc235a8babb20d1df5112859ad170cf18a165",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py": "f8f9d84a5ef63335ef7551f09fafb59c44c6e21c8b08fbc938252c4457d0fa8b",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py": "203829a4cd800d00260cc4ed197e86fd4f0f7e48145259806feaf978c049954f",
+    "versions/sem2act-v5/experiments/stage_consumer_inputs.py": "faa205eeda78b3519b5b35251e27a2c44b6d8c22a4e19676751710fe3a8be3f0"
+  },
+  "status": "prospective-before-result-bearing-execution"
+}

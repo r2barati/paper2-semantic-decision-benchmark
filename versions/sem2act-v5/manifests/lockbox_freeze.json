@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "experiment_id": "v5-lockbox",
+  "status": "frozen-provenance-passed",
+  "frozen_utc": "2026-09-25T02:36:27.286567+00:00",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "generation_manifest": {
+    "schema_version": 1,
+    "version_id": "sem2act-v5",
+    "generation_seed": 20260925,
+    "n_queries": 240,
+    "n_documents": 4080,
+    "regime_counts": {
+      "supplier_delay": 80,
+      "demand_surge": 80,
+      "normal": 80
+    },
+    "n_entities": 48,
+    "n_qrel_rows": 3840,
+    "qrels_private": true,
+    "source": "versions/sem2act-v5/experiments/lockbox/generate_lockbox.py",
+    "files": {
+      "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+      "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+      "qrels_free/queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+      "qrels_free/corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+      "private/qrels.tsv": "598b5539f373ecd226377ef7b33a376e8271c17a728d8820712139c6513e35b2",
+      "private/provenance.jsonl": "27a1d0b10c6fa62a5858d851103b7e677b97ac472dab825134bc4796f8356891"
+    }
+  },
+  "qrels_free_files": {
+    "qrels_free/queries.jsonl": {
+      "sha256": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+      "bytes": 81050
+    },
+    "qrels_free/corpus.jsonl": {
+      "sha256": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+      "bytes": 1908368
+    }
+  },
+  "private_qrels": {
+    "sha256": "598b5539f373ecd226377ef7b33a376e8271c17a728d8820712139c6513e35b2",
+    "bytes": 107545
+  },
+  "private_qrels_excluded_from_model_bundle": true,
+  "provenance_validation_manifest": "versions/sem2act-v5/manifests/provenance_validation.json",
+  "provenance_gate": {
+    "weighted_kappa": 1.000000000000011,
+    "exact": 1.0,
+    "within_one": 1.0
+  },
+  "provenance_gate_passed": true,
+  "qrels_immutable": true,
+  "model_input_qrels": false,
+  "failure_policy": "A failed provenance gate invalidates the lockbox; qrels are never repaired."
+}

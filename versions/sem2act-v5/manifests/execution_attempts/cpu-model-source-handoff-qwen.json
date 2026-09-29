@@ -1,0 +1,14 @@
+{
+  "accepted_utc": "2026-09-27T03:46:04.740525+00:00",
+  "content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+  "family": "qwen",
+  "manifest_id": "sem2act-v5-source-handoff-qwen-v1",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "source_probe_acceptance_sha256": "e3890b569f78f79b0c3b1cdd69504d712d6c736e1f8eb0f3d81cbe14a80f06ee",
+  "source_probe_manifest_sha256": "79227b3127e55f290adb91820868bc7e1b57e53e5a116801705825b5a960b5ed",
+  "source_ref": "qwen-lm/qwen-3/Transformers/8b-awq",
+  "status": "accepted-non-result-source-handoff"
+}

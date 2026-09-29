@@ -1,0 +1,74 @@
+schema_version: 1
+amendment_id: sem2act-v5-kaggle-backend-v3
+status: approved-prospective-before-result-bearing-execution
+effective_utc: 2026-09-29T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+parent_backend_amendment: versions/sem2act-v5/amendments/kaggle_backend_v2.yaml
+scope: execution-environment-only
+approval: user instruction dated 2026-09-29
+scientific_protocol_unchanged: true
+reason_for_amendment: >-
+  The V5 owner/runtime bindings and launcher disagreed with the newly verified
+  Kaggle operator account and staged reranker dataset. The old Kaggle image
+  supplied Torch implicitly, so the recorded package pin was not enforced.
+
+identity:
+  previous_frozen_owner: siavashsimin
+  effective_v5_owner: rezabarati2
+  evidence: operator-reported verified Kaggle GPU entitlement; staged dataset manifest is remote-verified under rezabarati2
+  account_preflight: authenticated account must equal rezabarati2; record the identity without credential material
+  no_secret_values: true
+
+platform:
+  provider: kaggle
+  owner: rezabarati2
+  machine: NvidiaTeslaT4
+  machine_shape_request: NvidiaTeslaT4
+  available_gpu_count_observed: 2
+  requested_gpu_count: 1
+  device: cuda:0
+  internet: true
+  qrel_free_inputs_only: true
+  staged_reranker_dataset: rezabarati2/sem2act-v5-rerank-inputs
+  staged_reranker_dataset_manifest: versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json
+
+runtime_policy:
+  python: "3.12"
+  torch: "2.7.1+cu126"
+  torch_cuda_runtime: "12.6"
+  observed_provider_cuda_driver: "12.8"
+  transformers: "4.57.6"
+  package_install_policy: >-
+    Install the exact torch wheel from https://download.pytorch.org/whl/cu126
+    and exact locked packages before importing torch or loading any model.
+    The provider's preinstalled image is not a runtime lock. Verify torch,
+    torch.version.cuda, Python, driver, and GPU; any mismatch stops.
+  gpu_policy: >-
+    Two T4s are available by operator report, but the V5 job continues to
+    request exactly one T4 and use cuda:0, preserving the existing model
+    placement and memory policy.
+
+pilot_policy:
+  smallest_result_pilot: >-
+    One fixed 20-query operational shard (v5-lb-q0001 through v5-lb-q0020),
+    50 candidates/query, 1000 pairs. The shard output is operational evidence
+    only and is excluded from analysis; a later complete run starts in a clean
+    output directory and reruns all 240 queries.
+  stop_after_pilot: true
+  next_stage_requires_codex_review: true
+  no_parallel_backend_fallback_after_scoring_starts: true
+
+consumer_staging:
+  qwen_llama_mistral_bundles_currently_staged: false
+  staging_gate: >-
+    After a complete 240-query reranker output is fetched, hash-verified, and
+    accepted by Codex, build separate qrel-free Qwen, Llama, and Mistral
+    consumer bundles from the frozen input builder. Upload each under
+    rezabarati2 only under a new explicit stage handoff. Do not stage from the
+    20-query pilot.
+  frozen_model_revisions_unchanged: true
+
+failure_policy: >-
+  Account, input, quota, runtime, package, device, hash, schema, or canary
+  mismatch stops before result-bearing execution. Never silently substitute
+  account, runtime, model, dependency, seed, or experiment parameter.

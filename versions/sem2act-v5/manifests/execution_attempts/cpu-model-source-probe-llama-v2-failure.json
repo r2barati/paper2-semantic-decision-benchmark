@@ -1,0 +1,17 @@
+{
+  "family": "llama",
+  "kernel_numeric_id": 136054747,
+  "kernel_source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct/2",
+  "manifest_id": "sem2act-v5-cpu-model-source-probe-llama-v2-failure",
+  "qrels_read": false,
+  "reason": "Kaggle accepted the documented five-part kernel attachment reference but mounted no official source; no inference or qrel access occurred.",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-source-probe-llama",
+  "source_probe_log": "versions/sem2act-v5/manifests/execution_attempts/source_probe_failures/llama-v2/source_probe.log",
+  "source_probe_log_sha256": "634dacfa58e9728f5d655e75e9d25141fd893b8d16c364c5106cb0879cc108f1",
+  "source_probe_manifest": "versions/sem2act-v5/manifests/execution_attempts/source_probe_failures/llama-v2/source_probe_manifest.json",
+  "source_probe_manifest_sha256": "f1d19319d5fa2a43aefbabbbb5c968c44a511482452689115f9442f95ae72c9b",
+  "source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct",
+  "status": "excluded-non-result-source-probe-failure"
+}

@@ -1,0 +1,25 @@
+{
+  "created_utc": "2026-09-27T05:33:49.344347+00:00",
+  "dataset": "phmcngc/snapx-mistral7b-instruct-v03-snapshot",
+  "family": "mistral",
+  "files": {
+    "kernel-metadata.json": {
+      "bytes": 438,
+      "sha256": "2bcf6e48f20af610eb4a9ad9003bc8ad8d426b4555596c07b711a837dbf3254f"
+    },
+    "mirror_probe_config.json": {
+      "bytes": 1875,
+      "sha256": "253ccaae8383f4089200f38ffdeff0dfe9100c2c53d34edfa7940bfe255dbfed"
+    },
+    "mistral_mirror_probe_job.py": {
+      "bytes": 5875,
+      "sha256": "48d3569b478e7ed67159b9228cd8daa35159672dd6deb4510afc229282afadb5"
+    }
+  },
+  "package_dir": "/private/tmp/sem2act-v5-mistral-mirror-probe",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-mistral-mirror-probe",
+  "status": "submitted-non-result-source-probe"
+}

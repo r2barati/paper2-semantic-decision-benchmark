@@ -1,0 +1,36 @@
+{
+  "checked_utc": "2026-09-25T04:50:09.149221+00:00",
+  "cli": "Kaggle CLI 2.2.4",
+  "cli_path": "/private/tmp/kaggle-cli-v2/bin/kaggle",
+  "gpu": {
+    "refreshAt": "2026-09-26T00:00:00",
+    "remaining": "0.00h",
+    "resource": "GPU",
+    "total": "30.00h",
+    "used": "30.41h"
+  },
+  "gpu_canary": {
+    "launched": false,
+    "reason": "GPU.remaining is 0.00h; canary is prohibited by the fail-closed preflight."
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "quota": [
+    {
+      "refreshAt": "2026-09-26T00:00:00",
+      "remaining": "0.00h",
+      "resource": "GPU",
+      "total": "30.00h",
+      "used": "30.41h"
+    },
+    {
+      "refreshAt": "2026-09-26T00:00:00",
+      "remaining": "20.00h",
+      "resource": "TPU",
+      "total": "20.00h",
+      "used": "0.00h"
+    }
+  ],
+  "quota_command": "kaggle quota --format json",
+  "schema_version": 1,
+  "status": "blocked-no-gpu-quota"
+}

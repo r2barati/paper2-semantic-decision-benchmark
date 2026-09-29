@@ -37,3 +37,9 @@ venv/
 htmlcov/
 dist/
 build/
+
+# V5 runtime inputs, preflight receipts, and fetched outputs are run-specific.
+# Keep only the explanatory README under runtime/ in the repository.
+versions/sem2act-v5/runtime/**
+!versions/sem2act-v5/runtime/README.md
+versions/sem2act-v5/manifests/kaggle_preflight_v3.json

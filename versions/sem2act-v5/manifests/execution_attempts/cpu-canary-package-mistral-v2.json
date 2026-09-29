@@ -1,0 +1,32 @@
+{
+  "created_utc": "2026-09-27T05:09:10.536414+00:00",
+  "engine_source_archive_sha256": "bc351a39f7a2c68f0e9827f86d0185c4ec7617be29493c4f8d349ecf41bbcbc6",
+  "engine_source_dataset": "siavashsimin/sem2act-v5-llama-cpp-b11194-source",
+  "engine_source_dataset_version": 2,
+  "engine_source_tree_sha256": "1bbfb63c28543063eadf2d55b9e74f63866d4d7d3fbfe448bab4a2d6e08a84e8",
+  "family": "mistral",
+  "files": {
+    "canary_config.json": {
+      "bytes": 1008,
+      "sha256": "f3930aa95b959bdc29123e1ca88770f9e880cbad9cc30f73f502cbd3ec8c9fe6"
+    },
+    "canary_job.py": {
+      "bytes": 28326,
+      "sha256": "ad8c3f8f8574e38c2c22eec4ad89a4973c5949916af466891456b34b1917eee5"
+    },
+    "kernel-metadata.json": {
+      "bytes": 420,
+      "sha256": "9f09309ea421968694976efd93efdd046e1be55638577051d0b61d871ecf869c"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "package_dir": "/var/folders/3y/02p_tc4x2nqdqm60b9051qvr0000gn/T/sem2act-v5-cpu-mistral-iprwadwl",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-mistral",
+  "status": "submitted-non-result-canary"
+}

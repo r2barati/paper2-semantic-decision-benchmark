@@ -1,0 +1,203 @@
+{
+  "amendment": "versions/sem2act-v5/amendments/cpu_backend_v1.yaml",
+  "client": {
+    "package": "openai==2.48.0",
+    "protocol": "openai_chat_completions_localhost",
+    "request_timeout_seconds": 1800
+  },
+  "conversion": {
+    "artifact_manifest": "versions/sem2act-v5/manifests/cpu_model_artifacts.json",
+    "commands": [
+      "python convert_hf_to_gguf.py {MODEL_DIR} --outfile {MODEL}.f16.gguf --outtype f16",
+      "llama-quantize {MODEL}.f16.gguf {MODEL}.Q4_K_M.gguf Q4_K_M"
+    ],
+    "conversion_script_sha256": null,
+    "quantizer": "llama-quantize",
+    "quantizer_binary_sha256": null,
+    "script": "convert_hf_to_gguf.py"
+  },
+  "decoding": {
+    "do_sample": false,
+    "max_new_tokens": 256,
+    "num_beams": 1,
+    "seed": 0,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "engine": {
+    "binary": "llama-server",
+    "build_flags": [
+      "-DGGML_NATIVE=OFF",
+      "-DGGML_OPENMP=ON",
+      "-DGGML_CUDA=OFF",
+      "-DGGML_METAL=OFF",
+      "-DGGML_VULKAN=OFF",
+      "-DGGML_SYCL=OFF"
+    ],
+    "build_manifest": "versions/sem2act-v5/manifests/cpu_engine_build.json",
+    "commit": "9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69",
+    "name": "llama.cpp",
+    "quantization_type": "Q4_K_M",
+    "repository": "https://github.com/ggml-org/llama.cpp",
+    "source_bundle": {
+      "commit": "9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69",
+      "dataset": "siavashsimin/sem2act-v5-llama-cpp-b11194-source",
+      "dataset_version": 2,
+      "filename": "llama-cpp-b11194.tar.gz",
+      "manifest_filename": "engine_source_manifest.json",
+      "sha256": "bc351a39f7a2c68f0e9827f86d0185c4ec7617be29493c4f8d349ecf41bbcbc6",
+      "source_tree_sha256": "1bbfb63c28543063eadf2d55b9e74f63866d4d7d3fbfe448bab4a2d6e08a84e8"
+    },
+    "tag": "b11194"
+  },
+  "failure_policy": "Any missing artifact, schema error, nondeterministic repeat, or unresolved failure stops before result-bearing execution.",
+  "lock_id": "sem2act-v5-cpu-runtime-v1",
+  "models": {
+    "llama": {
+      "attention_backend": "llama.cpp_cpu",
+      "backend": "llama.cpp",
+      "batch_size": 512,
+      "bitsandbytes": "disabled",
+      "device_map": "cpu",
+      "dtype": "ggml_q4_k_m",
+      "gguf_filename": "llama-3.1-8b-instruct.Q4_K_M.gguf",
+      "gguf_sha256": null,
+      "max_context_tokens": 4096,
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "model_source": {
+        "owner": "metaresearch",
+        "publisher": "Meta",
+        "source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct",
+        "type": "official_kaggle_model",
+        "version_id": 104449,
+        "version_number": 2
+      },
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "tokenizer_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "ubatch_size": 512
+    },
+    "mistral": {
+      "attention_backend": "llama.cpp_cpu",
+      "backend": "llama.cpp",
+      "batch_size": 512,
+      "bitsandbytes": "disabled",
+      "device_map": "cpu",
+      "dtype": "ggml_q4_k_m",
+      "gguf_filename": "mistral-7b-instruct-v0.3.Q4_K_M.gguf",
+      "gguf_sha256": null,
+      "max_context_tokens": 4096,
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "model_source": {
+        "architecture": "MistralForCausalLM",
+        "candidate_dataset": "phmcngc/snapx-mistral7b-instruct-v03-snapshot",
+        "content_sha256": "805960a9bbd7a17f70da2170a56f9364ecfd10ddae6a7698e4e0d55cceffa0b0",
+        "model_type": "mistral",
+        "patch_dataset": "siavashsimin/sem2act-v5-mistral-tokenizer-patch",
+        "patch_dataset_slug": "sem2act-v5-mistral-tokenizer-patch",
+        "patch_filename": "tokenizer_config.json",
+        "type": "verified_kaggle_dataset_assembly"
+      },
+      "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "tokenizer_revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "ubatch_size": 512
+    },
+    "qwen": {
+      "attention_backend": "llama.cpp_cpu",
+      "backend": "llama.cpp",
+      "batch_size": 512,
+      "bitsandbytes": "disabled",
+      "device_map": "cpu",
+      "dtype": "ggml_q4_k_m",
+      "gguf_filename": "qwen3-8b.Q4_K_M.gguf",
+      "gguf_sha256": null,
+      "max_context_tokens": 4096,
+      "model_id": "Qwen/Qwen3-8B-AWQ",
+      "model_source": {
+        "architecture": "Qwen3ForCausalLM",
+        "content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+        "model_type": "qwen3",
+        "owner": "qwen-lm",
+        "publisher": "QwenLM",
+        "source_ref": "qwen-lm/qwen-3/Transformers/8b-awq",
+        "type": "official_kaggle_model",
+        "version_id": 391615,
+        "version_number": 1
+      },
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "tokenizer_revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "ubatch_size": 512
+    },
+    "reranker": {
+      "attention_backend": "eager",
+      "backend": "transformers_cpu",
+      "batch_size": 1,
+      "bitsandbytes": "disabled",
+      "device": "cpu",
+      "device_map": "cpu",
+      "dtype": "float32",
+      "max_context_tokens": 1024,
+      "model_id": "Qwen/Qwen3-Reranker-0.6B",
+      "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "tokenizer_revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473"
+    }
+  },
+  "platform": {
+    "accelerator": "cpu_only",
+    "cuda": false,
+    "max_consumer_instances_per_host": 1,
+    "metal": false,
+    "orchestration": "github_actions_ci_or_private_self_hosted_runner",
+    "primary_execution": "local_multicore_cpu",
+    "qrel_free_inputs_only": true,
+    "secondary_execution": "kaggle_multicore_cpu"
+  },
+  "preflight_manifests": {
+    "consumer_canary": "versions/sem2act-v5/manifests/cpu_canary.json",
+    "host": "versions/sem2act-v5/manifests/cpu_host_preflight.json",
+    "model_source": "versions/sem2act-v5/manifests/cpu_model_source_preflight.json",
+    "reranker_canary": "versions/sem2act-v5/manifests/cpu_reranker_canary.json",
+    "status": "versions/sem2act-v5/manifests/cpu_preflight_status.json"
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "schema_version": 1,
+  "server": {
+    "batch_size": 512,
+    "context_tokens": 4096,
+    "gpu_layers": 0,
+    "jinja": true,
+    "parallel_slots": 1,
+    "reasoning": "off",
+    "reasoning_format": "none",
+    "threads": null,
+    "threads_batch": null,
+    "ubatch_size": 512
+  },
+  "smoke_fixture": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+  "source_contract": [
+    "versions/sem2act-v5/amendments/cpu_backend_v1.yaml",
+    "versions/sem2act-v5/compute/cpu/contract.py",
+    "versions/sem2act-v5/compute/cpu/canary.py",
+    "scripts/cpu_host_preflight.py",
+    "scripts/prepare_v5_cpu_artifacts.py",
+    "scripts/run_v5_cpu_canary.py",
+    "scripts/run_v5_cpu_reranker_canary.py",
+    "scripts/freeze_v5_cpu_runtime.py",
+    "scripts/plan_v5_cpu_shards.py",
+    "scripts/plan_v5_cpu_rerank_shards.py",
+    "scripts/run_v5_cpu_shard.py",
+    "scripts/run_v5_cpu_rerank_shard.py",
+    "scripts/verify_v5_cpu_shards.py",
+    "scripts/verify_v5_cpu_protocol.py",
+    "scripts/record_v5_cpu_engine_build.py",
+    "versions/sem2act-v5/compute/kaggle_cpu/canary_job.py",
+    "scripts/kaggle_cpu_canary.py",
+    "scripts/verify_kaggle_cpu_canary.py",
+    "versions/sem2act-v5/experiments/stage_consumer_inputs.py",
+    "versions/sem2act-v5/compute/kaggle_cpu/source_probe_job.py",
+    "scripts/kaggle_model_source_probe.py",
+    "scripts/verify_kaggle_model_source_probe.py",
+    "scripts/accept_v5_cpu_model_source.py",
+    "scripts/audit_v5_cpu_release_gate.py"
+  ],
+  "status": "prospective-before-cpu-preflight"
+}

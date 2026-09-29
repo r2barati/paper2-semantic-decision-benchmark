@@ -1,0 +1,35 @@
+\begin{table}[t]
+\centering
+\caption{Semantic quality on test queries at $k=3$ (160 queries). Abstention rates: C3/random 0.56--0.94, else $\le 0.03$. A C3 abstention scores $0$ accuracy while retaining the prior for Brier. Per-cell CIs (median half-width $0.07$) are in the anonymous supplementary artifact.}
+\label{tab:semantic}
+(a) Regime accuracy\\[2pt]
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+System & C0 & C1/8B & C1/14B & C3/8B & C3/14B \\
+\midrule
+BM25 & 0.406 & 0.275 & 0.338 & 0.344 & 0.338 \\
+Dense & 0.412 & 0.287 & 0.281 & 0.388 & 0.331 \\
+Hybrid & 0.425 & 0.362 & 0.350 & 0.375 & 0.350 \\
+Rerank & 0.400 & 0.406 & 0.412 & 0.444 & 0.444 \\
+Random & 0.350 & 0.237 & 0.225 & 0.081 & 0.006 \\
+Oracle & 0.594 & 0.700 & 0.719 & 0.963 & 0.969 \\
+\bottomrule
+\end{tabular}
+}
+\\[6pt](b) Brier score\\[2pt]
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+System & C0 & C1/8B & C1/14B & C3/8B & C3/14B \\
+\midrule
+BM25 & 0.254 & 0.356 & 0.314 & 0.271 & 0.288 \\
+Dense & 0.233 & 0.329 & 0.319 & 0.260 & 0.282 \\
+Hybrid & 0.260 & 0.315 & 0.291 & 0.263 & 0.273 \\
+Rerank & 0.297 & 0.258 & 0.257 & 0.269 & 0.262 \\
+Random & 0.286 & 0.336 & 0.327 & 0.252 & 0.226 \\
+Oracle & 0.157 & 0.121 & 0.127 & 0.028 & 0.035 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

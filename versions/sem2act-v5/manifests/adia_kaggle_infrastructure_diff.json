@@ -1,0 +1,158 @@
+{
+  "comparison": [
+    {
+      "adia": "rezabarati2",
+      "field": "authenticated_owner",
+      "finding": "The current token cannot access the private ADIA kernel; account/entitlement identity is unresolved.",
+      "sem2act": "siavashsimin",
+      "severity": "high"
+    },
+    {
+      "adia": "historical kagglesdk SDK submission",
+      "field": "submission_client",
+      "finding": "The historical SDK path is the reference mechanism, but exact historical package version cannot be recovered locally.",
+      "sem2act": "kagglesdk runner plus Kaggle CLI 2.2.4 diagnostic",
+      "severity": "medium"
+    },
+    {
+      "adia": "enable_gpu=true; machine_shape absent",
+      "field": "GPU_request",
+      "finding": "The explicit machine shape did not restore CUDA under the current account.",
+      "sem2act": "enable_gpu=true plus machine_shape=NvidiaTeslaT4",
+      "severity": "medium"
+    },
+    {
+      "adia": "private ADIA dataset attached",
+      "field": "dataset_source",
+      "finding": "The canary does not need data, but the source attachment is a packaging difference.",
+      "sem2act": "no dataset attached to canary",
+      "severity": "low"
+    },
+    {
+      "adia": "observed torch 2.10.0+cu128 on Tesla T4",
+      "field": "runtime_image",
+      "finding": "ADIA's saved output proves that its then-current image exposed CUDA and torch 2.10.0+cu128 on a T4. The Sem2Act canary stopped at CUDA initialization before reporting its torch version, so compatibility with the frozen 2.7.1+cu126 pin remains unverified.",
+      "sem2act": "expects torch 2.7.1+cu126; canary does not install the pinned runtime",
+      "severity": "high"
+    },
+    {
+      "adia": "private Python script",
+      "field": "kernel_shape",
+      "finding": "No difference found.",
+      "sem2act": "private Python script",
+      "severity": "none"
+    },
+    {
+      "adia": "disabled",
+      "field": "internet",
+      "finding": "No difference found for the canary.",
+      "sem2act": "disabled for canary",
+      "severity": "none"
+    }
+  ],
+  "decision": {
+    "do_not_launch_result_job": true,
+    "scientific_protocol_change": false,
+    "v2_result_execution": "blocked",
+    "v3_activation": "blocked pending a fresh rezabarati2 credential or demonstrated GPU entitlement for siavashsimin, plus an explicit runtime-image decision"
+  },
+  "generated_utc": "2026-09-26T07:19:41.307729+00:00",
+  "known_good_adia": {
+    "kernel": "rezabarati2/adia-gpu-probe",
+    "local_result": "artifacts/kaggle_out/adia-gpu-probe/results.json",
+    "observed_result": {
+      "cuda_available": true,
+      "device": "Tesla T4",
+      "torch": "2.10.0+cu128",
+      "total_memory_gb": 15.64
+    },
+    "result_sha256": "076d0d9c230c4a5ef333141a89f387df2796de0ad9a90ecad4e190d23e382685",
+    "source_hashes": {
+      "probe_script": "bf039b72664147aaf6df33dde8f70152b8873833506ea0e367e4797dc4eff085",
+      "push_script": "0e3e2756b800b23c50c75ee0125c82bffa92a88ee052a38f67a2b3cb3ea68c26"
+    },
+    "submission_pattern": {
+      "accelerator_cli_argument": "none; SDK submission",
+      "client": "kagglesdk.ApiSaveKernelRequest",
+      "dataset_sources": "attached by DATASET/DATASET_OVERRIDE",
+      "enable_gpu": "stem in GPU",
+      "enable_internet": "False",
+      "kernel_id_field": "not set; req.slug only",
+      "kernel_type": "script",
+      "machine_shape": "not set in historical ADIA push script",
+      "owner": "rezabarati2",
+      "private": true
+    }
+  },
+  "metadata_pull": {
+    "no_credential_values_recorded": true,
+    "reason": "The current token authenticates as siavashsimin and receives 403 when reading the private rezabarati2 kernel; the status of any historical credential is unverified.",
+    "status": "blocked"
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "report_id": "sem2act-v5-adia-kaggle-infrastructure-diff-v1",
+  "schema_version": 1,
+  "scientific_protocol_unchanged": true,
+  "sem2act_v5": {
+    "canary_kernel": "siavashsimin/sem2act-v5-canary",
+    "direct_cli_diagnostic_kernel": "siavashsimin/sem2act-v5-canary-direct",
+    "observed_attempts": {
+      "fresh_cli_v2": "KernelWorkerStatus.ERROR: CUDA is unavailable",
+      "quota_gpu_remaining_hours": 30.0,
+      "result_bearing_jobs_submitted": [],
+      "sdk_v1": "KernelWorkerStatus.ERROR: CUDA is unavailable",
+      "sdk_v2": "KernelWorkerStatus.ERROR: CUDA is unavailable"
+    },
+    "runtime_lock": {
+      "cuda": "12.6.1",
+      "cuda_required": true,
+      "package_install_policy": "exact-pins-before-model-load",
+      "python": "3.12",
+      "torch": "2.7.1+cu126"
+    },
+    "source_hashes": {
+      "canary": "a011eb0f05edcb72453cc56dd3699983ac5765fc61e1e938f7107ddcb91b27d8",
+      "execution_status": "2e18494167c660d7205785d81a6c6edf963d16bcc1c27616f44b7e4bda77a7eb",
+      "runner": "cc5d6145123dac6ea2ceea127306fcc908345c985f33c6d2afefe605a03a49da",
+      "runtime_lock": "08ece6cb58895df945dfeeae1f052f5f5f6fb5177178fbd80fbb9b00bd4658b9"
+    },
+    "submission_pattern": {
+      "accelerator_cli_argument": "NvidiaTeslaT4 for direct diagnostic",
+      "client": "kagglesdk 0.1.37 via runner; separate Kaggle CLI 2.2.4 diagnostic",
+      "dataset_sources": "none for canary",
+      "enable_gpu": true,
+      "enable_internet": "False for canary",
+      "kernel_id_field": "not set in SDK runner; direct diagnostic metadata included id",
+      "kernel_type": "script",
+      "machine_shape": "NvidiaTeslaT4 in v2 runner and direct metadata",
+      "owner": "siavashsimin",
+      "private": true
+    }
+  },
+  "status": "completed-read-only-diff",
+  "ui_entitlement_canary": {
+    "acceptance": {
+      "cuda_available_required": true,
+      "device_name_required": true,
+      "gpu_required": true,
+      "result_bearing_jobs_unlocked_only_after_pass": true
+    },
+    "account": "siavashsimin",
+    "canary": "kaggle-ui-account-entitlement",
+    "failure_policy": "If the UI canary cannot select a GPU or reports cuda_available=false, Kaggle is ineligible for v5 and no SDK/CLI debugging continues.",
+    "procedure": [
+      "Open a fresh private Kaggle notebook while signed in as siavashsimin.",
+      "Paste the exact canary script.",
+      "Manually select one available GPU accelerator in the notebook settings.",
+      "Run the notebook once and retain the displayed JSON and screenshot/export outside the manuscript.",
+      "Record the observed account, accelerator, torch version, cuda_available, device, and timestamp here."
+    ],
+    "result_bearing": false,
+    "schema_version": 1,
+    "scientific_protocol_unchanged": true,
+    "script": "versions/sem2act-v5/compute/kaggle_ui_canary.py",
+    "sem2act_code_used": false,
+    "sem2act_data_used": false,
+    "status": "pending-user-ui-run"
+  }
+}

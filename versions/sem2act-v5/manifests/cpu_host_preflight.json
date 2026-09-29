@@ -1,0 +1,29 @@
+{
+  "cpu_model": "i386",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "GGML_CUDA": "0",
+    "GGML_METAL": "0",
+    "GGML_SYCL": "0",
+    "GGML_VULKAN": "0",
+    "MKL_NUM_THREADS": "4",
+    "OMP_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4"
+  },
+  "frozen_threads": 4,
+  "frozen_threads_batch": 4,
+  "generated_utc": "2026-09-26T18:17:38.593697+00:00",
+  "llama_server": "/private/tmp/sem2act-llama.cpp-v11194/build/bin/llama-server",
+  "llama_server_sha256": "88e8738d07ec42722f6c99233bfe15cd48b25ecc523e8d1cc288353e522aa3ab",
+  "logical_cores": 8,
+  "machine": "x86_64",
+  "manifest_id": "sem2act-v5-cpu-host-preflight-v1",
+  "memory_bytes": 8589934592,
+  "memory_gib": 8.0,
+  "physical_cores": 4,
+  "platform": "macOS-15.7.7-x86_64-i386-64bit",
+  "python": "3.9.19",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "status": "pass"
+}

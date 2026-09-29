@@ -1,0 +1,26 @@
+{
+  "created_utc": "2026-09-27T03:41:13.065715+00:00",
+  "family": "qwen",
+  "files": {
+    "kernel-metadata.json": {
+      "bytes": 408,
+      "sha256": "023e883d3124fb866693ec59e562f7060956759b9c4988acd5ba2497a4f2864c"
+    },
+    "source_probe_config.json": {
+      "bytes": 580,
+      "sha256": "1a38196939f8b1d419f95f3cd20b9e7cbf57a854230fef9e96340fa048b54f0c"
+    },
+    "source_probe_job.py": {
+      "bytes": 4720,
+      "sha256": "cd6681f2b0d92cf3c283c8b1b869793016b799b39c07a0384e9038b417d644f7"
+    }
+  },
+  "kernel_source_ref": "qwen-lm/qwen-3/Transformers/8b-awq/1",
+  "package_dir": "/var/folders/3y/02p_tc4x2nqdqm60b9051qvr0000gn/T/sem2act-v5-source-probe-qwen-6xncozt5",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-source-probe-qwen",
+  "source_ref": "qwen-lm/qwen-3/Transformers/8b-awq",
+  "status": "submitted-non-result-source-probe"
+}

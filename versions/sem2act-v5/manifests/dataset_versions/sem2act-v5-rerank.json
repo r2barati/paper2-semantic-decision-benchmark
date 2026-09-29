@@ -1,0 +1,16 @@
+{
+  "dataset": "rezabarati2/sem2act-v5-rerank-inputs",
+  "dataset_version_number": 1,
+  "job": "sem2act-v5-rerank",
+  "recorded_utc": "2026-09-25T03:46:21Z",
+  "remote_sha256_verified": true,
+  "remote_verification_manifest": "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
+  "remote_verified_utc": "2026-09-25T03:56:56.678888+00:00",
+  "response_fields": {
+    "error": "",
+    "ref": "/datasets/rezabarati2/sem2act-v5-rerank-inputs",
+    "status": "Ok"
+  },
+  "response_repr": "{\"ref\": \"/datasets/rezabarati2/sem2act-v5-rerank-inputs\", \"url\": \"https://www.kaggle.com/datasets/rezabarati2/sem2act-v5-rerank-inputs\", \"status\": \"Ok\", \"error\": \"\", \"invalidTags\": []}",
+  "schema_version": 1
+}

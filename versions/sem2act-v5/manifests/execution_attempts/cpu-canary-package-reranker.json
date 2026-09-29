@@ -1,0 +1,32 @@
+{
+  "created_utc": "2026-09-27T02:02:03.440164+00:00",
+  "engine_source_archive_sha256": "bc351a39f7a2c68f0e9827f86d0185c4ec7617be29493c4f8d349ecf41bbcbc6",
+  "engine_source_dataset": "siavashsimin/sem2act-v5-llama-cpp-b11194-source",
+  "engine_source_dataset_version": 2,
+  "engine_source_tree_sha256": "1bbfb63c28543063eadf2d55b9e74f63866d4d7d3fbfe448bab4a2d6e08a84e8",
+  "family": "reranker",
+  "files": {
+    "canary_config.json": {
+      "bytes": 926,
+      "sha256": "5a04f66f6d75ddc17db5a4d3a20d8551bc7d1c66a0fc351e4549e91568acb513"
+    },
+    "canary_job.py": {
+      "bytes": 24594,
+      "sha256": "ce299ff14399ef7f94fe07988bbd5df6afeb5c2e4ae680c2216f975fb05a3626"
+    },
+    "kernel-metadata.json": {
+      "bytes": 422,
+      "sha256": "f1e304c621b289af58b6d90cf3dd67c36912812eac1fcc46ed7ddf6684330c21"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "package_dir": "/private/tmp/sem2act-v5-cpu-package-reranker",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-reranker",
+  "status": "packaged-non-result-canary"
+}

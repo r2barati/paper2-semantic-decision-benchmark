@@ -1,0 +1,55 @@
+{
+  "artifact_manifest": "versions/sem2act-v5/manifests/cpu_model_artifacts.json",
+  "consumer_canary": {
+    "reason": "Qwen conversion failed for the pinned AWQ snapshot; Mistral source was not mounted and Kaggle could not resolve Hugging Face before model load; no consumer canary has passed",
+    "status": "blocked"
+  },
+  "engine_build": "versions/sem2act-v5/manifests/cpu_engine_build.json",
+  "external_submission_gate": {
+    "manifest": "versions/sem2act-v5/manifests/execution_attempts/cpu-source-probe-submission-gate.json",
+    "packages": [
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-qwen.json"
+    ],
+    "qrels_read": false,
+    "reason": "Explicit authorization was received for private zero-inference Qwen/Llama source probes. Qwen passed; both Llama attempts were excluded because no official source mounted.",
+    "remote_jobs_started": true,
+    "result_bearing_execution_started": false,
+    "status": "completed-non-result-source-probes;llama-source-unavailable"
+  },
+  "failure_policy": "No result-bearing CPU execution is permitted until artifacts and all non-lockbox canaries pass.",
+  "local_host_preflight": "versions/sem2act-v5/manifests/cpu_host_preflight.json",
+  "local_reranker_canary": {
+    "path": "versions/sem2act-v5/manifests/cpu_reranker_canary.json",
+    "sha256": "d37e0aa7852bb8023a03fa6ad87409375965df216e2ea8ced492e9ebeef1ffb5",
+    "status": "pass"
+  },
+  "manifest_id": "sem2act-v5-cpu-preflight-status-v1",
+  "model_source_preflight": "versions/sem2act-v5/manifests/cpu_model_source_preflight.json",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "remote_kaggle_canary_attempts": [
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-reranker-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-reranker-v2-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v2-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v3-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v4-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v5-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v6-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v7-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v2-failure.json"
+  ],
+  "remote_kaggle_source_probe_attempts": [
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v2-failure.json",
+    "versions/sem2act-v5/manifests/cpu_source_probes/qwen/acceptance_manifest.json",
+    "versions/sem2act-v5/manifests/cpu_source_probes/mistral_assembly_v2/acceptance_manifest.json"
+  ],
+  "result_bearing_execution_started": false,
+  "runtime_freeze_manifest": "versions/sem2act-v5/manifests/cpu_runtime_freeze.json",
+  "schema_version": 1,
+  "status": "blocked-before-cpu-runtime-freeze;qwen-awq-conversion-failed;llama-source-probe-failed-no-mount;mistral-source-assembly-verified",
+  "updated_utc": "2026-09-27T06:55:02Z"
+}

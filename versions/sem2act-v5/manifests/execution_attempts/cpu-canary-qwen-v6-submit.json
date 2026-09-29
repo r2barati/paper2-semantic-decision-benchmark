@@ -1,0 +1,32 @@
+{
+  "created_utc": "2026-09-27T01:35:06.772879+00:00",
+  "engine_source_archive_sha256": "bc351a39f7a2c68f0e9827f86d0185c4ec7617be29493c4f8d349ecf41bbcbc6",
+  "engine_source_dataset": "siavashsimin/sem2act-v5-llama-cpp-b11194-source",
+  "engine_source_dataset_version": 2,
+  "engine_source_tree_sha256": "1bbfb63c28543063eadf2d55b9e74f63866d4d7d3fbfe448bab4a2d6e08a84e8",
+  "family": "qwen",
+  "files": {
+    "canary_config.json": {
+      "bytes": 754,
+      "sha256": "31c849f2fbd61175adc7613cce65792c35a46f3fb0f8cdbeef8d5e1aa8a678dc"
+    },
+    "canary_job.py": {
+      "bytes": 24111,
+      "sha256": "cc3f96f735bdb1d0b3547d629fd8767a8fec5c0ff79001ccd17be11ab256e31d"
+    },
+    "kernel-metadata.json": {
+      "bytes": 414,
+      "sha256": "53b5bb8e8bf8c619dae0fd5d90bbe029c9df010268354c9458f543710ef88b2a"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "package_dir": "/var/folders/3y/02p_tc4x2nqdqm60b9051qvr0000gn/T/sem2act-v5-cpu-qwen-_9gf6q7l",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "submitted-non-result-canary"
+}

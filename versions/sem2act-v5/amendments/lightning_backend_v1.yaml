@@ -1,0 +1,164 @@
+schema_version: 1
+amendment_id: sem2act-v5-lightning-backend-v1
+status: frozen-before-result-bearing-execution
+effective_utc: 2026-09-25T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: execution-environment-only
+scientific_protocol_unchanged: true
+
+platform:
+  provider: lightning-ai
+  job_kind: managed-single-gpu
+  machine: T4
+  gpu_count: 1
+  device: cuda:0
+  workspace: default-personal-workspace
+  artifact_root: ${LIGHTNING_ARTIFACTS_DIR}
+  private_input_artifact: sem2act-v5-qrel-free-inputs
+
+secrets:
+  hf_token:
+    source: lightning-secret
+    environment_variable: HF_TOKEN
+    value_recorded: false
+  platform_credentials:
+    source: process-environment-only
+    value_recorded: false
+    policy: revoked-after-plaintext-exposure-and-replaced-before-launch
+
+runtime:
+  python: "3.12"
+  torch_dtype: float16
+  cuda_required: true
+  cpu_offload: false
+  tensor_parallel_size: 1
+  no_runtime_fallbacks: true
+  package_pins:
+    vllm: 0.11.0
+    transformers: 4.57.6
+    openai: 2.48.0
+    pydantic: 2.12.5
+    PyYAML: 6.0.2
+
+models:
+  reranker:
+    backend: transformers
+    model_id: Qwen/Qwen3-Reranker-0.6B
+    revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+    tokenizer_revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+    tokenizer:
+      use_fast: true
+      padding_side: left
+      trust_remote_code: true
+    dtype: float16
+    quantization:
+      method: none
+    device_map:
+      "": cuda:0
+    attention_backend: eager
+    max_context_tokens: 1024
+    truncation: longest_first
+    batch_size: 32
+    instruction_hash_source: versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py
+
+  qwen:
+    backend: vllm
+    model_id: Qwen/Qwen3-8B-AWQ
+    revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+    tokenizer_revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+    dtype: float16
+    quantization:
+      method: awq
+    device_map:
+      device: cuda:0
+      tensor_parallel_size: 1
+      cpu_offload_gb: 0
+    attention_backend: TRITON_ATTN
+    max_context_tokens: 4096
+    batch_size: 1
+    max_num_seqs: 1
+    max_num_batched_tokens: 4096
+    gpu_memory_utilization: 0.85
+    enforce_eager: true
+    enable_thinking: false
+
+  llama:
+    backend: transformers
+    model_id: meta-llama/Llama-3.1-8B-Instruct
+    revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    tokenizer_revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    tokenizer:
+      use_fast: true
+      padding_side: left
+    dtype: float16
+    quantization:
+      method: bitsandbytes
+      load_in_4bit: true
+      bnb_4bit_quant_type: nf4
+      bnb_4bit_compute_dtype: float16
+      bnb_4bit_use_double_quant: true
+    device_map:
+      "": cuda:0
+    attention_backend: eager
+    max_context_tokens: 4096
+    max_input_tokens: 3840
+    max_new_tokens: 256
+    batch_size: 1
+    do_sample: false
+    num_beams: 1
+    use_cache: true
+
+  mistral:
+    backend: transformers
+    model_id: mistralai/Mistral-7B-Instruct-v0.3
+    revision: d79d1742f78eb0cc788c11e5b41a7539d7cb56ef
+    tokenizer_revision: d79d1742f78eb0cc788c11e5b41a7539d7cb56ef
+    tokenizer:
+      use_fast: true
+      padding_side: left
+    dtype: float16
+    quantization:
+      method: bitsandbytes
+      load_in_4bit: true
+      bnb_4bit_quant_type: nf4
+      bnb_4bit_compute_dtype: float16
+      bnb_4bit_use_double_quant: true
+    device_map:
+      "": cuda:0
+    attention_backend: eager
+    max_context_tokens: 4096
+    max_input_tokens: 3840
+    max_new_tokens: 256
+    batch_size: 1
+    do_sample: false
+    num_beams: 1
+    use_cache: true
+
+decoding:
+  temperature: 0.0
+  top_p: 1.0
+  max_new_tokens: 256
+  do_sample: false
+  num_beams: 1
+  seed: 0
+
+preflight:
+  smoke_fixture: versions/sem2act-v5/fixtures/runtime_smoke_v1.json
+  smoke_fixture_is_lockbox_query: false
+  required_stages:
+    - cuda_canary
+    - reranker_model_load_and_smoke
+    - qwen_model_load_and_smoke
+    - llama_model_load_and_smoke
+    - mistral_model_load_and_smoke
+  failure_policy: stop-before-result-bearing-execution
+  oom_policy: no-parameter-reduction-and-no-fallback
+
+execution_order:
+  - reranker
+  - qwen
+  - llama
+  - mistral
+  - assemble_beliefs
+  - replay
+  - analysis

@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Frozen QREL\_VALIDATION\_V2 audit. The provenance oracle is independent of the original qrel generator. The external judge was calibrated on public TREC pairs; its failed gate excludes it from Sem2Act validation.}
+\label{tab:v4-qrel-validation}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrl}
+\toprule
+Comparison & $n$ & Exact & Within 1 & Weighted $\kappa$ & Decision \\
+\midrule
+Constructed $\leftrightarrow$ provenance & 160 & 0.875 & 0.950 & 0.848 & audit retained \\
+TREC human $\leftrightarrow$ Qwen judge & 200 & 0.465 & 0.840 & 0.461 & excluded; Sem2Act excluded \\
+\multicolumn{6}{l}{Packet-restricted nDCG@3 order: constructed Hybrid>BM25>Dense>Rerank; provenance Hybrid>BM25>Dense>Rerank.} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

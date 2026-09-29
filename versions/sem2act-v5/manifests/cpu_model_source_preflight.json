@@ -1,0 +1,143 @@
+{
+  "alternate_official_sources": {
+    "llama": {
+      "author": "Meta",
+      "instance": "Transformers/8b-instruct",
+      "model": "llama-3.1",
+      "owner": "metaresearch",
+      "reason": "Kaggle version-file endpoint returned HTTP_403; exact artifact hashes and equivalence to the pinned HF revision could not be verified.",
+      "source": "kaggle_model",
+      "status": "rejected_before_use",
+      "version_id": 104449,
+      "version_number": 2
+    },
+    "mistral": {
+      "owner": "mistralai",
+      "reason": "Public Kaggle mirror weights and required metadata matched the pinned HF revision; tokenizer_config.json was replaced by the exact pinned file and the assembled hash passed.",
+      "source": "kaggle_model",
+      "status": "verified_pinned_mirror_assembly",
+      "verified_mirror_assembly": "versions/sem2act-v5/manifests/cpu_source_probes/mistral_assembly_v2/acceptance_manifest.json"
+    },
+    "qwen": {
+      "acceptance_manifest": "versions/sem2act-v5/manifests/cpu_source_probes/qwen/acceptance_manifest.json",
+      "content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+      "model": "qwen-3",
+      "owner": "qwen-lm",
+      "reason": "Pinned official Kaggle source passed the zero-inference source probe and content snapshot gate.",
+      "source": "kaggle_model",
+      "status": "accepted_official_source_probe"
+    }
+  },
+  "checked_utc": "2026-09-27T04:00:00Z",
+  "converter": {
+    "conversion_script_sha256": "e9a1da876330bbce9687541ab31736542a01b4ac43c6686126514a50f122fb7f",
+    "engine_commit": "9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69",
+    "quantizer_binary_sha256": "3626ead10c3018b8bb45db18ddf5d4b05b0dcbf7080cad3b13bab521bcc7aa40",
+    "qwen3_architecture_supported_by_source": true
+  },
+  "failure_policy": "Do not substitute a checkpoint, alter the CPU runtime, or begin result-bearing execution after this failure.",
+  "hf_metadata_checks": {
+    "llama": {
+      "gated": "manual",
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "private": false,
+      "requested_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "resolved_sha": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "siblings": 17,
+      "source": "huggingface_model_api",
+      "status": "metadata_verified_manual_gate"
+    },
+    "mistral": {
+      "gated": false,
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "private": false,
+      "requested_revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "resolved_sha": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "siblings": 15,
+      "source": "huggingface_model_api",
+      "status": "metadata_verified_public"
+    }
+  },
+  "last_source_handoff": {
+    "accepted_manifest_sha256": "d77cc8e1a9e4aaf77d914dc5d5ee1c150d415fda927ec0d96065a3b19ca6d484",
+    "accepted_utc": "2026-09-27T06:55:02.700839+00:00",
+    "content_sha256": "805960a9bbd7a17f70da2170a56f9364ecfd10ddae6a7698e4e0d55cceffa0b0",
+    "family": "mistral"
+  },
+  "manifest_id": "sem2act-v5-cpu-model-source-preflight-v1",
+  "models": {
+    "llama": {
+      "hf_metadata_check": "hf_metadata_checks.llama",
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "prior_hf_status": "metadata_verified_manual_gate",
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "source": {
+        "architecture": "LlamaForCausalLM",
+        "content_sha256": null,
+        "model_type": "llama",
+        "owner": "metaresearch",
+        "publisher": "Meta",
+        "source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct",
+        "type": "official_kaggle_model",
+        "version_id": 104449,
+        "version_number": 2
+      },
+      "source_probe_failures": [
+        "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v1-failure.json",
+        "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v2-failure.json"
+      ],
+      "status": "source_probe_failed_no_mount",
+      "weights_downloaded": false
+    },
+    "mistral": {
+      "architecture": "MistralForCausalLM",
+      "hf_metadata_check": "hf_metadata_checks.mistral",
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "source": {
+        "architecture": "MistralForCausalLM",
+        "candidate_dataset": "phmcngc/snapx-mistral7b-instruct-v03-snapshot",
+        "content_sha256": "805960a9bbd7a17f70da2170a56f9364ecfd10ddae6a7698e4e0d55cceffa0b0",
+        "model_type": "mistral",
+        "patch_dataset": "siavashsimin/sem2act-v5-mistral-tokenizer-patch",
+        "patch_dataset_slug": "sem2act-v5-mistral-tokenizer-patch",
+        "patch_filename": "tokenizer_config.json",
+        "type": "verified_kaggle_dataset_assembly"
+      },
+      "source_probe_acceptance_manifest": "versions/sem2act-v5/manifests/cpu_source_probes/mistral_assembly_v2/acceptance_manifest.json",
+      "source_snapshot_file_count": 10,
+      "status": "source_assembly_passed",
+      "weights_downloaded": true
+    },
+    "qwen": {
+      "model_id": "Qwen/Qwen3-8B-AWQ",
+      "prior_hf_status": "config_reachable_weights_not_downloaded",
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "source": {
+        "architecture": "Qwen3ForCausalLM",
+        "content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+        "model_type": "qwen3",
+        "owner": "qwen-lm",
+        "publisher": "QwenLM",
+        "source_ref": "qwen-lm/qwen-3/Transformers/8b-awq",
+        "type": "official_kaggle_model",
+        "version_id": 391615,
+        "version_number": 1
+      },
+      "source_probe_acceptance_manifest": "versions/sem2act-v5/manifests/cpu_source_probes/qwen/acceptance_manifest.json",
+      "source_snapshot_file_count": 12,
+      "status": "source_probe_passed",
+      "weights_downloaded": true
+    }
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "source_probe_attempts": [
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-qwen.json",
+    "versions/sem2act-v5/manifests/cpu_source_probes/mistral_assembly_v2/acceptance_manifest.json"
+  ],
+  "status": "blocked-before-model-artifact-freeze;qwen-awq-conversion-unsupported;llama-access-pending"
+}

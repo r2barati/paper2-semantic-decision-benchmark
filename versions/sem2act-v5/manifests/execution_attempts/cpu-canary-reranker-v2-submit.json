@@ -1,0 +1,28 @@
+{
+  "created_utc": "2026-09-26T18:56:57.885711+00:00",
+  "family": "reranker",
+  "files": {
+    "canary_config.json": {
+      "bytes": 401,
+      "sha256": "9eb771f6f9427b90b931b562e60450d710f4c2d9e666a5a29d060e3f36c96873"
+    },
+    "canary_job.py": {
+      "bytes": 18912,
+      "sha256": "f659d026522680436393430817af2ec72bb26f4df53a10d58ce1641696852d79"
+    },
+    "kernel-metadata.json": {
+      "bytes": 365,
+      "sha256": "94d1e6c86b868bc4ca0fbc453a9223da97f3a45c1d517c623438a7e3c43bf798"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "package_dir": "/var/folders/3y/02p_tc4x2nqdqm60b9051qvr0000gn/T/sem2act-v5-cpu-reranker-rxfmbs22",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-reranker",
+  "status": "submitted-non-result-canary"
+}

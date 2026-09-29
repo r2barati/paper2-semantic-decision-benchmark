@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\caption{Paired $\Delta J$ vs no-retrieval control at $k=3$ (160 test queries $\times$ 5 seeds; crossed bootstrap, $B=5{,}000$). $^*$: Holm rejection (105 arms); unstarred cells Holm-n.s. Displayed CIs are unadjusted; stars carry multiplicity control. A harm claim is headlined only if Holm-robust under balanced weights and same-signed under empirical weights. Cluster CIs (median $1.08\times$, max $1.19\times$) agree in direction for every starred cell. Refs: NoInfo $1779.0$, PerfectBelief $1994.4$, Hindsight $2451.2$. NoText\_Tuned $1881.1$ (\S\ref{sec:tuned}).}
+\label{tab:utility}
+{\small\setlength{\tabcolsep}{1pt}\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.35cm}*{5}{>{\centering\arraybackslash}p{1.85cm}}@{}}
+\toprule
+System & C0 & \shortstack{C1\\8B} & \shortstack{C1\\14B} & \shortstack{C3\\8B} & \shortstack{C3\\14B} \\
+\midrule
+BM25 & $-8.5$ & $-103.5^*$ & $-89.7^*$ & $-43.4$ & $-59.8^*$ \\
+ & $[-32,+16]$ & $[-137,-71]$ & $[-118,-63]$ & $[-71,-15]$ & $[-82,-37]$ \\
+\addlinespace[1pt]
+Dense & $-4.6$ & $-91.5^*$ & $-93.2^*$ & $-27.9$ & $-55.2^*$ \\
+ & $[-26,+17]$ & $[-122,-61]$ & $[-121,-66]$ & $[-58,+3]$ & $[-79,-31]$ \\
+\addlinespace[1pt]
+Hybrid & $-9.8$ & $-74.6^*$ & $-73.9^*$ & $-36.6$ & $-54.4^*$ \\
+ & $[-35,+15]$ & $[-105,-44]$ & $[-97,-51]$ & $[-64,-10]$ & $[-73,-35]$ \\
+\addlinespace[1pt]
+Rerank & $-40.2$ & $-43.6^*$ & $-40.9^*$ & $-21.8$ & $-20.7$ \\
+ & $[-68,-13]$ & $[-65,-23]$ & $[-62,-20]$ & $[-56,+11]$ & $[-48,+7]$ \\
+\addlinespace[1pt]
+Random & $-35.0$ & $-90.4^*$ & $-89.9^*$ & $-13.1$ & $+10.9^*$ \\
+ & $[-62,-9]$ & $[-110,-71]$ & $[-104,-75]$ & $[-26,-2]$ & $[+7,+14]$ \\
+\addlinespace[1pt]
+Oracle & $+39.3$ & $+74.9^*$ & $+70.6^*$ & $+178.9^*$ & $+162.5^*$ \\
+ & $[+9,+69]$ & $[+38,+111]$ & $[+32,+108]$ & $[+135,+221]$ & $[+125,+200]$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

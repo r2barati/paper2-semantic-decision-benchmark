@@ -1,0 +1,31 @@
+{
+  "downloaded_output_files": {
+    "preflight_manifest.json": {
+      "bytes": 282,
+      "sha256": "0e23c8a6b54eac7c96333caef88d2f3090cd105444106825c217616fa0cc126f"
+    },
+    "sem2act-v5-cpu-preflight-reranker.log": {
+      "bytes": 1602,
+      "sha256": "dc60c7b1d823cc59670d00833fd6d165bac6cffd1c63e46a1682d6973d07954f"
+    }
+  },
+  "family": "reranker",
+  "kaggle_kernel_version": 1,
+  "manifest_id": "sem2act-v5-kaggle-cpu-reranker-canary-v1-failure",
+  "qrels_read": false,
+  "reason": "FileNotFoundError: [Errno 2] No such file or directory: 'canary_config.json'",
+  "remote_manifest": {
+    "error": "FileNotFoundError: [Errno 2] No such file or directory: 'canary_config.json'",
+    "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+    "qrels_read": false,
+    "result_bearing_execution_started": false,
+    "schema_version": 1,
+    "status": "failed",
+    "wall_seconds": 0.0
+  },
+  "remote_manifest_sha256": "0e23c8a6b54eac7c96333caef88d2f3090cd105444106825c217616fa0cc126f",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-reranker",
+  "status": "failed-before-model-load"
+}

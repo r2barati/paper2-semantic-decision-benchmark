@@ -1,0 +1,100 @@
+{
+  "action": "submit two private zero-inference official model source probes",
+  "authorization_scope": "User-authorized Qwen and Llama source-probe code payloads only; no qrels, credentials, annotations, lockbox inputs, consumer inference, GGUF consumer runs, or scientific analysis.",
+  "excluded_attempts": [
+    {
+      "kernel_id": "siavashsimin/sem2act-v5-official-source-probe-llama",
+      "kernel_numeric_id": 136053290,
+      "manifest": "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v1-failure.json",
+      "manifest_sha256": "ba5e095256f9cc6eef0c91081aca331c9b04968ce3fac3e4b9f32f251cf0ab0e",
+      "status": "excluded-non-result-source-probe-failure"
+    },
+    {
+      "kernel_id": "siavashsimin/sem2act-v5-source-probe-llama",
+      "kernel_numeric_id": 136054747,
+      "manifest": "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v2-failure.json",
+      "manifest_sha256": "941f76c68f14f8d801c632d49b0fb481cf41e6a65a6399f4d6b8329ef61aad18",
+      "status": "excluded-non-result-source-probe-failure"
+    }
+  ],
+  "manifest_id": "sem2act-v5-source-probe-submission-gate-v2",
+  "packages": [
+    {
+      "family": "llama",
+      "kernel_id": "siavashsimin/sem2act-v5-source-probe-llama",
+      "kernel_source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct/2",
+      "kernel_version": 1,
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "model_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "package_files": {
+        "kernel-metadata.json": {
+          "bytes": 423,
+          "sha256": "8b6f70450862e547671f0d0ea8ff09e9512fd9291a17f809b2b9d32cdc609c20"
+        },
+        "source_probe_config.json": {
+          "bytes": 612,
+          "sha256": "4e0306a014662663f2478e6722d20e69f61ae1540f8008e0cf173ed00c395723"
+        },
+        "source_probe_job.py": {
+          "bytes": 4201,
+          "sha256": "9874cbec9e0bee68684c1f9a033a0c0ea8ffdfd0b22d5a9caf09372cc80734f5"
+        }
+      },
+      "package_manifest": "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama.json",
+      "package_manifest_sha256": "ffe30fccdb7468fab6299ef967c84829b82bb6491e47de03cd1c7309599ac2d8",
+      "qrels_read": false,
+      "reason": "Kaggle accepted the documented attachment reference but mounted no official source.",
+      "remote_log_path": "versions/sem2act-v5/manifests/execution_attempts/source_probe_failures/llama-v2/source_probe.log",
+      "remote_log_sha256": "634dacfa58e9728f5d655e75e9d25141fd893b8d16c364c5106cb0879cc108f1",
+      "remote_manifest_path": "versions/sem2act-v5/manifests/execution_attempts/source_probe_failures/llama-v2/source_probe_manifest.json",
+      "remote_manifest_sha256": "f1d19319d5fa2a43aefbabbbb5c968c44a511482452689115f9442f95ae72c9b",
+      "remote_status": "excluded-no-mounted-source",
+      "result_bearing_execution_started": false,
+      "source_ref": "metaresearch/llama-3.1/Transformers/8b-instruct",
+      "source_version_id": 104449,
+      "source_version_number": 2
+    },
+    {
+      "acceptance_manifest": "versions/sem2act-v5/manifests/cpu_source_probes/qwen/acceptance_manifest.json",
+      "content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+      "family": "qwen",
+      "kernel_id": "siavashsimin/sem2act-v5-source-probe-qwen",
+      "kernel_source_ref": "qwen-lm/qwen-3/Transformers/8b-awq/1",
+      "kernel_version": 1,
+      "model_id": "Qwen/Qwen3-8B-AWQ",
+      "model_revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "package_files": {
+        "kernel-metadata.json": {
+          "bytes": 408,
+          "sha256": "023e883d3124fb866693ec59e562f7060956759b9c4988acd5ba2497a4f2864c"
+        },
+        "source_probe_config.json": {
+          "bytes": 580,
+          "sha256": "1a38196939f8b1d419f95f3cd20b9e7cbf57a854230fef9e96340fa048b54f0c"
+        },
+        "source_probe_job.py": {
+          "bytes": 4720,
+          "sha256": "cd6681f2b0d92cf3c283c8b1b869793016b799b39c07a0384e9038b417d644f7"
+        }
+      },
+      "package_manifest": "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-qwen.json",
+      "package_manifest_sha256": "7f99e5a70f1d2b10a79b6d108a6669aa9f29da438d595d65f710323a668c2332",
+      "qrels_read": false,
+      "remote_log_path": "versions/sem2act-v5/manifests/cpu_source_probes/qwen/sem2act-v5-source-probe-qwen.log",
+      "remote_log_sha256": "9195efb07ff6fef97635e74d2dd8cf28c95cda69c951c85826846d65e602cadd",
+      "remote_manifest_path": "versions/sem2act-v5/manifests/cpu_source_probes/qwen/source_probe_manifest.json",
+      "remote_manifest_sha256": "79227b3127e55f290adb91820868bc7e1b57e53e5a116801705825b5a960b5ed",
+      "remote_status": "accepted",
+      "result_bearing_execution_started": false,
+      "source_ref": "qwen-lm/qwen-3/Transformers/8b-awq",
+      "source_version_id": 391615,
+      "source_version_number": 1
+    }
+  ],
+  "qrels_read": false,
+  "remote_jobs_started": true,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "status": "completed-non-result-source-probes;llama-source-unavailable",
+  "updated_utc": "2026-09-27T03:46:04Z"
+}

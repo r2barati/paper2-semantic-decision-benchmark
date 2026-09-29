@@ -1,0 +1,29 @@
+\begin{table}[t]
+\caption{Experiment~C (controlled benchmark). Calibration is not an isolated
+intervention: \texttt{CalibratedClassifierCV} refits one classifier per fold,
+so the calibrated arm differs from the single-model arm in two ways. The
+fold-ensemble row carries the ensembling change without a calibration map and
+is the control that separates them. Isotonic regression on six calibration
+points per fold saturates; the sigmoid arm is the small-sample alternative.
+Effects are against the uninformed prior, which returns 1635.}
+\label{tab:calibration}
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l rrr rlr}
+\toprule
+Interpreter & Acc. & Brier & Log-loss & $\Delta J$ & 95\% CI & SIVR \\
+\midrule
+NoInfo (prior) & 0.333 & 0.668 & 1.101 & +0.0 & [+0, +0] & 0.000 \\
+No-text (uniform) & 0.333 & 0.667 & 1.099 & +12.5 & [+11, +14] & 0.047 \\
+\textbf{No-text (dev-tuned)} & 0.333 & 1.333 & 15.351 & +194.8 & [+169, +221] & 0.737 \\
+RuleBased & 0.833 & 0.319 & 1.111 & +205.7 & [+161, +245] & 0.779 \\
+TF--IDF (single) & 0.889 & 0.552 & 0.932 & +64.8 & [+48, +81] & 0.245 \\
+TF--IDF (label only) & 0.889 & 0.222 & 2.558 & +204.3 & [+85, +275] & 0.773 \\
+TF--IDF (fold ensemble) & 0.889 & 0.583 & 0.977 & +40.6 & [+23, +60] & 0.154 \\
+TF--IDF (calib., isotonic) & 0.806 & 0.319 & 0.542 & +89.4 & [+13, +159] & 0.338 \\
+TF--IDF (calib., sigmoid) & 0.861 & 0.392 & 0.699 & +69.0 & [+26, +109] & 0.261 \\
+TF--IDF cal.\ (label only) & 0.806 & 0.389 & 4.477 & +142.3 & [+0, +265] & 0.539 \\
+TF--IDF cal.\ (shuffled) & 0.417 & 0.849 & 3.716 & -16.5 & [-100, +72] & -0.062 \\
+Perfect-semantic ref. & 1.000 & 0.000 & 0.000 & +264.2 & [+238, +289] & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}

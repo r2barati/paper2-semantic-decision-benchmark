@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "project": "sem2act-v5",
+  "run_id": "<unique-backend-stage-utc-id>",
+  "status": "not-started",
+  "stage": "fixed-20-query-reranker-operations-pilot",
+  "pilot_only": true,
+  "analysis_use": "prohibited",
+  "execution_sha": null,
+  "protocol": {
+    "path": "versions/sem2act-v5/protocol/confirmation.yaml",
+    "sha256": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022"
+  },
+  "backend_amendment": {
+    "path": null,
+    "sha256": null
+  },
+  "runtime_lock": {
+    "path": null,
+    "sha256": null
+  },
+  "input_manifest": {
+    "path": "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
+    "sha256": null,
+    "qrels_uploaded": false
+  },
+  "inputs": {
+    "queries.jsonl": null,
+    "corpus.jsonl": null,
+    "rerank_candidates.jsonl": null
+  },
+  "model": {
+    "model_id": "Qwen/Qwen3-Reranker-0.6B",
+    "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "tokenizer_revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "dtype": null
+  },
+  "backend": {
+    "provider": null,
+    "operator": null,
+    "account_identity": null,
+    "provider_job_id": null,
+    "device": null,
+    "device_count": null,
+    "device_memory_bytes": null,
+    "host_id": null
+  },
+  "runtime": {
+    "python": null,
+    "torch": null,
+    "torch_cuda_runtime": null,
+    "cuda_driver": null,
+    "transformers": null,
+    "threads": null,
+    "interop_threads": null
+  },
+  "seed": null,
+  "seed_applicability": "none; deterministic reranker inference",
+  "qrels_read": false,
+  "query_ids": [],
+  "expected_queries": 20,
+  "accepted_queries": 0,
+  "candidate_depth": 50,
+  "expected_pairs": 1000,
+  "accepted_pairs": 0,
+  "failure_count": null,
+  "started_utc": null,
+  "completed_utc": null,
+  "receipts": {
+    "preflight_path": null,
+    "preflight_sha256": null,
+    "canary_path": null,
+    "canary_sha256": null
+  },
+  "outputs": [],
+  "verification": {
+    "status": "pending",
+    "checks": [],
+    "report_sha256": null
+  },
+  "failure_evidence": []
+}

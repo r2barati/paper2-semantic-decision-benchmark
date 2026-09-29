@@ -1,0 +1,26 @@
+{
+  "candidate_dataset": "phmcngc/snapx-mistral7b-instruct-v03-snapshot",
+  "created_utc": "2026-09-27T05:54:58.273097+00:00",
+  "family": "mistral",
+  "files": {
+    "assembly_probe_config.json": {
+      "bytes": 2007,
+      "sha256": "7d9576fb299fcdd4a984bb75716dfb816d7d00d482517685279ff9c1699e7713"
+    },
+    "kernel-metadata.json": {
+      "bytes": 519,
+      "sha256": "1244ff2a432ec513059b0c4940e4368d0557e7300381acdcf02f5bbfe29ff626"
+    },
+    "mistral_source_assembly_probe_job.py": {
+      "bytes": 7284,
+      "sha256": "492630282edb779cd5b214394a00139e69803154c88a129ad753f47acd87094c"
+    }
+  },
+  "package_dir": "/private/tmp/sem2act-v5-mistral-source-assembly-probe",
+  "patch_dataset": "siavashsimin/sem2act-v5-mistral-tokenizer-patch",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-mistral-source-assembly-probe",
+  "status": "submitted-non-result-source-probe"
+}

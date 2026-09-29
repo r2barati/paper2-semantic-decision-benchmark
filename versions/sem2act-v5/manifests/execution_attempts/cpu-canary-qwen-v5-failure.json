@@ -1,0 +1,31 @@
+{
+  "downloaded_output_files": {
+    "preflight_manifest.json": {
+      "bytes": 289,
+      "sha256": "7bd23f51cc83aadace9d2a5d3639284aafa839e2afa4313bb669e67f96bdf6af"
+    },
+    "sem2act-v5-cpu-preflight-qwen.log": {
+      "bytes": 38516,
+      "sha256": "7a0a035cb0d85dbff991d6ceff3128f1e3be4d21a6f652f562435b03d3c5e2c5"
+    }
+  },
+  "family": "qwen",
+  "kaggle_kernel_version": 5,
+  "manifest_id": "sem2act-v5-kaggle-cpu-qwen-canary-v5-failure",
+  "qrels_read": false,
+  "reason": "FileNotFoundError: [Errno 2] No such file or directory: 'runtime_smoke_v1.json'",
+  "remote_manifest": {
+    "error": "FileNotFoundError: [Errno 2] No such file or directory: 'runtime_smoke_v1.json'",
+    "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+    "qrels_read": false,
+    "result_bearing_execution_started": false,
+    "schema_version": 1,
+    "status": "failed",
+    "wall_seconds": 519.258
+  },
+  "remote_manifest_sha256": "7bd23f51cc83aadace9d2a5d3639284aafa839e2afa4313bb669e67f96bdf6af",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "failed-after-engine-build-before-model-load"
+}

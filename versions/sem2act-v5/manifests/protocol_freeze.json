@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "experiment_id": "v5-confirmation-package",
+  "status": "protocol-frozen",
+  "frozen_utc": "2026-09-24",
+  "files": [
+    {
+      "path": "versions/sem2act-v5/protocol/confirmation.yaml",
+      "sha256": "05d2d30a74b263839028bebff9e59d24957ca2d72a45183109dc5adeb3025328",
+      "bytes": 4678
+    },
+    {
+      "path": "versions/sem2act-v5/experiments/signed_estimands.py",
+      "sha256": "3e52d36970ba930b84e89fd3b3ad1bc002410655225bf9408bdbe01e2327438d",
+      "bytes": 1122
+    },
+    {
+      "path": "versions/sem2act-v5/experiments/selective_entropy.py",
+      "sha256": "4bd1ef22c2fd10cd234f260ddd2cec28b8187958cf7ef9e23a8d761248cabd9b",
+      "bytes": 1223
+    },
+    {
+      "path": "versions/sem2act-v5/experiments/controllers.py",
+      "sha256": "0cc2e9b228545bb6b34ace28941bf084e4214a1e44f3077c52d80ac7d9e96fe0",
+      "bytes": 1150
+    },
+    {
+      "path": "versions/sem2act-v5/experiments/lockbox/generate_lockbox.py",
+      "sha256": "9e54137bc307bbfbab083849c693565b4c1fa5ebae803dfdd46ef40b72265130",
+      "bytes": 9894
+    },
+    {
+      "path": "versions/sem2act-v5/experiments/lockbox/provenance_validate.py",
+      "sha256": "26cd9dd4154ef1b3f59f97f61607fcd6fd4158f613c933141e86d29b812c010d",
+      "bytes": 4684
+    }
+  ],
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "signed_estimands": {
+    "delta": "J_Rerank - J_NoInfo",
+    "interaction": "[DeltaJ40 - DeltaJ1]_persistent - [DeltaJ40 - DeltaJ1]_reset",
+    "primary_null": "H0: I_40_1 = 0"
+  },
+  "no_design_changes_after_freeze": true
+}

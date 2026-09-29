@@ -1,0 +1,29 @@
+\begin{table}[t]
+\centering
+\caption{Decomposition at $k=3$ (rerank arm; balanced $J$; 95\% CIs inline). The ``NoInfo baseline'' is $J(\mathrm{ActualRetrieval})-J(\mathrm{NoInfo})$; the four diagnostic gaps are Selection $=$ $J(\mathrm{OracleRelevant})-J(\mathrm{ActualRetrieval})$, Rel$\to$Fact, Interp., and Control. Control $+456.8$ $[+387,+538]$ is retrieval-independent and shown once.}
+\label{tab:gaps}
+{\small\setlength{\tabcolsep}{1pt}\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.00cm}*{4}{>{\centering\arraybackslash}p{1.85cm}}@{}}
+\toprule
+Arm & \shortstack{NoInfo\\baseline} & Selection & \shortstack{Rel$\to$\\Fact} & Interp. \\
+\midrule
+C0 & $-40.2$ & $+79.5$ & $+0.0$ & $+176.0$ \\
+ & $[-68,-13]$ & $[+57,+103]$ & $[+0,+0]$ & $[+130,+220]$ \\
+\addlinespace[1pt]
+C1/8B & $-43.6$ & $+118.4$ & $+0.0$ & $+140.5$ \\
+ & $[-65,-23]$ & $[+91,+146]$ & $[+0,+0]$ & $[+108,+172]$ \\
+\addlinespace[1pt]
+C3/8B & $-21.8$ & $+200.7$ & $+0.0$ & $+36.4$ \\
+ & $[-56,+11]$ & $[+162,+239]$ & $[+0,+0]$ & $[+17,+58]$ \\
+\addlinespace[1pt]
+C1/14B & $-40.9$ & $+111.5$ & $+0.0$ & $+144.8$ \\
+ & $[-62,-20]$ & $[+79,+144]$ & $[+0,+0]$ & $[+114,+177]$ \\
+\addlinespace[1pt]
+C3/14B & $-20.7$ & $+183.1$ & $+0.0$ & $+52.9$ \\
+ & $[-48,+7]$ & $[+147,+219]$ & $[+0,+0]$ & $[+31,+77]$ \\
+\midrule
+Control (all arms) & \multicolumn{4}{c}{$+456.8$ $[+387,+538]$} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

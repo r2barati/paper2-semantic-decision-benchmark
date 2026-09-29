@@ -1,0 +1,40 @@
+{
+  "amendment_sha256": "eaa6514cd6902388c1811891cd2f115714a81f0a763c644110e0c88e901e4331",
+  "created_utc": "2026-09-29T09:05:54.432487+00:00",
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "lock_id": "sem2act-v5-colab-runtime-v1",
+  "lock_sha256": "b40454497dd6a365aa1531b691eb515bab06a156e1a158d774af92d9cb4c3c4b",
+  "manifest_id": "sem2act-v5-colab-runtime-freeze-v1",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "result_bearing_execution_started": false,
+  "runtime_policy": {
+    "cpu_offload": false,
+    "cuda": "12.8 (torch runtime; also record driver separately)",
+    "cuda_required": true,
+    "package_install_policy": "Do not replace or silently inherit a changed Colab torch image. Require exact torch/runtime; pin and record transformers before model load.",
+    "provider_image_policy": "The operator-reported current Colab image is explicitly accepted only when torch==2.11.0+cu128 and torch.version.cuda==12.8; mismatch stops. Do not silently downgrade/upgrade torch.",
+    "python": "3.12 (must be freshly verified; otherwise stop)",
+    "runtime_versions_recorded": [
+      "python",
+      "torch",
+      "torch.version.cuda",
+      "transformers",
+      "CUDA driver",
+      "GPU name/count/memory"
+    ],
+    "torch": "2.11.0+cu128",
+    "torch_dtype": "float16",
+    "transformers": "4.57.6"
+  },
+  "schema_version": 1,
+  "source_contract_sha256": {
+    "scripts/colab_v5_preflight.py": "0fb32a02c7606825d06bcbadde79133fb825426d2041e6702e9ca830592912e9",
+    "scripts/freeze_v5_colab_runtime.py": "bba602feec290fafbff812a24113095efe17b28e179c2b692bb074f15e7c57c5",
+    "scripts/verify_v5_rerank_inputs.py": "b6fcc26d2131db487fc8e1dfc53796db78b5f6d494db869349e0a16d1db2a54c",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py": "f8f9d84a5ef63335ef7551f09fafb59c44c6e21c8b08fbc938252c4457d0fa8b",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py": "203829a4cd800d00260cc4ed197e86fd4f0f7e48145259806feaf978c049954f",
+    "versions/sem2act-v5/fixtures/runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+    "versions/sem2act-v5/manifests/colab_runtime_lock_v1.json": "b40454497dd6a365aa1531b691eb515bab06a156e1a158d774af92d9cb4c3c4b"
+  },
+  "status": "prospective-before-result-bearing-execution"
+}

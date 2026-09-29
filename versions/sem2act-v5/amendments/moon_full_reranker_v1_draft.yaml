@@ -1,0 +1,59 @@
+schema_version: 1
+amendment_id: sem2act-v5-moon-full-reranker-v1
+status: draft-not-authorized
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: reranker-stage-scale-up-only
+scientific_protocol_changed: false
+activation_condition: >-
+  A deterministic Moon pilot verification JSON with status PASS for canonical
+  pilot execution SHA 6d97cd0fe11cc87cd38661ac3a3646ebb36b7599, followed by a
+  separate explicit Codex full-run authorization bound to the verifier JSON
+  SHA-256 and the clean next-stage execution SHA.
+workload:
+  queries: 240
+  candidate_depth: 50
+  candidate_scores: 12000
+  shards: 12
+  queries_per_shard: 20
+runtime:
+  provider: tmu-moon
+  operator: OpenCode
+  python: 3.9.19
+  torch: 2.8.0+cpu
+  transformers: 4.57.6
+  device: cpu
+  dtype: float32
+  intra_op_threads: 16
+  inter_op_threads: 1
+  model_id: Qwen/Qwen3-Reranker-0.6B
+  revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+storage:
+  input_and_model_cache: node-local /tmp/sem2act-v5
+  checkpoints_and_outputs: pilot-verified NFS mount
+  minimum_free_nfs_bytes: 10000000
+checkpointing:
+  boundary: one complete 20-query shard
+  stop_on_failure: true
+  recovery: >-
+    No automatic resume after interruption or shard failure. Codex reviews the
+    checkpoint, then issues a new authorization containing the exact parent
+    checkpoint-state SHA-256 and exactly the incomplete shard indexes. The
+    runner may fill missing query keys only and may not overwrite accepted keys.
+provenance:
+  - clean checkout and exact execution SHA
+  - accepted pilot verifier JSON and SHA-256
+  - Moon hostname receipt and same-host match to pilot
+  - runtime lock/freeze hashes, CPU flags, CPU-only state, memory, thread policy
+  - input, model snapshot, shard-plan, per-shard, merged-output SHA-256 values
+  - qrels_read: false
+outputs:
+  - per-query ranking and original score digest
+  - deterministic order-preserving TREC adapter
+  - full run/checkpoint/failure manifests
+  - SHA-256 for each output artifact
+stop_conditions:
+  - any verifier, runtime, input, model, hostname, or storage mismatch
+  - any shard failure or coverage mismatch
+  - any qrels access
+  - immediately after the complete 240-query stage, pending verifier and Codex acceptance
+authorization: not-granted

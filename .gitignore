@@ -82,3 +82,10 @@ kaggle_kernel/**/.kaggle/
 
 # V5 runtime data and model/output caches are operator-local artifacts.
 /versions/sem2act-v5/runtime/
+
+# V5 Kaggle operator receipts are local provenance inputs to the verifier,
+# not execution-code or scientific-result commits.
+/versions/sem2act-v5/manifests/kaggle_submissions/
+/versions/sem2act-v5/manifests/upload/sem2act-v5-llama-inputs.json
+/versions/sem2act-v5/manifests/upload/sem2act-v5-mistral-inputs.json
+/artifacts/kaggle_out/sem2act-v5-*/

@@ -1,7 +1,7 @@
 {
   "amendment_sha256": "01b18c3aea982d288040774cd86cf149a5bc85e5904ad44160b8c14300954b33",
   "failure_policy": "Any quota, lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed.",
-  "frozen_utc": "2026-09-29T09:33:06.141083+00:00",
+  "frozen_utc": "2026-09-29T12:41:13.250782+00:00",
   "lock_id": "sem2act-v5-kaggle-runtime-v3",
   "lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
   "manifest_id": "sem2act-v5-kaggle-runtime-freeze-v3",
@@ -17,7 +17,7 @@
   "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
   "source_contract_sha256": {
     "scripts/freeze_v5_kaggle_runtime.py": "60444bf3175121b3f5a0d1a8518aa7ccefb80dd081ec661209282078ec2e9110",
-    "scripts/kaggle_compute.py": "ea2a8a71ec6fa9a40601ee18f21350d11d70295c37b75a1982cea1d32f6114e5",
+    "scripts/kaggle_compute.py": "11e235c136e61adaba9d81f1f5743bfc3335179c028de76a9dbf6f9adc182341",
     "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_canary.py": "371fe0c4dbe870480328e6da0b66a3e37e0824fbd29dec5bd0a12a3d68f28c5f",
     "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_consumer.py": "b7c1f4150ccbcb112fbe52491495de5dada80ba5586d01404ed3c53f80f90125",
     "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_qwen_consumer.py": "56d3d25abf0cd73900d597be2302000b96b97df9ff6bd13252d573bff37992df",

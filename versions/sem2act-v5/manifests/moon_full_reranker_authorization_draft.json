@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "manifest_id": "sem2act-v5-moon-full-reranker-authorization-v1",
+  "status": "draft-not-authorized",
+  "run_id": "sem2act-v5-moon-reranker-240q-001",
+  "execution_sha": "SET_TO_CLEAN_NEXT_STAGE_COMMIT_SHA",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "pilot_execution_sha": "6d97cd0fe11cc87cd38661ac3a3646ebb36b7599",
+  "pilot_verification_sha256": "SET_TO_SHA256_OF_ACCEPTED_VERIFIER_JSON",
+  "input_manifest_sha256": "486c9763aa29d6000620bac9762cf9d5b261833226fc8bbddc5a96c138bbee24",
+  "runtime_lock_sha256": "6585a859629c589337a0af0abf4bc758bbd60005922d64f5310a92038ab0224a",
+  "runtime_freeze_sha256": "a177be10e94bba7e7285129ddb33657dd0498b3bc1d1e852ec721ab6fad2d368",
+  "pilot_gate": {
+    "pilot_execution_sha": "6d97cd0fe11cc87cd38661ac3a3646ebb36b7599",
+    "verifier": "scripts/verify_v5_moon_reranker_pilot.py",
+    "required_verifier_status": "PASS",
+    "pilot_verification_sha256": "SET_TO_SHA256_OF_ACCEPTED_VERIFIER_JSON",
+    "codex_acceptance_required": true
+  },
+  "paths": {
+    "input_root": "/tmp/sem2act-v5/inputs",
+    "model_path": "/tmp/sem2act-v5/models/qwen3-reranker-0.6b",
+    "output_root": "SET_TO_UNIQUE_PATH_ON_THE_PILOT_VERIFIED_NFS_MOUNT"
+  },
+  "input_sha256": {
+    "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+    "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+    "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+  },
+  "model": {
+    "model_id": "Qwen/Qwen3-Reranker-0.6B",
+    "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "model_snapshot_sha256": "41cf4abc03b3351ce9903ae119ab5c5d1496a6002fea8cd36181e23fd4b51642"
+  },
+  "model_snapshot_sha256": "41cf4abc03b3351ce9903ae119ab5c5d1496a6002fea8cd36181e23fd4b51642",
+  "recovery": {
+    "mode": "fresh"
+  },
+  "scope": {
+    "queries": 240,
+    "candidate_depth": 50,
+    "candidate_scores": 12000,
+    "queries_per_shard": 20,
+    "shards": 12,
+    "threads": 16,
+    "dtype": "float32",
+    "device": "cpu",
+    "qrels_read": false,
+    "scientific_protocol_changed": false
+  },
+  "checkpoint_policy": {
+    "one_shard_directory_per_20_queries": true,
+    "checkpoint_filesystem": "pilot-verified NFS",
+    "model_cache_and_inputs": "node-local /tmp/sem2act-v5",
+    "stop_on_first_failed_shard": true,
+    "resume": "Codex must issue a new authorization bound to the exact checkpoint-state SHA and exactly the incomplete shard indexes; runner resumes missing keys only"
+  },
+  "expected_outputs": {
+    "root": "<output_root>",
+    "required": [
+      "full_run_manifest.json",
+      "full_run_state.json",
+      "rankings.jsonl",
+      "rerank.trec",
+      "failures.json",
+      "plans/index.json",
+      "plans/shard-000.json through plans/shard-011.json",
+      "shards/shard-000 through shards/shard-011, each with run_manifest.json, rankings.jsonl, failures.json, result_bearing_started.json"
+    ],
+    "output_sha256": "computed for every produced file in full_run_manifest.json; exact result hashes are unknown until execution",
+    "trec_scores": "monotonic rank encoding used only to preserve order for the downstream top-3 assembler; each query retains its original model-score digest in rankings.jsonl"
+  },
+  "stop_conditions": [
+    "pilot verifier output is not PASS or its SHA-256 differs",
+    "the execution SHA, input/model/runtime hashes, hostname, CPU flags, CPU-only runtime, or NFS checks drift",
+    "any shard reports a failure, incomplete keyspace, candidate depth other than 50, or qrels_read=true",
+    "any interruption occurs; preserve the NFS checkpoint and return to Codex",
+    "after all 240 queries finish: stop and await full-reranker output verification and explicit Codex acceptance"
+  ],
+  "authorization": "NOT GRANTED"
+}

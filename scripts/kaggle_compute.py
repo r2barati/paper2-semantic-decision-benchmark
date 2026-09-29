@@ -94,7 +94,7 @@ V5_OWNER = "rezabarati2"
 V5_PROTOCOL_HASH = "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022"
 V5_KAGGLE_LOCK = ROOT / "versions/sem2act-v5/manifests/kaggle_runtime_lock.json"
 V5_KAGGLE_FREEZE = ROOT / "versions/sem2act-v5/manifests/kaggle_runtime_freeze.json"
-V5_KAGGLE_PREFLIGHT = ROOT / "versions/sem2act-v5/manifests/kaggle_preflight.json"
+V5_KAGGLE_PREFLIGHT = ROOT / "versions/sem2act-v5/runtime/kaggle_preflight.json"
 
 JOBS = {
     "v5-canary": {
@@ -841,6 +841,47 @@ def _job_owner(job):
     return job.get("owner", OWNER)
 
 
+def _v5_execution_sha():
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+
+
+def _v5_submission_path(job_key, execution_sha):
+    return (ROOT / "versions/sem2act-v5/manifests/kaggle_submissions"
+            / job_key / f"{execution_sha}.json")
+
+
+def _v5_submission_record(job_key, job, path, execution_sha):
+    lock_path = V5_KAGGLE_LOCK
+    freeze_path = V5_KAGGLE_FREEZE
+    upload_manifest_path = _v5_upload_manifest_path(job) if job.get("dataset_dir") else None
+    upload_sha = _sha(upload_manifest_path) if upload_manifest_path and upload_manifest_path.is_file() else None
+    payload = {
+        "schema_version": 1,
+        "status": "kernel-source-saved",
+        "job_key": job_key,
+        "job_slug": job["slug"],
+        "owner": _job_owner(job),
+        "execution_sha": execution_sha,
+        "protocol_hash": V5_PROTOCOL_HASH,
+        "runtime_lock_sha256": _sha(lock_path),
+        "runtime_freeze_sha256": _sha(freeze_path),
+        "kernel_script": str(path.relative_to(ROOT)),
+        "kernel_source_sha256": _sha(path),
+        "dataset_upload_manifest_sha256": upload_sha,
+        "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    return payload
+
+
+def _require_v5_source_freeze():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/freeze_v5_kaggle_runtime.py"), "--check"],
+        cwd=ROOT, check=False, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise SystemExit("Kaggle runtime/source freeze check failed before submission or fetch")
+
+
 def _upload_blob(client, path):
     size = path.stat().st_size
     req = ApiStartBlobUploadRequest()
@@ -865,7 +906,7 @@ def _v5_upload_manifest_path(job):
 
 def _local_upload_record(job, files):
     owner = _job_owner(job)
-    return {
+    record = {
         "schema_version": 1,
         "status": "upload-pending",
         "job": job["slug"],
@@ -879,6 +920,22 @@ def _local_upload_record(job, files):
         "files": {path.name: _sha(path) for path in files},
         "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
+    if job["slug"] in ("sem2act-v5-llama", "sem2act-v5-mistral"):
+        family = "llama" if job["slug"].endswith("-llama") else "mistral"
+        spec_path = ROOT / job["dataset_dir"] / "model_spec.json"
+        bundle_path = ROOT / job["dataset_dir"] / f"consumer_inputs_{family}.json"
+        if not spec_path.is_file() or not bundle_path.is_file():
+            raise SystemExit("V5 Kaggle consumer upload requires its model spec and bundle manifest")
+        spec = json.loads(spec_path.read_text())
+        bundle = json.loads(bundle_path.read_text())
+        record.update({
+            "execution_sha": spec.get("execution_sha"),
+            "bundle_manifest_sha256": _sha(bundle_path),
+            "source_reranker_output_sha256": bundle.get("source_reranker_output_sha256"),
+            "runtime_lock_sha256": _sha(V5_KAGGLE_LOCK),
+            "runtime_freeze_sha256": _sha(V5_KAGGLE_FREEZE),
+        })
+    return record
 
 
 def _require_v5_dataset_verified(job):
@@ -988,6 +1045,20 @@ def cmd_push(job_name, job):
     _require_kaggle_sdk()
     if job_name.startswith("v5-") and job.get("gpu"):
         _require_v5_kaggle_submission_gate(job_name)
+    execution_sha = None
+    path = ROOT / job["script"]
+    submission_path = None
+    if job["slug"].startswith("sem2act-v5-"):
+        _require_v5_source_freeze()
+        execution_sha = _v5_execution_sha()
+        if job_name in ("v5-llama", "v5-mistral"):
+            family = "llama" if job_name == "v5-llama" else "mistral"
+            spec = json.loads((ROOT / job["dataset_dir"] / "model_spec.json").read_text())
+            if spec.get("execution_sha") != execution_sha:
+                raise SystemExit("Kaggle consumer bundle execution SHA differs from the current clean stage commit")
+        submission_path = _v5_submission_path(job_name, execution_sha)
+        if submission_path.exists():
+            raise SystemExit("a Kaggle submission record already exists for this job and execution SHA")
     slug, title = job["slug"], job["title"]
     if _slugify(title) != slug:
         raise SystemExit(f"title {title!r} slugifies to {_slugify(title)!r}, not {slug!r}")
@@ -1031,6 +1102,16 @@ def cmd_push(job_name, job):
     error = getattr(resp, "error", "") or getattr(resp, "_error", "")
     if error:
         raise RuntimeError(f"Kaggle rejected {job_name}: {error}")
+    if submission_path is not None:
+        submission_path.parent.mkdir(parents=True, exist_ok=True)
+        record = _v5_submission_record(job_name, job, path, execution_sha)
+        response_fields = {}
+        for name in ("version_number", "ref", "slug", "status"):
+            value = getattr(resp, name, None)
+            if value is not None:
+                response_fields[name] = str(value)
+        record["response_fields"] = response_fields
+        submission_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
     if job_name == "v4-qrel-sem2act":
         submission_marker = ROOT / "versions/sem2act-v4/manifests/qrel_validation_v2_sem2act_submission.json"
         calibration_freeze = ROOT / "versions/sem2act-v4/manifests/qrel_validation_v2_calibration_freeze.json"
@@ -1082,6 +1163,20 @@ def _sha(p):
 
 def cmd_fetch(job):
     _require_kaggle_sdk()
+    v5_submission = None
+    if job["slug"].startswith("sem2act-v5-"):
+        _require_v5_source_freeze()
+        job_key = next(key for key, value in JOBS.items() if value["slug"] == job["slug"])
+        execution_sha = _v5_execution_sha()
+        submission_path = _v5_submission_path(job_key, execution_sha)
+        if not submission_path.is_file():
+            raise SystemExit("no V5 Kaggle source-submission receipt exists for this execution SHA")
+        v5_submission = json.loads(submission_path.read_text())
+        if (v5_submission.get("execution_sha") != execution_sha
+                or v5_submission.get("kernel_source_sha256") != _sha(ROOT / job["script"])
+                or v5_submission.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK)
+                or v5_submission.get("runtime_freeze_sha256") != _sha(V5_KAGGLE_FREEZE)):
+            raise SystemExit("V5 Kaggle fetched job source/runtime provenance differs from the recorded submission")
     req = ApiDownloadKernelOutputRequest()
     req.owner_slug, req.kernel_slug = _job_owner(job), job["slug"]
     dest = ROOT / "artifacts" / "kaggle_out" / job["slug"]
@@ -1143,12 +1238,25 @@ def cmd_fetch(job):
         target.write_bytes((dest / name).read_bytes())
         print(f"installed {target} sha={_sha(target)[:12]}")
     fetch_manifest_name = job.get("fetch_manifest_name", "kaggle_fetch_manifest.json")
-    (ROOT / job["dest_dir"] / fetch_manifest_name).write_text(json.dumps({
+    fetch_manifest = {
         "job": job["slug"], "fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "files": {n: _sha(ROOT / job["dest_dir"] / install_names.get(n, n))
                   for n in job["outputs"] if n != "run_manifest.json"},
         "verification": verification or {},
-    }, indent=2))
+    }
+    if v5_submission is not None:
+        job_key = next(key for key, value in JOBS.items() if value["slug"] == job["slug"])
+        submission_path = _v5_submission_path(job_key, v5_submission["execution_sha"])
+        fetch_manifest.update({
+            "execution_sha": v5_submission["execution_sha"],
+            "submission_manifest_sha256": _sha(submission_path),
+            "kernel_script": v5_submission["kernel_script"],
+            "kernel_source_sha256": v5_submission["kernel_source_sha256"],
+            "runtime_lock_sha256": v5_submission["runtime_lock_sha256"],
+            "runtime_freeze_sha256": v5_submission["runtime_freeze_sha256"],
+            "dataset_upload_manifest_sha256": v5_submission.get("dataset_upload_manifest_sha256"),
+        })
+    (ROOT / job["dest_dir"] / fetch_manifest_name).write_text(json.dumps(fetch_manifest, indent=2, sort_keys=True) + "\n")
     if job.get("verify") == "v5canary":
         record = _read_v5_preflight()
         record.update({
@@ -1226,6 +1334,7 @@ def _kaggle_cli_path():
 
 
 def cmd_v5_preflight():
+    V5_KAGGLE_PREFLIGHT.parent.mkdir(parents=True, exist_ok=True)
     quota_cmd = _kaggle_cli_path()
     owner_proc = subprocess.run(
         [quota_cmd, "datasets", "list", "--mine", "--search", "sem2act-v5-rerank-inputs", "--format", "json"],

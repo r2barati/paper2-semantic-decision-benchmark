@@ -32,6 +32,9 @@ PROTOCOL_HASH = "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf202
 EXPECTED_SMOKE_FIXTURE_SHA256 = "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
 EXPECTED_SMOKE_CANONICAL_SHA256 = "f90caec2e59315135fffb4b032fb0afceb7b9ca6cc164aaafabd26b548ba1004"
 DEFAULT_PILOT_LIMIT = 20
+# Kaggle's launcher replaces this placeholder with the exact handoff SHA at
+# submission time. Colab uses SEM2ACT_HANDOFF_SHA from its checked-out runtime.
+KAGGLE_HANDOFF_SHA = None
 SMOKE_FIXTURE = {
     "schema_version": 1,
     "fixture_id": "sem2act-v5-runtime-smoke-v1",
@@ -292,7 +295,7 @@ def main():
         "seed": None,
         "seed_applicability": "none; deterministic model.eval inference",
         "runtime": runtime,
-        "execution_sha": os.environ.get("SEM2ACT_HANDOFF_SHA"),
+        "execution_sha": KAGGLE_HANDOFF_SHA or os.environ.get("SEM2ACT_HANDOFF_SHA"),
         "started_utc": started_utc,
         "completed_utc": datetime.now(timezone.utc).isoformat(),
         "output_sha256": {

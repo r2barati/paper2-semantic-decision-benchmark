@@ -1039,11 +1039,20 @@ def cmd_push(job_name, job):
             raise SystemExit("refusing Sem2Act judge: calibration freeze/result hash mismatch")
     path = ROOT / job["script"]
     _lint_kernel(path)
+    source_text = path.read_text()
+    if job_name in {"v5-canary", "v5-rerank-pilot"}:
+        handoff_sha = _v5_handoff_sha()
+        marker = "KAGGLE_HANDOFF_SHA = None"
+        if source_text.count(marker) != 1:
+            raise SystemExit(f"{job_name} source must contain exactly one Kaggle handoff SHA marker")
+        source_text = source_text.replace(
+            marker, f"KAGGLE_HANDOFF_SHA = {json.dumps(handoff_sha)}", 1
+        )
     req = ApiSaveKernelRequest()
     owner = _job_owner(job)
     req.slug = f"{owner}/{slug}"
     req.new_title = title
-    req.text = path.read_text()
+    req.text = source_text
     req.language = "python"
     req.kernel_type = "script"
     req.is_private = True
@@ -1205,8 +1214,11 @@ def cmd_fetch(job):
 
 def _verify_v5_canary(dest, job):
     manifest = json.loads((dest / "canary_manifest.json").read_text())
+    expected_execution_sha = _read_v5_preflight().get("execution_sha")
     if manifest.get("status") != "pass":
         raise SystemExit("Kaggle canary did not pass")
+    if manifest.get("execution_sha") != expected_execution_sha:
+        raise SystemExit("Kaggle canary execution SHA differs from the checked-out handoff")
     if manifest.get("protocol_hash") != V5_PROTOCOL_HASH:
         raise SystemExit("Kaggle canary protocol hash drift")
     if manifest.get("amendment_id") != "sem2act-v5-kaggle-backend-v3":
@@ -1224,7 +1236,10 @@ def _verify_v5_canary(dest, job):
 
 def _verify_v5_rerank_pilot(dest, job):
     manifest = json.loads((dest / "run_manifest.json").read_text())
+    expected_execution_sha = _read_v5_preflight().get("execution_sha")
     expected_qids = {f"v5-lb-q{i:04d}" for i in range(1, 21)}
+    if manifest.get("execution_sha") != expected_execution_sha:
+        raise SystemExit("V5 pilot execution SHA differs from the checked-out handoff")
     if manifest.get("experiment_id") != "v5-lockbox-rerank-pilot" or manifest.get("pilot_only") is not True:
         raise SystemExit("wrong V5 pilot identity or pilot flag")
     if manifest.get("protocol_hash") != V5_PROTOCOL_HASH or manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
@@ -1271,6 +1286,8 @@ def _read_v5_preflight():
     if not V5_KAGGLE_LOCK.exists() or not V5_KAGGLE_FREEZE.exists():
         raise SystemExit("Kaggle runtime freeze is missing")
     record = json.loads(V5_KAGGLE_PREFLIGHT.read_text())
+    if record.get("execution_sha") != _v5_handoff_sha():
+        raise SystemExit("Kaggle preflight execution SHA differs from the checked-out handoff")
     if record.get("protocol_hash") != V5_PROTOCOL_HASH:
         raise SystemExit("Kaggle preflight protocol hash drift")
     if record.get("authenticated_account") != V5_OWNER or record.get("expected_owner") != V5_OWNER:
@@ -1312,7 +1329,18 @@ def _kaggle_cli_path():
     raise SystemExit("Kaggle CLI is unavailable")
 
 
+def _v5_handoff_sha():
+    expected = os.environ.get("SEM2ACT_HANDOFF_SHA", "").strip()
+    current = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=str(ROOT), text=True
+    ).strip()
+    if not expected or expected != current:
+        raise SystemExit("SEM2ACT_HANDOFF_SHA must equal the exact checked-out Git HEAD")
+    return current
+
+
 def cmd_v5_preflight():
+    handoff_sha = _v5_handoff_sha()
     account = os.environ.get("SEM2ACT_V5_AUTHENTICATED_ACCOUNT", "").strip()
     if account != V5_OWNER:
         raise SystemExit(f"confirm the Kaggle account in the provider UI and set SEM2ACT_V5_AUTHENTICATED_ACCOUNT={V5_OWNER}")
@@ -1345,6 +1373,7 @@ def cmd_v5_preflight():
     if proc.returncode != 0:
         record = {
             "schema_version": 1, "status": "unavailable",
+            "execution_sha": handoff_sha,
             "protocol_hash": V5_PROTOCOL_HASH,
             "authenticated_account": account, "expected_owner": V5_OWNER,
             "reranker_dataset": staged["dataset"],
@@ -1371,6 +1400,7 @@ def cmd_v5_preflight():
     record = {
         "schema_version": 1,
         "status": "quota-passed" if remaining > 0 else "blocked-no-gpu-quota",
+        "execution_sha": handoff_sha,
         "protocol_hash": V5_PROTOCOL_HASH,
         "authenticated_account": account,
         "expected_owner": V5_OWNER,

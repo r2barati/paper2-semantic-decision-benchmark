@@ -167,3 +167,38 @@ pilot; Codex review is required before another backend or scale-up.
   staged qrel-free input-manifest SHA-256
   `486c9763aa29d6000620bac9762cf9d5b261833226fc8bbddc5a96c138bbee24`;
   protocol hash `2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022`.
+
+### 2026-09-29 — bind Kaggle kernel provenance to the exact handoff SHA
+
+- **Issue:** Kaggle kernels do not inherit the submitting operator's local
+  environment, so the uploaded GPU pilot could otherwise have a null
+  `execution_sha` despite a correct local checkout.
+- **Approved implementation:** require `SEM2ACT_HANDOFF_SHA` to equal local
+  `HEAD`, embed that SHA into submitted Kaggle canary/pilot source, record it in
+  the local preflight receipt, and reject fetched remote manifests that differ.
+- **Affected files:** `scripts/kaggle_compute.py`, the V5 Kaggle canary/pilot
+  kernels, and `RUNBOOK.md`.
+- **Scientific interpretation:** unchanged; this binds provenance only.
+- **Approval/status:** within the user-approved exact-SHA handoff and
+  provenance requirements; implemented before any V5 job was launched.
+
+### 2026-09-29 — refresh GPU runtime source freezes after provenance guard
+
+- **Issue:** the exact-SHA launcher and manifest checks changed the active
+  Kaggle source contract after the original runtime freeze was generated.
+- **Previous frozen state:** Kaggle v3 freeze SHA-256
+  `60e5b5eff56e1e9d69c25766e271b6c9006ba84abc88d236bf68d385ad3d4676` and
+  Colab v1 freeze SHA-256
+  `181a4af896ee3f8f825f2ed9e9510bcd545b2c4741e754d478381fe3f902159d`.
+- **Approved implementation:** regenerate both source freeze manifests from
+  their committed tools because the shared Kaggle pilot source is also part of
+  the Colab source contract.
+- **New freeze SHA-256 values:** Kaggle v3
+  `b414f79984e0dbb5932024cd9cf445c0ba753d7b1e5c1adbfb038940012f8f4d`; Colab
+  v1 `15caf26ba3fd6fcb4be45f0f35d459a395cca9518d6841ecfb0194310813e4b6`.
+- **Affected files:** both GPU runtime freeze manifests, the Kaggle launcher,
+  the Kaggle canary/pilot kernels, and this decision log.
+- **Scientific interpretation:** unchanged; model, protocol, runtime lock,
+  and experiment parameters are unchanged.
+- **Approval/status:** implementation within the user-approved provenance
+  requirements; preflight still required before execution.

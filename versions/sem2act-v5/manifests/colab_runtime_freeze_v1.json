@@ -1,6 +1,6 @@
 {
   "amendment_sha256": "eaa6514cd6902388c1811891cd2f115714a81f0a763c644110e0c88e901e4331",
-  "created_utc": "2026-09-29T09:05:54.432487+00:00",
+  "created_utc": "2026-09-29T09:30:38.515122+00:00",
   "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
   "lock_id": "sem2act-v5-colab-runtime-v1",
   "lock_sha256": "b40454497dd6a365aa1531b691eb515bab06a156e1a158d774af92d9cb4c3c4b",
@@ -32,7 +32,7 @@
     "scripts/freeze_v5_colab_runtime.py": "bba602feec290fafbff812a24113095efe17b28e179c2b692bb074f15e7c57c5",
     "scripts/verify_v5_rerank_inputs.py": "b6fcc26d2131db487fc8e1dfc53796db78b5f6d494db869349e0a16d1db2a54c",
     "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py": "f8f9d84a5ef63335ef7551f09fafb59c44c6e21c8b08fbc938252c4457d0fa8b",
-    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py": "203829a4cd800d00260cc4ed197e86fd4f0f7e48145259806feaf978c049954f",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py": "e25494c036a3c0f06908c9111509cdd51d0ad8e52133ac934a9ea7205d8bb16f",
     "versions/sem2act-v5/fixtures/runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
     "versions/sem2act-v5/manifests/colab_runtime_lock_v1.json": "b40454497dd6a365aa1531b691eb515bab06a156e1a158d774af92d9cb4c3c4b"
   },

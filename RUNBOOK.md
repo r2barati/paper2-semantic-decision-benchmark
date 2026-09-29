@@ -20,6 +20,7 @@ in the Codex handoff. Do not use the dirty working checkout.
 ```sh
 git clone --branch sem2act-v5-pilot-execution-20260928 https://github.com/r2barati/paper2-semantic-decision-benchmark.git sem2act-v5
 cd sem2act-v5
+export SEM2ACT_HANDOFF_SHA="<exact SHA supplied in the Codex handoff>"
 git checkout --detach "$SEM2ACT_HANDOFF_SHA"
 test "$(git rev-parse HEAD)" = "$SEM2ACT_HANDOFF_SHA"
 test -z "$(git status --porcelain)"
@@ -32,6 +33,12 @@ Expected: the checkout is clean; the protocol hash is
 `2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022`;
 all backend freeze checks pass. Stop on a SHA, source, lock, or protocol
 mismatch.
+
+For Kaggle, `SEM2ACT_HANDOFF_SHA` must remain set to that exact commit while
+running the preflight, canary, submission, and fetch commands. The launcher
+embeds the verified SHA in the uploaded canary/pilot source. The local
+preflight receipt and fetched remote manifests must report that same
+`execution_sha`; a mismatch stops.
 
 The only reranker inputs are the qrel-free `queries.jsonl`,
 `corpus.jsonl`, and `rerank_candidates.jsonl` in

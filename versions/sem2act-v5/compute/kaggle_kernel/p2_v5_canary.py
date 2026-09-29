@@ -13,6 +13,8 @@ EXPECTED_TORCH = "2.7.1+cu126"
 EXPECTED_TRANSFORMERS = "4.57.6"
 EXPECTED_CUDA = "12.6"
 EXPECTED_RUNTIME_LOCK_SHA256 = "df2618f13337b37d59ae4e21cda4eb3423569190869db27614b651f07234ca6b"
+# Kaggle's launcher replaces this placeholder with the exact handoff SHA.
+KAGGLE_HANDOFF_SHA = None
 
 
 def install_pins():
@@ -65,6 +67,7 @@ def main() -> int:
         "protocol_hash": PROTOCOL_HASH,
         "amendment_id": AMENDMENT_ID,
         "runtime_lock_sha256": EXPECTED_RUNTIME_LOCK_SHA256,
+        "execution_sha": KAGGLE_HANDOFF_SHA,
         "python": platform.python_version(),
         "torch": torch.__version__,
         "torch_cuda_runtime": cuda,

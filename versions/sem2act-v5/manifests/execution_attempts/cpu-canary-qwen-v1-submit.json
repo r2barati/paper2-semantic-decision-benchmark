@@ -1,0 +1,30 @@
+{
+  "created_utc": "2026-09-26T19:28:06.993273+00:00",
+  "family": "qwen",
+  "files": {
+    "canary_config.json": {
+      "bytes": 437,
+      "sha256": "07bd8f4cd0109b43a3b9f42012b1cb5b31dbcf0e3669de70c4869c6c9849b544"
+    },
+    "canary_job.py": {
+      "bytes": 20120,
+      "sha256": "71ed66e7bc2259f0e46d0e7a2f6efec4cf01cb01b9e23558cfcaa37dda44a023"
+    },
+    "kernel-metadata.json": {
+      "bytes": 357,
+      "sha256": "f6ff4431c700039fb32f12503bc837150c4311e02c050781ee57df48f87a3bc6"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "kaggle_kernel_version": 1,
+  "package_dir": "/private/tmp/sem2act-v5-cpu-package-qwen",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "result_bearing_execution_started": false,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "submitted-non-result-canary",
+  "submitted_utc": "2026-09-26T21:29:19.714617+00:00"
+}

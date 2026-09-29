@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "manifest_id": "sem2act-v5-cpu-execution-allocation-v1",
+  "status": "prospective-before-cpu-runtime-freeze",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "scientific_protocol_unchanged": true,
+  "allocations": {
+    "kaggle_cpu": {
+      "purpose": ["reranker", "one_consumer_family"],
+      "unit": "deterministic_query_range_shard",
+      "private_only": true,
+      "qrel_free_inputs_only": true
+    },
+    "local_multicore_cpu": {
+      "purpose": ["remaining_consumer_families"],
+      "concurrency": "one_loaded_7B_8B_model_at_a_time",
+      "unit": "deterministic_query_range_shard",
+      "qrel_free_inputs_only": true
+    },
+    "github_actions": {
+      "purpose": [
+        "contract_validation",
+        "manifest_and_hash_validation",
+        "shard_coverage_verification",
+        "belief_assembly",
+        "simulation",
+        "bootstrap_and_holm_analysis",
+        "paper_compilation",
+        "release_audit"
+      ],
+      "hosted_7B_8B_inference": false,
+      "untrusted_public_pr_execution": false
+    },
+    "private_self_hosted_runner": {
+      "enabled": false,
+      "allowed_use": "optional private orchestration of local CPU jobs only",
+      "public_pr_workloads": false
+    }
+  },
+  "failure_policy": "Infrastructure allocation may change only through a prospective amendment; scientific cells are never dropped for throughput."
+}

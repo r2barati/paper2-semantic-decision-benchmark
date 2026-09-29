@@ -1,32 +1,27 @@
-# Sem2Act / Paper 2 compute mapping
+# Sem2Act / Paper 2 compute routing
 
-This file is a concise routing index. Project manifests and a fresh
-Codex-issued runbook handoff govern each run. Resource observations below are
-dated and do not authorize a job.
+The frozen scientific protocol is
+`2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022`.
+Execution amendments below do not change prompts, lockbox, estimands, model
+revisions, decoding, coverage, or analysis. Use only the canonical execution
+SHA in [`RUNBOOK.md`](RUNBOOK.md).
 
-| Workload | Preferred backend | Fallback | Requirements and current state |
-|---|---|---|---|
-| V5 GPU inference | Kaggle, using only the V5 owner and job shape in the V5 job declarations | No automatic fallback | Frozen pipeline value: `V5_OWNER=siavashsimin`; the V5 jobs request one Tesla T4 and name a pinned runtime lock, but the current canary has not passed. The launcher also defines general `OWNER=rezabarati2`; do not conflate it with `V5_OWNER`. The operator reports a separate `rezabarati2` smoke test observed 2× T4, CUDA 12.8, and approximately 30 GPU-hours/week; see the provenance note below. Fresh authenticated-account, private-input access, quota, hardware, and exact-runtime preflight is still required. Do not change V5 owner or runtime from this evidence. |
-| V5 CPU inference | Local multicore CPU as specified by `cpu_backend_v1.yaml` | Kaggle multicore CPU as specified there | Existing execution-only backend amendment; runtime freeze is absent. The local Mac disk is critically constrained. Qwen AWQ conversion currently blocks the CPU runtime freeze; Llama source access is unresolved; Mistral source assembly is verified. No consumer result run is unlocked. |
-| Reranker and consumer staging | Existing staged-bundle sequence in V5 manifests | No substitute artifacts | Current machine status reports the reranker staged and Qwen/Llama/Mistral not staged. Preserve exact revisions and hashes. Fetch and verify each accepted bundle before the next authorized stage. |
-| Validation, replay, analysis, paper build | GitHub Actions or local CPU within the frozen environment | TMU moon only if separately authorized and compatible | Hosted Actions are CPU-only in the existing Sem2Act guidance, with a documented six-hour/job limit; confirm current limits. They do not replace 7B–8B inference. |
-| Long-running CPU development | TMU CS moon for generic CPU work | Local CPU for small jobs | Moon is not part of the current V5 backend mapping. Verify SSH/VPN, quota, `hostname`, CPU/RAM, and disk before separately authorizing any route change. |
+| Workload | Backend and current authorization | Requirements and state |
+|---|---|---|
+| First reranker pilot | OpenCode on TMU Moon; one 20-query / 1,000-candidate shard | Host/runtime profile, node-local scratch, qrel-free staged reranker inputs, exact pinned reranker snapshot, and a 4-vs-16 thread fixture parity gate are enforced by `scripts/run_v5_moon_reranker_pilot.py`. Stop after shard 000. |
+| GPU consumer stage | Muse on Colab, Qwen first | Explicit runtime is one T4 with at least 14 GiB visible VRAM, `torch==2.11.0+cu128`, CUDA build `12.8`; no Torch/CUDA replacement. The 240-query Qwen consumer bundle is not yet available and this result stage remains conditional on a complete accepted reranker output. |
+| Kaggle GPU | OpenCode, account `rezabarati2`; runtime canary only | The machine shape allocates two T4s; the lock exposes only GPU 0 and masks GPU 1. V5 image policy is Python 3.12, `torch==2.10.0+cu128`, CUDA build `12.8`; exact-package installation must preserve that tuple. A fresh owner/quota/runtime/model canary is required. No Kaggle result-stage job is authorized in this handoff. |
+| CPU consumer inference | Moon, blocked | AWQ-to-GGUF conversion for Qwen has failed and Llama official source access is unresolved. This is separate from GPU consumers and the Transformers CPU reranker. Do not substitute a quantization, model, or source. |
+| Consumer input staging | Kaggle datasets, after full reranker acceptance | `stage_consumer_inputs.py` creates the three full-coverage qrel-free bundles only from the complete accepted `rerank.trec`. Current Qwen/Llama/Mistral bundles are absent; no placeholder or partial bundle is valid. |
 
-## Kaggle identity and smoke evidence
+Moon observations are 16 vCPU / 62 GB RAM, CPU only, with AVX2/AVX512
+masked. The 16-thread setting is authorized only when the in-run fixed
+non-lockbox fixture preserves all three document scores within `1e-6` and the
+ranking exactly against 4 threads. Builds, model snapshots, caches, and
+temporary inputs belong on node-local scratch. Persist only the compact shard
+checkpoint and provenance under the operator's quota-limited home directory.
 
-- The frozen V5 pipeline owner remains `siavashsimin` in
-  `scripts/kaggle_compute.py` (`V5_OWNER`) and the V5 runtime/job manifests.
-- The same launcher has a general `OWNER="rezabarati2"` binding for other
-  jobs. It is not the V5 owner binding.
-- The operator-reported, GPU-verified account is `rezabarati2`. On 2026-09-28
-  the operator reported a smoke-test observation of two T4 GPUs, CUDA 12.8,
-  and approximately 30 GPU-hours per week. This report is recorded in
-  [`provenance/kaggle_gpu_smoke_operator_report_20260928.md`](provenance/kaggle_gpu_smoke_operator_report_20260928.md).
-- This account evidence does not prove access to V5-owned kernels or inputs,
-  does not satisfy the fresh V5 quota/runtime check, and does not change the
-  frozen owner or the V5 lock's CUDA/PyTorch pins. Report an access or runtime
-  mismatch to Codex; do not rewrite ownership, locks, or model/runtime choices.
-
-The detailed provider inventory is shared in
-`${RESEARCH_OS_HOME:-$HOME/Research/research-os}/compute/providers.yaml` and
-`${RESEARCH_OS_HOME:-$HOME/Research/research-os}/docs/COMPUTE_INVENTORY.md`.
+Kaggle's two-T4 entitlement does not change the frozen one-GPU job shape. The
+account identity, runtime image, package-preservation rule, and canary are
+recorded in `versions/sem2act-v5/amendments/kaggle_backend_v3.yaml` and the
+V5 Kaggle runtime lock. A positive quota alone is not a runtime pass.

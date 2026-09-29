@@ -1,0 +1,203 @@
+schema_version: 1
+amendment_id: sem2act-v5-cpu-backend-v1
+status: prospective-before-cpu-preflight
+effective_utc: 2026-09-26T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+parent_backend_attempts:
+  - versions/sem2act-v5/amendments/kaggle_backend_v1.yaml
+  - versions/sem2act-v5/amendments/kaggle_backend_v2.yaml
+  - versions/sem2act-v5/amendments/kaggle_backend_v3_adia_reference.yaml
+  - versions/sem2act-v5/amendments/lightning_backend_v1.yaml
+scope: execution-environment-only
+scientific_protocol_unchanged: true
+reason_for_amendment: >-
+  Kaggle and Lightning GPU canaries under the active Sem2Act account did not
+  expose CUDA. This amendment provides a CPU-only execution representation
+  while preserving the frozen v5 scientific protocol and retaining all GPU
+  attempts as excluded infrastructure history.
+
+preserved_scientific_contract:
+  lockbox_queries: 240
+  qrels_and_provenance_gate: unchanged
+  prompts_and_schemas: unchanged
+  systems_and_consumers: unchanged
+  controllers: unchanged
+  simulation_seeds: [61000, 61001, 61002, 61003, 61004, 61005, 61006, 61007, 61008, 61009, 61010, 61011, 61012, 61013, 61014, 61015, 61016, 61017, 61018, 61019]
+  persistence_estimand: unchanged
+  bootstrap: {replicates: 5000, seed: 42}
+  multiplicity_families: unchanged
+  result_policy: "No post-result tuning, repair, substitution, or dropped cells."
+
+platform:
+  primary_execution: local_multicore_cpu
+  secondary_execution: kaggle_multicore_cpu
+  orchestration: github_actions_ci_or_private_self_hosted_runner
+  accelerator: cpu_only
+  cuda: disabled
+  metal: disabled
+  qrel_free_inputs_only: true
+  concurrency: "one 7B-8B consumer model instance per host"
+
+runtime:
+  engine: llama.cpp
+  repository: https://github.com/ggml-org/llama.cpp
+  tag: b11194
+  commit: 9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69
+  build_flags:
+    - -DGGML_NATIVE=OFF
+    - -DGGML_OPENMP=ON
+    - -DGGML_CUDA=OFF
+    - -DGGML_METAL=OFF
+    - -DGGML_VULKAN=OFF
+    - -DGGML_SYCL=OFF
+  server_binary: llama-server
+  quantization_type: Q4_K_M
+  artifact_policy: "Official HF revision converted by the pinned llama.cpp conversion script; no third-party GGUF substitution."
+  alternate_source_policy: "An alternate source is admissible only when its owner/publisher, source reference, version, architecture, and content hash are recorded before the canary; an unverified source is rejected."
+  artifact_hash_policy: "Every GGUF SHA-256 must be recorded before the CPU runtime freeze."
+  reranker:
+    backend: transformers_cpu
+    model_id: Qwen/Qwen3-Reranker-0.6B
+    revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+    tokenizer_revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+    dtype: float32
+    device: cpu
+    max_context_tokens: 1024
+    batch_size: 1
+    attention_backend: eager
+    bitsandbytes: disabled
+    device_map: cpu
+  conversion:
+    script: convert_hf_to_gguf.py
+    quantizer: llama-quantize
+    source_revision_policy: "The HF model and tokenizer revisions below are immutable inputs."
+    commands:
+      - "python convert_hf_to_gguf.py {MODEL_DIR} --outfile {MODEL}.f16.gguf --outtype f16"
+      - "llama-quantize {MODEL}.f16.gguf {MODEL}.Q4_K_M.gguf Q4_K_M"
+    conversion_script_sha256: pending_non_result_preflight
+    quantizer_binary_sha256: pending_non_result_preflight
+  consumers:
+    qwen:
+      backend: llama.cpp
+      model_source:
+        type: official_kaggle_model
+        source_ref: qwen-lm/qwen-3/Transformers/8b-awq
+        content_sha256: 57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5
+        owner: qwen-lm
+        publisher: QwenLM
+        version_number: 1
+        version_id: 391615
+        model_type: qwen3
+        architecture: Qwen3ForCausalLM
+      model_id: Qwen/Qwen3-8B-AWQ
+      revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+      tokenizer_revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+      gguf_filename: qwen3-8b.Q4_K_M.gguf
+      dtype: ggml_q4_k_m
+      bitsandbytes: disabled
+      device_map: cpu
+      max_context_tokens: 4096
+      batch_size: 512
+      ubatch_size: 512
+      attention_backend: llama.cpp_cpu
+    llama:
+      backend: llama.cpp
+      model_source:
+        type: official_kaggle_model
+        source_ref: metaresearch/llama-3.1/Transformers/8b-instruct
+        owner: metaresearch
+        publisher: Meta
+        version_number: 2
+        version_id: 104449
+      model_id: meta-llama/Llama-3.1-8B-Instruct
+      revision: 0e9e39f249a16976918f6564b8830bc894c89659
+      tokenizer_revision: 0e9e39f249a16976918f6564b8830bc894c89659
+      gguf_filename: llama-3.1-8b-instruct.Q4_K_M.gguf
+      dtype: ggml_q4_k_m
+      bitsandbytes: disabled
+      device_map: cpu
+      max_context_tokens: 4096
+      batch_size: 512
+      ubatch_size: 512
+      attention_backend: llama.cpp_cpu
+    mistral:
+      backend: llama.cpp
+      model_id: mistralai/Mistral-7B-Instruct-v0.3
+      revision: d79d1742f78eb0cc788c11e5b41a7539d7cb56ef
+      tokenizer_revision: d79d1742f78eb0cc788c11e5b41a7539d7cb56ef
+      model_source:
+        type: verified_kaggle_dataset_assembly
+        model_type: mistral
+        architecture: MistralForCausalLM
+        candidate_dataset: phmcngc/snapx-mistral7b-instruct-v03-snapshot
+        patch_dataset: siavashsimin/sem2act-v5-mistral-tokenizer-patch
+        patch_dataset_slug: sem2act-v5-mistral-tokenizer-patch
+        patch_filename: tokenizer_config.json
+        content_sha256: 805960a9bbd7a17f70da2170a56f9364ecfd10ddae6a7698e4e0d55cceffa0b0
+      gguf_filename: mistral-7b-instruct-v0.3.Q4_K_M.gguf
+      dtype: ggml_q4_k_m
+      bitsandbytes: disabled
+      device_map: cpu
+      max_context_tokens: 4096
+      batch_size: 512
+      ubatch_size: 512
+      attention_backend: llama.cpp_cpu
+  server:
+    gpu_layers: 0
+    context_tokens: 4096
+    batch_size: 512
+    ubatch_size: 512
+    threads: freeze_from_host_preflight
+    threads_batch: freeze_from_host_preflight
+    parallel_slots: 1
+    jinja_chat_templates: true
+    reasoning: off
+    reasoning_format: none
+  client:
+    protocol: openai_chat_completions_localhost
+    package: openai==2.48.0
+    model_name: server_reported_model_id
+    request_timeout_seconds: 1800
+
+decoding:
+  temperature: 0.0
+  top_p: 1.0
+  seed: 0
+  do_sample: false
+  max_new_tokens: 256
+  num_beams: 1
+
+sharding:
+  unit: frozen_query_id_range
+  target_model_calls_per_shard: 240
+  resume_policy: "Resume only missing keys; accepted content-addressed keys are never regenerated."
+  merge_policy: "Accepted shards must be exactly disjoint and exhaustive over the preregistered keyspace."
+  raw_response_policy: "Each raw response is stored by SHA-256 content address with a key index."
+
+preflight:
+  required_before_result_execution:
+    - cpu_hardware_snapshot
+    - llama_cpp_commit_and_build_hash
+    - model_source_access_preflight
+    - official_model_source_content_hash_probe
+    - official_model_conversion
+    - all_three_gguf_hashes
+    - reranker_cpu_smoke
+    - qwen_cpu_smoke
+    - llama_cpu_smoke
+    - mistral_cpu_smoke
+    - deterministic_repeat_equality
+    - frozen_cpu_runtime_manifest
+  canary_fixture: versions/sem2act-v5/fixtures/runtime_smoke_v1.json
+  canary_fixture_is_lockbox_query: false
+  failure_policy: "Any missing artifact, schema error, nondeterministic repeat, or unresolved failure stops before result-bearing execution."
+
+allocation:
+  kaggle_cpu: "reranker plus one consumer family in deterministic query-range shards"
+  local_cpu: "remaining consumer families, one loaded model at a time"
+  github_actions: "verification, manifests, assembly, simulation, bootstrap, analysis, paper and release audits"
+  self_hosted_runner: "optional private orchestration only; no public or untrusted PR workloads"
+
+gpu_history:
+  retained_as_excluded_attempts: true
+  result_bearing_gpu_execution: false

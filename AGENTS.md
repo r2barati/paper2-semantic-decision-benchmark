@@ -18,19 +18,23 @@ authorization artifacts, and machine manifests linked from it control.
   failed infrastructure attempts as evidence. A requested code, manifest,
   dependency, or protocol change goes to Codex for an explicit amendment and
   commit.
-- In `scripts/kaggle_compute.py`, the current frozen V5 owner is
-  `V5_OWNER="siavashsimin"`. Preserve that value and every owner field in the
-  frozen V5 manifests. The launcher's general `OWNER="rezabarati2"` binding
-  and the operator-reported GPU-verified `rezabarati2` account are distinct
-  from `V5_OWNER`; never infer or apply one binding to the other. The smoke
-  evidence is recorded in
+- Historical V5 Kaggle amendments v1/v2 record owner
+  `siavashsimin` and their original runtime. The user explicitly authorized
+  execution amendment v3 on 2026-09-29: current V5 owner is
+  `V5_OWNER="rezabarati2"`, with account ownership verified by the staged
+  reranker input dataset. Preserve v1/v2 and their execution records as
+  history; use v3 for new V5 Kaggle work. The separate general `OWNER` binding
+  remains independent. The underlying operator observation is recorded in
   [`provenance/kaggle_gpu_smoke_operator_report_20260928.md`](provenance/kaggle_gpu_smoke_operator_report_20260928.md).
-  It does not change V5 ownership. A fresh handoff preflight must record the
-  authenticated identity and verify access to the frozen V5 resources; any
-  owner/access/runtime mismatch stops the run and is reported to Codex.
-- The V5 GPU job declarations specify their recorded runtime and one-GPU job
-  shape, but the current runtime canary has not passed. A separate account's
-  two-T4/CUDA-12.8 observation does not update or validate that lock.
+- The v3 Kaggle shape allocates two T4s and exposes only GPU 0 to PyTorch. Its
+  base tuple is Python 3.12 / Torch `2.10.0+cu128` / CUDA 12.8; package
+  installation must preserve Torch/CUDA. A fresh owner, quota, runtime, and
+  model canary is still required before a result-stage handoff.
+- Colab has a separate explicit runtime lock and also requires the installed
+  package set to preserve its observed Torch/CUDA tuple. Moon has a separate
+  reranker-only lock; its 16-thread profile is gated by the fixed 4-vs-16
+  non-lockbox fixture parity check. Neither lock authorizes the blocked CPU
+  consumer route.
   The CPU backend is a prospective execution-only route whose runtime freeze
   remains gated by complete artifact hashes and accepted non-result canaries.
   Do not replace an unsupported AWQ-to-GGUF conversion with another model,

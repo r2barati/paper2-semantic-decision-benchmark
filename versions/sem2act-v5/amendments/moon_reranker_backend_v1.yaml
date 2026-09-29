@@ -1,0 +1,76 @@
+schema_version: 1
+amendment_id: sem2act-v5-moon-reranker-backend-v1
+status: authorized-on-host-and-parity-gates
+effective_utc: 2026-09-29T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: reranker-execution-only
+scientific_protocol_unchanged: true
+reason_for_amendment: >-
+  Moon has 16 vCPU / 62 GB RAM but no accelerator. The only authorized change
+  from the earlier four-thread profile is 16 intra-op threads after a fixed
+  three-document non-lockbox parity gate against four threads. The CPU
+  consumer route remains blocked by the separate GGUF/source blockers.
+
+platform:
+  provider: tmu-moon
+  operator: OpenCode
+  execution: cpu-only
+  logical_vcpus: 16
+  minimum_memory_gb: 60
+  required_architecture: x86_64
+  required_masked_instruction_flags: [avx2, avx512f]
+  scratch_root: /tmp/sem2act-v5
+  persistent_output_filesystem: nfs
+  output_quota_minimum_free_bytes: 10000000
+  output_quota_probe_bytes: 10000000
+  instruction_flag_check: every /proc/cpuinfo processor record
+
+runtime:
+  python: 3.9.19
+  torch: 2.8.0+cpu
+  transformers: 4.57.6
+  device: cpu
+  dtype: float32
+  intra_op_threads: 16
+  inter_op_threads: 1
+  torch_cuda: false
+  torch_mps: false
+  parity_gate:
+    fixture: versions/sem2act-v5/fixtures/runtime_smoke_v1.json
+    fixture_documents: 3
+    reference_threads: 4
+    candidate_threads: 16
+    repeat_equality_per_profile: exact
+    score_absolute_tolerance: 0.000001
+    ranking_equality: exact
+
+model:
+  model_id: Qwen/Qwen3-Reranker-0.6B
+  revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+  dtype: float32
+  tokenizer_padding_side: left
+  trust_remote_code: true
+  model_snapshot_reference: versions/sem2act-v5/manifests/cpu_reranker_canary.json
+
+input_bundle:
+  dataset: rezabarati2/sem2act-v5-rerank-inputs
+  version: 1
+  protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+  files:
+    corpus.jsonl: 6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1
+    queries.jsonl: c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986
+    rerank_candidates.jsonl: 11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803
+
+pilot:
+  stage: reranker
+  shard_index: 0
+  queries: 20
+  candidate_depth: 50
+  expected_scores: 1000
+  resume: missing-key-only
+  next_shard_requires_codex_handoff: true
+
+failure_policy: >-
+  Stop before scoring any lockbox pair if SHA/worktree, host profile, runtime,
+  input hashes, model snapshot, thread parity, disk, NFS, or qrel-free checks
+  fail. Never alter model, scoring, or query coverage to recover.

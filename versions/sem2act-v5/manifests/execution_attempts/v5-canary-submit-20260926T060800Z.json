@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "attempt_id": "v5-canary-submit-2026-09-26T060800Z",
+  "job": "v5-canary",
+  "kernel": "siavashsimin/sem2act-v5-canary",
+  "kernel_id": 135929371,
+  "kernel_version": 1,
+  "backend_amendment_at_submission": "sem2act-v5-kaggle-backend-v1",
+  "status": "remote-error",
+  "result_bearing": false,
+  "remote_status": "KernelWorkerStatus.ERROR",
+  "observed_log": "CUDA is unavailable",
+  "diagnosis": "The v1 runner set deprecated enable_gpu without the current machine_shape request; no CUDA device was exposed.",
+  "outputs_fetched": false,
+  "result_jobs_unlocked": false,
+  "recorded_utc": "2026-09-26T06:18:55Z"
+}

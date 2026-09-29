@@ -1,0 +1,20 @@
+{
+  "family": "qwen",
+  "gguf_sha256": null,
+  "kaggle_kernel_id": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "kaggle_kernel_version": 7,
+  "manifest_id": "sem2act-v5-kaggle-cpu-qwen-canary-v7-failure",
+  "qrels_read": false,
+  "reason": "Pinned Qwen AWQ source snapshot and llama.cpp engine passed source/build checks, but convert_hf_to_gguf.py rejected quant_method 'awq'; no GGUF or inference was produced.",
+  "remote_error": "CalledProcessError: Command '['/usr/bin/python3', '/kaggle/working/llama.cpp/convert_hf_to_gguf.py', '/kaggle/input/models/qwen-lm/qwen-3/transformers/8b-awq/1', '--outfile', '/kaggle/working/artifacts/qwen3-8b.Q4_K_M.f16.gguf', '--outtype', 'f16']' returned non-zero exit status 1.",
+  "remote_log": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/qwen-v7/canary.log",
+  "remote_log_sha256": "363e37548e5a4543c5ede536253b29419dabec1a0af05a5a6c512679019b3615",
+  "remote_manifest": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/qwen-v7/preflight_manifest.json",
+  "remote_manifest_sha256": "6f561d12788d075ca6f3766b95ee177ae7aaaea381b7ec3dd6fc0ff8f77fab9e",
+  "remote_status": "failed",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "source_snapshot_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+  "status": "failed-non-result-canary"
+}

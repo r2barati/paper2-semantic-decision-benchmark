@@ -1,0 +1,20 @@
+{
+  "family": "mistral",
+  "gguf_sha256": null,
+  "kaggle_kernel_id": "siavashsimin/sem2act-v5-cpu-preflight-mistral",
+  "kaggle_kernel_version": 2,
+  "manifest_id": "sem2act-v5-kaggle-cpu-mistral-canary-v2-failure",
+  "qrels_read": false,
+  "reason": "The pinned public Mistral snapshot was not mounted. The fixed CPU canary could not resolve Hugging Face in the Kaggle runtime after the engine build, so no source snapshot, GGUF, or inference was produced.",
+  "remote_error": "LocalEntryNotFoundError: Got: ConnectError: [Errno -3] Temporary failure in name resolution; no local snapshot folder was available for the pinned revision.",
+  "remote_log": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/mistral-v2/canary.log",
+  "remote_log_sha256": "168d6a07b5428aa689baed8306fa7a9260f502de1645ed48872d3ad70a9b6707",
+  "remote_manifest": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/mistral-v2/preflight_manifest.json",
+  "remote_manifest_sha256": "a11d18598473c1056cb6722f71b784129046ee32706d955e24099a268ab294a1",
+  "remote_status": "failed",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-mistral",
+  "source_snapshot_sha256": null,
+  "status": "failed-non-result-canary"
+}

@@ -1,0 +1,26 @@
+{
+  "candidate_dataset": "phmcngc/snapx-mistral7b-instruct-v03-snapshot",
+  "family": "mistral",
+  "gguf_sha256": null,
+  "inference_calls": 0,
+  "kaggle_kernel_version": 1,
+  "manifest_id": "sem2act-v5-mistral-mirror-probe-v1-failure",
+  "mismatch": {
+    "expected_bytes": 137799,
+    "expected_sha256": "cf7d90917f89931e443b02253432a581abef86379533a5b962f7f2d3b7ac8d90",
+    "observed_bytes": 140874,
+    "observed_sha256": "0533dec9cfe319163801b6618d0f3ec9cfa126b6288e3df5deca6e32acb09cd2",
+    "path": "tokenizer_config.json"
+  },
+  "qrels_read": false,
+  "reason": "All pinned Mistral weights and required metadata matched the HF revision except tokenizer_config.json; the candidate contained a different tool-aware chat template.",
+  "remote_log": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/mistral-mirror-v1/canary.log",
+  "remote_log_sha256": "74d81597f83dd9d7feba1a93cf0694a1966ee89e7428d376de4392c1d2ab21eb",
+  "remote_manifest": "versions/sem2act-v5/manifests/execution_attempts/canary_failures/mistral-mirror-v1/preflight_manifest.json",
+  "remote_manifest_sha256": "072938842db2a6244615160e19ca9df6063b2ce26d51f661ea952517a9b762ac",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-mistral-mirror-source-probe",
+  "source_snapshot_accepted": false,
+  "status": "failed-non-result-source-probe"
+}

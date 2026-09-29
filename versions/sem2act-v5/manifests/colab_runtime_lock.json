@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "lock_id": "sem2act-v5-colab-runtime-v1",
+  "status": "frozen-before-result-bearing-execution",
+  "amendment": "versions/sem2act-v5/amendments/colab_backend_v1.yaml",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "smoke_fixture": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+  "models": {
+    "reranker": {
+      "model_id": "Qwen/Qwen3-Reranker-0.6B",
+      "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "tokenizer_revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "backend": "transformers",
+      "dtype": "float16",
+      "quantization": {
+        "method": "none"
+      },
+      "device_map": {
+        "": "cuda:0"
+      },
+      "attention_backend": "eager",
+      "max_context_tokens": 1024,
+      "batch_size": 32
+    },
+    "qwen": {
+      "model_id": "Qwen/Qwen3-8B-AWQ",
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "tokenizer_revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "backend": "vllm",
+      "vllm_version": "0.11.0",
+      "dtype": "float16",
+      "quantization": {
+        "method": "awq"
+      },
+      "device_map": {
+        "device": "cuda:0",
+        "tensor_parallel_size": 1,
+        "cpu_offload_gb": 0
+      },
+      "attention_backend": "TRITON_ATTN",
+      "max_context_tokens": 4096,
+      "batch_size": 1,
+      "max_num_seqs": 1,
+      "max_num_batched_tokens": 4096,
+      "gpu_memory_utilization": 0.85,
+      "enforce_eager": true,
+      "enable_thinking": false
+    },
+    "llama": {
+      "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "tokenizer_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "backend": "transformers",
+      "dtype": "float16",
+      "quantization": {
+        "method": "bitsandbytes",
+        "load_in_4bit": true,
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_compute_dtype": "float16",
+        "bnb_4bit_use_double_quant": true
+      },
+      "device_map": {
+        "": "cuda:0"
+      },
+      "attention_backend": "eager",
+      "max_context_tokens": 4096,
+      "max_input_tokens": 3840,
+      "max_new_tokens": 256,
+      "batch_size": 1,
+      "do_sample": false,
+      "num_beams": 1,
+      "use_cache": true,
+      "tokenizer": {
+        "use_fast": true,
+        "padding_side": "left"
+      }
+    },
+    "mistral": {
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "tokenizer_revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "backend": "transformers",
+      "dtype": "float16",
+      "quantization": {
+        "method": "bitsandbytes",
+        "load_in_4bit": true,
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_compute_dtype": "float16",
+        "bnb_4bit_use_double_quant": true
+      },
+      "device_map": {
+        "": "cuda:0"
+      },
+      "attention_backend": "eager",
+      "max_context_tokens": 4096,
+      "max_input_tokens": 3840,
+      "max_new_tokens": 256,
+      "batch_size": 1,
+      "do_sample": false,
+      "num_beams": 1,
+      "use_cache": true,
+      "tokenizer": {
+        "use_fast": true,
+        "padding_side": "left"
+      }
+    }
+  },
+  "runtime": {
+    "python_policy": "record-the-base-image-version;do-not-replace",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu_min_vram_gib": 14,
+    "torch_dtype": "float16",
+    "cuda_required": true,
+    "cpu_offload": false,
+    "tensor_parallel_size": 1,
+    "package_install_policy": "exact-pins-preserve-image-torch-cuda-tuple",
+    "package_pins": {
+      "vllm": "0.11.0",
+      "transformers": "4.57.6",
+      "openai": "2.48.0",
+      "pydantic": "2.12.5",
+      "PyYAML": "6.0.2"
+    }
+  },
+  "decoding": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_new_tokens": 256,
+    "do_sample": false,
+    "num_beams": 1,
+    "seed": 0
+  },
+  "source_contract": [
+    "versions/sem2act-v5/compute/lightning/runtime_contract.py",
+    "versions/sem2act-v5/compute/lightning/model_smoke.py",
+    "versions/sem2act-v5/compute/lightning/job_entrypoint.py",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_rerank.py",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_qwen_consumer.py",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_consumer.py",
+    "scripts/colab_compute.py",
+    "scripts/freeze_v5_colab_runtime.py"
+  ],
+  "failure_policy": "Any lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed."
+}

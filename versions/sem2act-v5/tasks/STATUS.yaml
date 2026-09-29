@@ -1,0 +1,26 @@
+schema_version: 1
+version_id: sem2act-v5
+status: lightning-backend-frozen-preflight-pending
+updated_utc: 2026-09-25
+stages:
+  protocol:
+    status: frozen
+    blocker: "No design changes permitted after the recorded protocol hash."
+  lockbox:
+    status: frozen-provenance-passed
+    blocker: "No lockbox changes are permitted after the provenance gate."
+  provenance:
+    status: passed
+    blocker: "None; qrels remain immutable."
+  model_preflight:
+    status: lightning-runtime-lock-frozen
+    blocker: "T4 canary and four fixed-fixture model smokes require the rotated Lightning credentials and HF_TOKEN secret."
+  execution:
+    status: lightning-preflight-pending
+    blocker: "No result-bearing job is permitted until the Lightning private Drive upload, T4 canary, and all four model smokes pass."
+  analysis:
+    status: blocked-until-frozen-results
+  paper:
+    status: not-started
+  release:
+    status: local-only

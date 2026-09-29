@@ -1,0 +1,41 @@
+schema_version: 1
+amendment_id: sem2act-v5-colab-backend-v1
+status: authorized-before-result-bearing-execution;input-gated
+effective_utc: 2026-09-29T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: execution-environment-only
+scientific_protocol_unchanged: true
+reason_for_amendment: >-
+  Muse validated exact-SHA clone/check on a Colab Tesla T4 with 15 GB VRAM.
+  The runtime is explicitly pinned to the observed torch/CUDA image, and
+  package installation is forbidden from changing that image tuple.
+
+platform:
+  provider: google-colab
+  operator: Muse
+  machine: NvidiaTeslaT4
+  gpu_count: 1
+  minimum_visible_vram_gib: 14
+  device: cuda:0
+  qrel_free_inputs_only: true
+
+runtime:
+  python_policy: record-the-base-image-version;do-not-replace
+  torch: "2.11.0+cu128"
+  cuda: "12.8"
+  transformers: "4.57.6"
+  vllm: "0.11.0"
+  package_policy: exact-pins-preserve-image-torch-cuda-tuple
+  no_runtime_fallbacks: true
+
+preflight:
+  exact_sha_clean_checkout: required
+  smoke_fixture: versions/sem2act-v5/fixtures/runtime_smoke_v1.json
+  smoke_fixture_is_lockbox_query: false
+  required_stages:
+    - exact_torch_cuda_t4_vram_check
+    - exact_package_install_without_torch_change
+    - in_job_model_smoke
+    - qrel_free_input_manifest_check
+  failure_policy: stop-before-result-bearing-execution
+  oom_policy: no-parameter-reduction-and-no-fallback

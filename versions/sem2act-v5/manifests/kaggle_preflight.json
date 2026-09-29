@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "status": "fresh-preflight-required",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "owner": "rezabarati2",
+  "owner_verified": false,
+  "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+  "runtime_freeze_sha256": "80b3a6b9f77807be41cdf22edf5b5fa1f22a212009fff4392fabcb1655005832",
+  "gpu_remaining_hours": null,
+  "result_bearing_execution_started": false,
+  "historical_quota_record": "versions/sem2act-v5/manifests/kaggle_preflight_v2_historical.json"
+}

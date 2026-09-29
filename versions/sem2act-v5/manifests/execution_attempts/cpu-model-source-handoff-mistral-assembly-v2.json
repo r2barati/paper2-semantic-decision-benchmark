@@ -1,0 +1,17 @@
+{
+  "accepted_utc": "2026-09-27T06:55:02.703375+00:00",
+  "candidate_dataset": "phmcngc/snapx-mistral7b-instruct-v03-snapshot",
+  "content_sha256": "805960a9bbd7a17f70da2170a56f9364ecfd10ddae6a7698e4e0d55cceffa0b0",
+  "family": "mistral",
+  "inference_calls": 0,
+  "manifest_id": "sem2act-v5-source-handoff-mistral-assembly-v2",
+  "patch_dataset": "siavashsimin/sem2act-v5-mistral-tokenizer-patch",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "source_assembly": "candidate_weights_plus_pinned_tokenizer_config",
+  "source_probe_acceptance_sha256": "d77cc8e1a9e4aaf77d914dc5d5ee1c150d415fda927ec0d96065a3b19ca6d484",
+  "source_probe_manifest_sha256": "2d2405ab0c7fa43f30cb024604beb08ad1627840f8c29bceddbf63074483f3d3",
+  "status": "accepted-non-result-source-handoff"
+}

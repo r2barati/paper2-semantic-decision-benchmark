@@ -1,0 +1,197 @@
+{
+  "archived_backends": {
+    "lightning_ai": {
+      "amendment": "versions/sem2act-v5/amendments/lightning_backend_v1.yaml",
+      "runtime_freeze_manifest": "versions/sem2act-v5/manifests/lightning_runtime_freeze.json",
+      "runtime_freeze_manifest_sha256": "4d38ea469d67708087521336e9ae13392d47228c8ac412443944cc059dd1f1ac",
+      "status": "excluded-before-remote-job-creation"
+    }
+  },
+  "backend": {
+    "amendment": "versions/sem2act-v5/amendments/kaggle_backend_v3.yaml",
+    "fresh_preflight_required": true,
+    "gpu_count": 2,
+    "historical_amendment": "versions/sem2act-v5/amendments/kaggle_backend_v2.yaml",
+    "historical_status": "kaggle-v2-canary-failed-no-cuda",
+    "machine": "NvidiaTeslaT4",
+    "owner": "rezabarati2",
+    "preflight_manifest": "versions/sem2act-v5/manifests/kaggle_preflight.json",
+    "provider": "kaggle",
+    "remote_jobs_started": [],
+    "runtime_freeze_manifest": "versions/sem2act-v5/manifests/kaggle_runtime_freeze.json",
+    "runtime_freeze_manifest_sha256": "80b3a6b9f77807be41cdf22edf5b5fa1f22a212009fff4392fabcb1655005832",
+    "runtime_lock": "versions/sem2act-v5/manifests/kaggle_runtime_lock.json",
+    "status": "v3-authorized-before-results;fresh-owner-quota-runtime-canary-required",
+    "visible_gpu_count": 1
+  },
+  "canary_attempt_manifest": "versions/sem2act-v5/manifests/execution_attempts/v5-canary-direct-20260926T062300Z.json",
+  "colab_backend": {
+    "cuda": "12.8",
+    "gpu": "one T4; minimum 14 GiB visible VRAM",
+    "result_bearing_execution_started": false,
+    "runtime_freeze": "versions/sem2act-v5/manifests/colab_runtime_freeze.json",
+    "runtime_freeze_sha256": "61ec60a98183e008f16b3330c77ec9bfa9f690def471d9d49475da52d8a316e4",
+    "runtime_lock": "versions/sem2act-v5/manifests/colab_runtime_lock.json",
+    "runtime_lock_sha256": "42555838e5e7da0c4fd9e09e445e3d6ecc2a6b48c10ee00e5e40361bfb33d603",
+    "smallest_valid_pilot": "full 240-query Qwen family stage after accepted reranker output and staged bundle",
+    "package_smoke_gate": "required-in-job-before-result-kernel;not-yet-passed",
+    "status": "configured;input-and-package-smoke-gated",
+    "torch": "2.11.0+cu128"
+  },
+  "consumer_bundle_status": {
+    "llama": false,
+    "mistral": false,
+    "qwen": false,
+    "reason": "Consumer bundles require a complete accepted reranker output.",
+    "reranker_input_dataset": "rezabarati2/sem2act-v5-rerank-inputs version 1 verified"
+  },
+  "cpu_backend": {
+    "allocation_manifest": "versions/sem2act-v5/manifests/cpu_execution_allocation.json",
+    "amendment": "versions/sem2act-v5/amendments/cpu_backend_v1.yaml",
+    "artifact_manifest": "versions/sem2act-v5/manifests/cpu_model_artifacts.json",
+    "consumer_canary": "versions/sem2act-v5/manifests/cpu_canary.json",
+    "engine_build_manifest": "versions/sem2act-v5/manifests/cpu_engine_build.json",
+    "gpu_history_retained": true,
+    "host_preflight": "versions/sem2act-v5/manifests/cpu_host_preflight.json",
+    "local_reranker_canary": "versions/sem2act-v5/manifests/cpu_reranker_canary.json",
+    "local_reranker_canary_status": "pass",
+    "preflight_attempts": [
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-reranker-v1-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-reranker-v2-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v1-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v2-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v6-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v7-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v1-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v2-failure.json"
+    ],
+    "preflight_status": "versions/sem2act-v5/manifests/cpu_preflight_status.json",
+    "qrel_free_inputs_only": true,
+    "remote_mistral_canary_status": "failed-after-engine-build; pinned-public-source-not-mounted; kaggle-huggingface-dns",
+    "remote_mistral_source_status": "verified-pinned-mirror-assembly;content-hash-805960a9",
+    "remote_qwen_canary_status": "failed-after-engine-build; frozen-AWQ-conversion-unsupported",
+    "remote_reranker_canary_status": "blocked-on-kaggle-hf-secret",
+    "reranker_canary": "versions/sem2act-v5/manifests/cpu_reranker_canary.json",
+    "result_bearing_jobs_started": 0,
+    "runtime_freeze_manifest": "versions/sem2act-v5/manifests/cpu_runtime_freeze.json",
+    "runtime_lock": "versions/sem2act-v5/manifests/cpu_runtime_lock.json",
+    "scientific_protocol_unchanged": true,
+    "shard_planner_reranker": "versions/sem2act-v5/manifests/cpu_shards/reranker/index.json",
+    "source_probe_attempts": [
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v1-failure.json",
+      "versions/sem2act-v5/manifests/execution_attempts/cpu-model-source-probe-llama-v2-failure.json",
+      "versions/sem2act-v5/manifests/cpu_source_probes/qwen/acceptance_manifest.json",
+      "versions/sem2act-v5/manifests/cpu_source_probes/mistral_assembly_v2/acceptance_manifest.json"
+    ],
+    "status": "consumer-canaries-pending;runtime-freeze-blocked-on-qwen-conversion-llama-access"
+  },
+  "failure_policy": "No model or analysis result triggers redesign after the protocol freeze.",
+  "gpu_blocker": "Fresh V3 owner/quota/runtime canary remains pending; no Kaggle result stage is authorized.",
+  "historical_gpu_blocker_v2": "Kaggle quota reported 30.00 GPU hours, but both the v2 SDK canary and a fresh CLI canary with machine_shape=NvidiaTeslaT4 and --accelerator NvidiaTeslaT4 reached KernelWorkerStatus.ERROR with CUDA unavailable. No upload or result-bearing job was submitted.",
+  "historical_quota_gate_v2": {
+    "checked_utc": "2026-09-26T06:08:24Z",
+    "cli_version": "Kaggle CLI 2.2.4",
+    "error": null,
+    "gpu_canary_launched": true,
+    "gpu_canary_submission_attempted": true,
+    "gpu_refresh_at": "2026-10-03T00:00:00",
+    "gpu_remaining": 30.0,
+    "source_of_truth": "kaggle quota --format json",
+    "status": "quota-passed-canary-failed"
+  },
+  "infrastructure_diff": "versions/sem2act-v5/manifests/adia_kaggle_infrastructure_diff.json",
+  "kaggle_preflight_manifest": "versions/sem2act-v5/manifests/kaggle_preflight.json",
+  "kaggle_result_stage_authorized": false,
+  "last_execution_attempt": "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v2-failure.json",
+  "lightning_fallback": {
+    "failure_note": "Submission failed before remote job creation; exact platform-side cause unavailable.",
+    "model_smoke_jobs_started": 0,
+    "remote_jobs_created": 0,
+    "status": "excluded",
+    "submission_attempts": [
+      {
+        "job_name": "sem2act-v5-t4-canary-20260926-0242z",
+        "manifest": "versions/sem2act-v5/manifests/lightning_attempts/sem2act-v5-t4-canary-20260926-0242z.json",
+        "remote_job_created": false,
+        "status": "submit-failed"
+      },
+      {
+        "job_name": "sem2act-v5-t4-canary-20260926-0247z",
+        "manifest": "versions/sem2act-v5/manifests/lightning_attempts/sem2act-v5-t4-canary-20260926-0247z.json",
+        "remote_job_created": false,
+        "status": "submit-failed"
+      }
+    ]
+  },
+  "local_files_ready": [
+    "protocol/confirmation.yaml",
+    "experiments/lockbox",
+    "compute/kaggle_kernel",
+    "experiments/assemble_beliefs.py",
+    "experiments/simulate_confirmation.py",
+    "experiments/analyze_confirmation.py",
+    "paper/manuscript_lncs"
+  ],
+  "lockbox": {
+    "documents": 4080,
+    "exact": 1.0,
+    "provenance_gate": "passed",
+    "queries": 240,
+    "weighted_kappa": 1.0,
+    "within_one": 1.0
+  },
+  "model_source_preflight": "versions/sem2act-v5/manifests/cpu_model_source_preflight.json",
+  "moon_reranker_pilot": {
+    "result_bearing_execution_started": false,
+    "runtime_freeze": "versions/sem2act-v5/manifests/moon_reranker_runtime_freeze.json",
+    "runtime_freeze_sha256": "a177be10e94bba7e7285129ddb33657dd0498b3bc1d1e852ec721ab6fad2d368",
+    "runtime_lock": "versions/sem2act-v5/manifests/moon_reranker_runtime_lock.json",
+    "runtime_lock_sha256": "6585a859629c589337a0af0abf4bc758bbd60005922d64f5310a92038ab0224a",
+    "smallest_pilot": "reranker shard 000: 20 queries / 1,000 candidates",
+    "status": "authorized-after-host-and-thread-parity-gates",
+    "stop_after": "shard 000",
+    "thread_parity": "4-vs-16 non-lockbox fixture; exact repeats; exact ranking; absolute score tolerance 1e-6",
+    "threads": 16
+  },
+  "pending_backend_amendment": "versions/sem2act-v5/amendments/cpu_backend_v1.yaml",
+  "preflight_attempts": [
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-reranker-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-reranker-v2-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v2-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v3-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v4-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v5-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v6-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-qwen-v7-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v1-failure.json",
+    "versions/sem2act-v5/manifests/execution_attempts/cpu-canary-mistral-v2-failure.json"
+  ],
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "quota_gate": {
+    "gpu_canary_launched": false,
+    "owner": "rezabarati2",
+    "runtime_freeze_sha256": "80b3a6b9f77807be41cdf22edf5b5fa1f22a212009fff4392fabcb1655005832",
+    "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+    "status": "fresh-preflight-required"
+  },
+  "quota_preflight_manifest": "versions/sem2act-v5/manifests/quota_preflight.json",
+  "remote_jobs_started": [],
+  "remote_upload_gate": "Kaggle upload requires a fresh machine credential, positive quota preflight, and a verifier-accepted T4 canary.",
+  "schema_version": 1,
+  "signed_estimands": {
+    "delta": "Delta J_{a,T} = J_{Rerank,a,T} - J_{NoInfo,a,T}",
+    "interaction": "[Delta J_{40} - Delta J_{1}]_{persistent} - [Delta J_{40} - Delta J_{1}]_{reset}",
+    "primary_null": "H0: I_40_1 = 0"
+  },
+  "staged_bundles": {
+    "llama": false,
+    "mistral": false,
+    "qwen": false,
+    "reranker": true
+  },
+  "status": "Moon reranker shard 000 authorized after gates; Kaggle runtime canary pending; GPU consumer stages input-gated; CPU consumer route blocked.",
+  "ui_entitlement_canary": "versions/sem2act-v5/manifests/kaggle_ui_canary.json",
+  "updated_utc": "2026-09-29T09:33:31.069685Z",
+  "version_id": "sem2act-v5"
+}

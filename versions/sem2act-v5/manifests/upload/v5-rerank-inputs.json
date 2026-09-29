@@ -1,0 +1,62 @@
+{
+  "dataset": "rezabarati2/sem2act-v5-rerank-inputs",
+  "files": {
+    "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+    "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+    "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+  },
+  "job": "v5-rerank",
+  "kaggle_version_number": 1,
+  "lockbox_manifest_sha256": "609229009d6780c9f96304179c19d7d45336e5fd44922819b333e20d856713be",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_uploaded": false,
+  "remote_api_status": "DatabundleVersionStatus.READY",
+  "remote_file_list": [
+    {
+      "creation_date": "2026-09-25 03:46:22.372000",
+      "name": "corpus.jsonl",
+      "total_bytes": 1908368
+    },
+    {
+      "creation_date": "2026-09-25 03:46:22.301000",
+      "name": "queries.jsonl",
+      "total_bytes": 81050
+    },
+    {
+      "creation_date": "2026-09-25 03:46:22.343000",
+      "name": "rerank_candidates.jsonl",
+      "total_bytes": 213840
+    }
+  ],
+  "remote_file_list_match": true,
+  "remote_hash_match": true,
+  "remote_headers": {
+    "corpus.jsonl": {
+      "Content-Length": "1908368",
+      "ETag": "\"d8aadec44579c99c73cb7dfdf89842b9\"",
+      "Last-Modified": "Fri, 25 Sep 2026 03:46:22 GMT",
+      "x-goog-hash": "crc32c=vdskmQ==, md5=2KrexEV5yZxzy339+JhCuQ=="
+    },
+    "queries.jsonl": {
+      "Content-Length": "81050",
+      "ETag": "\"68a8060771d03d58887695af778b350f\"",
+      "Last-Modified": "Fri, 25 Sep 2026 03:46:22 GMT",
+      "x-goog-hash": "crc32c=xHwetA==, md5=aKgGB3HQPViIdpWvd4s1Dw=="
+    },
+    "rerank_candidates.jsonl": {
+      "Content-Length": "213840",
+      "ETag": "\"2c4a245561bd07c4f273bb47462ba81f\"",
+      "Last-Modified": "Fri, 25 Sep 2026 03:46:22 GMT",
+      "x-goog-hash": "crc32c=PmCG8Q==, md5=LEokVWG9B8Tyc7tHRiuoHw=="
+    }
+  },
+  "remote_sha256": {
+    "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+    "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+    "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+  },
+  "remote_verified_utc": "2026-09-25T03:55:26.333249+00:00",
+  "schema_version": 1,
+  "status": "remote-verified",
+  "verified_utc": "2026-09-25T03:45:48.794695+00:00"
+}

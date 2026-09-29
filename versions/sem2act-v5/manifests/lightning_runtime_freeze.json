@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "manifest_id": "sem2act-v5-lightning-runtime-freeze-v1",
+  "status": "frozen-before-result-bearing-execution",
+  "frozen_utc": "2026-09-25T13:53:27.002617+00:00",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "lock_id": "sem2act-v5-lightning-runtime-v1",
+  "lock_sha256": "d4da193a8df0705acdf121301660d9eaa80bcb836f378afef9f99458e2959498",
+  "amendment_sha256": "6a6417155a43dde965e4a2aad01260c79c2ac8e65e0f80a09c0677b9213a0034",
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "protocol_sha256": "05d2d30a74b263839028bebff9e59d24957ca2d72a45183109dc5adeb3025328",
+  "source_contract_sha256": {
+    "versions/sem2act-v5/compute/lightning/runtime_contract.py": "f382dd373825dfc648882736985c8ff9400da16e35184578ac8e8973f0ee802d",
+    "versions/sem2act-v5/compute/lightning/model_smoke.py": "3e64d35034629ae1762a46833de8a43fac68dbb70bb25c3509ee298409824c7d",
+    "versions/sem2act-v5/compute/lightning/job_entrypoint.py": "2558a3431790acbbc239af26dc88ac32d8050161344cf2d9dca9c08496e709d2",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_rerank.py": "9b436f30b1b444c86f79f9c26a45fc9df9a57506253476bb47fcf86d648bcc66",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_qwen_consumer.py": "b86a3fbbba7836487993e290ecf688165c742e14f385bd511865be37edac8ec2",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_consumer.py": "dbc4f81b24ad71bf48bba573f9f12a6b346bbf0e9b2b89943e12ee87584f9905",
+    "scripts/lightning_compute.py": "a587e4af87ba667ea438d505a069f9b83bb983a24bb2caa1533e47f0fed9476a",
+    "scripts/freeze_v5_lightning_runtime.py": "59377daddc5cbf1aa61b623bc39c161c181c39eff61387db256f059f9bd7dd77"
+  },
+  "smoke_fixture_policy": {
+    "path": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+    "is_lockbox_query": false,
+    "must_be_hashed_before_model_execution": true
+  },
+  "failure_policy": "Any lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed.",
+  "no_result_dependent_runtime_changes": true
+}

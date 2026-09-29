@@ -1,0 +1,9 @@
+{
+  "error": "CalledProcessError: Command '['git', 'clone', '--filter=blob:none', '--branch', 'b11194', 'https://github.com/ggml-org/llama.cpp', '/kaggle/working/llama.cpp']' returned non-zero exit status 128.",
+  "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "status": "failed",
+  "wall_seconds": 64.401
+}

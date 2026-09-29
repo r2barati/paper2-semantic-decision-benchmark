@@ -1,0 +1,10 @@
+{
+  "error": "RuntimeError: expected one mounted official source, found 0",
+  "manifest_id": "sem2act-v5-kaggle-model-source-probe-v1",
+  "qrels_read": false,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "source_only": true,
+  "status": "failed",
+  "wall_seconds": 0.0
+}

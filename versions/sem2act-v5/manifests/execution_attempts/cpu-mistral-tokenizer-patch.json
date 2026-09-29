@@ -1,0 +1,30 @@
+{
+  "created_utc": "2026-09-27T05:47:37.881350+00:00",
+  "dataset_slug": "siavashsimin/sem2act-v5-mistral-tokenizer-patch",
+  "dataset_version_id": null,
+  "files": {
+    "tokenizer_config.json": {
+      "bytes": 137799,
+      "sha256": "cf7d90917f89931e443b02253432a581abef86379533a5b962f7f2d3b7ac8d90"
+    }
+  },
+  "manifest_id": "sem2act-v5-mistral-tokenizer-patch-v1",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_read": false,
+  "remote_files": [
+    {
+      "bytes": 137799,
+      "name": "tokenizer_config.json",
+      "sha256": "cf7d90917f89931e443b02253432a581abef86379533a5b962f7f2d3b7ac8d90"
+    }
+  ],
+  "remote_private": true,
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "source_model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+  "source_revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+  "source_url": "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3/resolve/d79d1742f78eb0cc788c11e5b41a7539d7cb56ef/tokenizer_config.json",
+  "status": "uploaded-private-and-hash-verified",
+  "uploaded_utc": "2026-09-27T05:49:07.985000Z",
+  "verified_utc": "2026-09-27T05:51:32.008555+00:00"
+}

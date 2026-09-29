@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "status": "submit-failed",
+  "stage": "canary",
+  "family": null,
+  "job_name": "sem2act-v5-t4-canary-20260926-0242z",
+  "machine": "T4",
+  "job_type": "single-machine",
+  "teamspace": "gemma-4-implementation-project",
+  "studio": null,
+  "remote_input": null,
+  "remote_output": "${LIGHTNING_ARTIFACTS_DIR}/sem2act-v5",
+  "command": "python3 versions/sem2act-v5/compute/lightning/job_entrypoint.py --stage canary --output-root ${LIGHTNING_ARTIFACTS_DIR}/sem2act-v5",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "runtime_freeze_manifest_sha256": "4d38ea469d67708087521336e9ae13392d47228c8ac412443944cc059dd1f1ac",
+  "credential_values_logged": false,
+  "created_utc": "2026-09-26T02:43:10.602904+00:00",
+  "returncode": 1,
+  "updated_utc": "2026-09-26T02:43:15.056691+00:00"
+}

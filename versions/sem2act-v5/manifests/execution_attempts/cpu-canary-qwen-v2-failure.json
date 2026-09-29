@@ -1,0 +1,31 @@
+{
+  "downloaded_output_files": {
+    "preflight_manifest.json": {
+      "bytes": 404,
+      "sha256": "650cf05502ba76f96196a9839fd3bd32095c83b00a62d01b21279b9e1bdd269f"
+    },
+    "sem2act-v5-cpu-preflight-qwen.log": {
+      "bytes": 1998,
+      "sha256": "eb87d751e35c6120870872aa26c21a76da459d7977e4d9bca674ed48a6bd7726"
+    }
+  },
+  "family": "qwen",
+  "kaggle_kernel_version": 2,
+  "manifest_id": "sem2act-v5-kaggle-cpu-qwen-canary-v2-failure",
+  "qrels_read": false,
+  "reason": "CalledProcessError: Command '['git', 'clone', '--filter=blob:none', '--branch', 'b11194', 'https://github.com/ggml-org/llama.cpp', '/kaggle/working/llama.cpp']' returned non-zero exit status 128.",
+  "remote_manifest": {
+    "error": "CalledProcessError: Command '['git', 'clone', '--filter=blob:none', '--branch', 'b11194', 'https://github.com/ggml-org/llama.cpp', '/kaggle/working/llama.cpp']' returned non-zero exit status 128.",
+    "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+    "qrels_read": false,
+    "result_bearing_execution_started": false,
+    "schema_version": 1,
+    "status": "failed",
+    "wall_seconds": 64.391
+  },
+  "remote_manifest_sha256": "650cf05502ba76f96196a9839fd3bd32095c83b00a62d01b21279b9e1bdd269f",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "failed-before-model-load"
+}

@@ -1,0 +1,133 @@
+schema_version: 1
+amendment_id: sem2act-v5-kaggle-backend-v2
+status: prospective-before-result-bearing-execution
+effective_utc: 2026-09-26T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: execution-environment-only
+scientific_protocol_unchanged: true
+parent_backend_amendment: versions/sem2act-v5/amendments/kaggle_backend_v1.yaml
+reason_for_amendment: >-
+  The v1 submission set only the deprecated enable_gpu flag. The non-result
+  canary reached Kaggle but logged CUDA unavailable. v2 sets the current
+  machine_shape request explicitly and records the authenticated owner.
+
+platform:
+  provider: kaggle
+  owner: siavashsimin
+  job_kind: private-script-kernel
+  machine: NvidiaTeslaT4
+  machine_shape_request: NvidiaTeslaT4
+  gpu_count: 1
+  device: cuda:0
+  internet: true
+  authentication: machine-credential-only
+  credential_path: ~/.kaggle/access_token
+  qrel_free_inputs_only: true
+
+runtime:
+  python: "3.12"
+  cuda: "12.6.1"
+  torch: "2.7.1+cu126"
+  transformers: "4.57.6"
+  vllm: "0.11.0"
+  bitsandbytes: "0.48.1"
+  openai: "2.48.0"
+  pydantic: "2.12.5"
+  torch_dtype: float16
+  cuda_required: true
+  cpu_offload: false
+  tensor_parallel_size: 1
+  no_runtime_fallbacks: true
+
+models:
+  reranker:
+    backend: transformers
+    model_id: Qwen/Qwen3-Reranker-0.6B
+    revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+    tokenizer_revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+    dtype: float16
+    quantization: none
+    device_map: {"": cuda:0}
+    attention_backend: eager
+    max_context_tokens: 1024
+    batch_size: 32
+
+  qwen:
+    backend: vllm
+    model_id: Qwen/Qwen3-8B-AWQ
+    revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+    tokenizer_revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+    dtype: float16
+    quantization: awq
+    device_map: {device: cuda:0, tensor_parallel_size: 1, cpu_offload_gb: 0}
+    attention_backend: TRITON_ATTN
+    max_context_tokens: 4096
+    batch_size: 1
+    max_num_seqs: 1
+    max_num_batched_tokens: 4096
+    gpu_memory_utilization: 0.85
+    enforce_eager: true
+    enable_thinking: false
+
+  llama:
+    backend: transformers
+    model_id: meta-llama/Llama-3.1-8B-Instruct
+    revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    tokenizer_revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    dtype: float16
+    quantization: bitsandbytes_nf4
+    device_map: {"": cuda:0}
+    attention_backend: eager
+    max_context_tokens: 4096
+    max_input_tokens: 3840
+    max_new_tokens: 256
+    batch_size: 1
+
+  mistral:
+    backend: transformers
+    model_id: mistralai/Mistral-7B-Instruct-v0.3
+    revision: d79d1742f78eb0cc788c11e5b41a7539d7cb56ef
+    tokenizer_revision: d79d1742f78eb0cc788c11e5b41a7539d7cb56ef
+    dtype: float16
+    quantization: bitsandbytes_nf4
+    device_map: {"": cuda:0}
+    attention_backend: eager
+    max_context_tokens: 4096
+    max_input_tokens: 3840
+    max_new_tokens: 256
+    batch_size: 1
+
+decoding:
+  temperature: 0.0
+  top_p: 1.0
+  max_new_tokens: 256
+  do_sample: false
+  num_beams: 1
+  seed: 0
+
+preflight:
+  quota_command: kaggle quota --format json
+  quota_requirement: GPU.remaining > 0
+  canary: v5-canary
+  smoke_fixture: versions/sem2act-v5/fixtures/runtime_smoke_v1.json
+  smoke_fixture_is_lockbox_query: false
+  required_stages:
+    - quota_preflight
+    - cuda_canary
+    - reranker_model_load_and_smoke
+    - qwen_model_load_and_smoke
+    - llama_model_load_and_smoke
+    - mistral_model_load_and_smoke
+  failure_policy: stop-before-result-bearing-execution
+  oom_policy: no-parameter-reduction-and-no-fallback
+
+execution_order:
+  - quota_preflight
+  - cuda_canary
+  - reranker
+  - qwen
+  - llama
+  - mistral
+  - assemble_beliefs
+  - replay
+  - analysis

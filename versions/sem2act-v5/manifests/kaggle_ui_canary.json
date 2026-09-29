@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "canary": "kaggle-ui-account-entitlement",
+  "account": "siavashsimin",
+  "status": "pending-user-ui-run",
+  "scientific_protocol_unchanged": true,
+  "sem2act_code_used": false,
+  "sem2act_data_used": false,
+  "result_bearing": false,
+  "script": "versions/sem2act-v5/compute/kaggle_ui_canary.py",
+  "procedure": [
+    "Open a fresh private Kaggle notebook while signed in as siavashsimin.",
+    "Paste the exact canary script.",
+    "Manually select one available GPU accelerator in the notebook settings.",
+    "Run the notebook once and retain the displayed JSON and screenshot/export outside the manuscript.",
+    "Record the observed account, accelerator, torch version, cuda_available, device, and timestamp here."
+  ],
+  "acceptance": {
+    "gpu_required": true,
+    "cuda_available_required": true,
+    "device_name_required": true,
+    "result_bearing_jobs_unlocked_only_after_pass": true
+  },
+  "failure_policy": "If the UI canary cannot select a GPU or reports cuda_available=false, Kaggle is ineligible for v5 and no SDK/CLI debugging continues."
+}

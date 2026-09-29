@@ -1,0 +1,48 @@
+schema_version: 1
+version_id: sem2act-v5
+parent_version: sem2act-v4
+status: lockbox-frozen-provenance-passed
+created_utc: 2026-09-24
+purpose: "Fresh lockbox, cross-family consumers, controller replay, selective consumption, and persistence confirmation."
+freeze_policy: "After protocol_hash is recorded, do not change the design in response to any result."
+protocol: versions/sem2act-v5/protocol/confirmation.yaml
+protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+backend:
+  provider: kaggle
+  machine: NvidiaTeslaT4
+  amendment: versions/sem2act-v5/amendments/kaggle_backend_v3.yaml
+  runtime_lock: versions/sem2act-v5/manifests/kaggle_runtime_lock.json
+  runtime_freeze_manifest: versions/sem2act-v5/manifests/kaggle_runtime_freeze.json
+  preflight_manifest: versions/sem2act-v5/manifests/kaggle_preflight.json
+  prior_backend: lightning-ai (excluded before remote job creation)
+  status: execution-amendment-v3-approved;fresh-runtime-canary-required
+waves:
+  lockbox:
+    status: implementation-ready
+    queries: 240
+    seeds: [61000, 61001, 61002, 61003, 61004, 61005, 61006, 61007, 61008, 61009, 61010, 61011, 61012, 61013, 61014, 61015, 61016, 61017, 61018, 61019]
+  provenance:
+    status: required-before-model-execution
+    gate: "weighted_kappa >= 0.60; exact >= 0.60; within_one >= 0.90"
+  consumers:
+    status: preflight-pending
+    families:
+      - Qwen/Qwen3-8B-AWQ
+      - meta-llama/Llama-3.1-8B-Instruct
+      - mistralai/Mistral-7B-Instruct-v0.3
+  controllers:
+    status: replay-ready
+    belief_dependent: [CausalOptimizer, BeliefBaseStock]
+    evidence_insensitive: [WorstCaseBaseStock]
+  persistence:
+    status: replay-ready
+    primary_arm: "Qwen3-8B, Rerank vs NoInfo, C1, CausalOptimizer, release t=12"
+    null: "H0: I_40_1 = 0"
+paper:
+  source: versions/sem2act-v5/paper/manuscript_lncs
+  parent_source: versions/sem2act-v4/paper/manuscript_lncs
+  content_page_limit: 12
+release:
+  local_only_until_review: true
+  qrels_private: true
+  no_substitution_after_preflight_failure: true

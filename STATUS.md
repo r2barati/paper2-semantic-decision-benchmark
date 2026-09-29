@@ -1,59 +1,45 @@
 # Sem2Act / Paper 2 status
 
-> Human-readable snapshot and index only. Follow the linked frozen protocol,
-> authorization, and machine manifests for authoritative state.
+> Human-readable snapshot and index only. Frozen protocol and runtime locks are
+> authoritative.
 
-- **Last reconciled:** 2026-09-28; project base HEAD before this documentation
-  commit: `5bd6581`. The active V5 files referenced below are in the current
-  working tree; this base SHA alone is not an execution handoff.
-- **Current stage:** V5 infrastructure preflight; no result-bearing V5 job is
-  recorded as started.
-- **Completed:** V5 protocol/lockbox freeze and provenance gate are recorded in
-  the V5 manifests. The reranker bundle is staged.
-- **Running:** No V5 result-bearing job is recorded as running.
-- **Blocked:** The GPU route needs a fresh account/access/quota/runtime
-  preflight. The existing V5 lock fixes `V5_OWNER=siavashsimin`; the newly
-  supplied `rezabarati2` account has separate operator-reported GPU smoke
-  evidence, without a V5 ownership change. The launcher also contains a
-  general `OWNER="rezabarati2"` binding; it is separate from `V5_OWNER`.
-  The 2026-09-26 infrastructure diff records that the then-current
-  `siavashsimin` credential received 403 when reading a private legacy
-  `rezabarati2` kernel; that historical attempt does not characterize the
-  newly supplied account. The prior V5 runtime canary under `siavashsimin`
-  reported CUDA unavailable.
-  The CPU route is still before runtime freeze: Qwen AWQ-to-GGUF conversion
-  failed, the Llama source probe did not mount its source, and the Mistral
-  source assembly was verified. Qwen, Llama, and Mistral consumer bundles are
-  not staged.
-- **Next authorized step:** A separately handed-off, preflight-only check that
-  records the authenticated account and verifies compatibility with frozen V5
-  ownership, private inputs, quota, hardware, and runtime pins. No result stage
-  follows without its own exact Codex handoff and passed gates.
-- **Compute status:** The operator reported that `rezabarati2` passed a smoke
-  test with 2× T4, CUDA 12.8, and approximately 30 GPU-hours/week. This is
-  account-specific evidence, not a fresh V5 quota/runtime preflight. The local
-  Mac's recorded free disk is too small for large model artifacts; the V5 CPU
-  route remains limited to its existing local/Kaggle mapping. GitHub Actions
-  remains validation/analysis/build infrastructure for V5.
-- **Important risks:** Account ownership and access must be reconciled without
-  changing `V5_OWNER`; CUDA 12.8 evidence does not establish compatibility with
-  the locked V5 runtime; a missing runtime-freeze manifest blocks CPU results.
+- **Last reconciled:** 2026-09-29. The execution branch is prepared for the
+  first gated pilot; Codex has not executed a result-bearing job.
+- **Scientific protocol:** frozen at
+  `2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022`.
+- **Next authorized result step:** OpenCode/Moon may run only reranker shard
+  000 (20 queries, 1,000 candidate scores), and only after the launcher passes
+  exact-SHA, host/runtime, input/model hash, and 4-vs-16 thread parity gates.
+  Stop after the shard and return its provenance to Codex.
+- **Kaggle:** V5 ownership is amended to `rezabarati2`. The runtime contract
+  allocates two T4s but exposes only GPU 0, fixes Python 3.12 / Torch
+  `2.10.0+cu128` / CUDA 12.8, and rejects package changes to Torch/CUDA. Owner,
+  quota, and non-result CUDA/model canary checks are the only Kaggle actions
+  authorized in this handoff.
+- **Muse/Colab:** exact runtime policy is one T4 with at least 14 GiB VRAM,
+  Torch `2.11.0+cu128`, CUDA 12.8. Its full Qwen family stage is prepared but
+  input-gated until a complete reranker output is accepted and a qrel-free
+  Qwen bundle is staged with a Codex-issued manifest hash. The exact package
+  install and non-lockbox Qwen smoke must also pass before the result kernel.
+- **Not staged:** Qwen, Llama, and Mistral consumer bundles. The reranker
+  qrel-free input dataset is staged as Kaggle dataset version 1.
+- **CPU consumer route:** remains blocked by Qwen AWQ-to-GGUF conversion and
+  unresolved Llama source access. These do not block the Transformers CPU
+  reranker or GPU consumer routes.
+- **No V5 result-bearing jobs** are recorded as launched.
 
 ## Authoritative records
 
-- V5 scientific protocol: `versions/sem2act-v5/protocol/confirmation.yaml`
-  and `manifests/protocol_freeze.json`.
-- Current machine execution summary: `versions/sem2act-v5/manifests/EXECUTION_STATUS.json`.
-- Kaggle and CPU gate detail:
-  `versions/sem2act-v5/manifests/kaggle_runtime_lock.json`,
-  `manifests/kaggle_preflight.json`, `manifests/cpu_runtime_lock.json`,
-  `manifests/cpu_preflight_status.json`, and the corresponding runtime-freeze
-  and canary manifests.
-- `manifests/kaggle_ui_canary.json` is a separate machine record for
-  `siavashsimin` and still reports `pending-user-ui-run`; it is not the newer
-  operator-reported smoke observation for `rezabarati2`.
-- The older `versions/sem2act-v5/tasks/STATUS.yaml` still describes the
-  September 25 Lightning preflight state. Treat it as historical; this snapshot
-  points to the later machine execution records rather than replacing them.
-- Operator-reported GPU observation:
-  `provenance/kaggle_gpu_smoke_operator_report_20260928.md`.
+- Protocol: `versions/sem2act-v5/protocol/confirmation.yaml` and
+  `versions/sem2act-v5/manifests/protocol_freeze.json`.
+- Pilot commands, required inputs, and STOP points: [`RUNBOOK.md`](RUNBOOK.md).
+- Backend routing: [`COMPUTE.md`](COMPUTE.md).
+- Kaggle runtime/owner: `versions/sem2act-v5/amendments/kaggle_backend_v3.yaml`,
+  `versions/sem2act-v5/manifests/kaggle_runtime_lock.json`, and its freeze.
+- Colab runtime: `versions/sem2act-v5/amendments/colab_backend_v1.yaml`,
+  `versions/sem2act-v5/manifests/colab_runtime_lock.json`, and its freeze.
+- Moon reranker-only runtime: `versions/sem2act-v5/amendments/moon_reranker_backend_v1.yaml`,
+  `versions/sem2act-v5/manifests/moon_reranker_runtime_lock.json`, and its
+  freeze.
+- Existing broader CPU consumer gate remains in
+  `versions/sem2act-v5/manifests/cpu_preflight_status.json`.

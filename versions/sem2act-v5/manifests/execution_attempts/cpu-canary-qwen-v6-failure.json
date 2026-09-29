@@ -1,0 +1,58 @@
+{
+  "downloaded_output_files": {
+    "preflight_manifest.json": {
+      "bytes": 1537,
+      "sha256": "8830da69a19731dff8057b6f4226ac1e3ecaab8fe768078c1f051be206ebbaa7"
+    },
+    "sem2act-v5-cpu-preflight-qwen.log": {
+      "bytes": 41415,
+      "sha256": "18c4161012fea4eaa17eed77f750b2a8a2e85badca73a71789efa69f9df18932"
+    }
+  },
+  "family": "qwen",
+  "kaggle_kernel_version": 6,
+  "manifest_id": "sem2act-v5-kaggle-cpu-qwen-canary-v6-failure",
+  "qrels_read": false,
+  "reason": "LocalEntryNotFoundError: Got: ConnectError: [Errno -3] Temporary failure in name resolution\nAn error happened while trying to locate the files on the Hub and we cannot find the appropriate snapshot folder for the specified revision on the local disk. Please check your internet connection and try again.",
+  "remote_manifest": {
+    "credential_source": "public_unauthenticated",
+    "engine": {
+      "build_flags": [
+        "-DGGML_NATIVE=OFF",
+        "-DGGML_OPENMP=ON",
+        "-DGGML_CUDA=OFF",
+        "-DGGML_METAL=OFF",
+        "-DGGML_VULKAN=OFF",
+        "-DGGML_SYCL=OFF"
+      ],
+      "commit": "9f70b2cecd1a9a3f73ac525c47ca22a6ee9a7b69",
+      "quantizer_sha256": "2a21b31e98ccaacab43615f738b05b6075054dfaa214fe22f8392cf82baacb8e",
+      "server_sha256": "fdf72d7c66033d9f9c9fdeaed0916bc4c21a8059f0acf8b37f5fbe51e82fb6a9",
+      "source_archive_sha256": "bc351a39f7a2c68f0e9827f86d0185c4ec7617be29493c4f8d349ecf41bbcbc6",
+      "source_mode": "private_kaggle_dataset_source_tree"
+    },
+    "error": "LocalEntryNotFoundError: Got: ConnectError: [Errno -3] Temporary failure in name resolution\nAn error happened while trying to locate the files on the Hub and we cannot find the appropriate snapshot folder for the specified revision on the local disk. Please check your internet connection and try again.",
+    "family": "qwen",
+    "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+    "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+    "model_id": "Qwen/Qwen3-8B-AWQ",
+    "platform": {
+      "machine": "x86_64",
+      "physical_cores": 4,
+      "python": "3.12.13"
+    },
+    "qrels_read": false,
+    "result_bearing_execution_started": false,
+    "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "schema_version": 1,
+    "status": "failed",
+    "threads": 4,
+    "tokenizer_revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "wall_seconds": 609.936
+  },
+  "remote_manifest_sha256": "8830da69a19731dff8057b6f4226ac1e3ecaab8fe768078c1f051be206ebbaa7",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-qwen",
+  "status": "failed-after-engine-build-before-model-load"
+}

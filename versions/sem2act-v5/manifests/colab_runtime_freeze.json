@@ -1,0 +1,29 @@
+{
+  "amendment_sha256": "ae6cb60a854b942f42481a40a6e20d2d9adcc99eee4ece4244a66bee36b9ec58",
+  "failure_policy": "Any lock, model, device, package, schema, or smoke failure stops before result-bearing execution; no runtime parameter substitution is allowed.",
+  "frozen_utc": "2026-09-29T09:50:16.100111+00:00",
+  "lock_id": "sem2act-v5-colab-runtime-v1",
+  "lock_sha256": "42555838e5e7da0c4fd9e09e445e3d6ecc2a6b48c10ee00e5e40361bfb33d603",
+  "manifest_id": "sem2act-v5-colab-runtime-freeze-v1",
+  "no_result_dependent_runtime_changes": true,
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "protocol_sha256": "05d2d30a74b263839028bebff9e59d24957ca2d72a45183109dc5adeb3025328",
+  "schema_version": 1,
+  "smoke_fixture_policy": {
+    "is_lockbox_query": false,
+    "must_be_hashed_before_model_execution": true,
+    "path": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"
+  },
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "source_contract_sha256": {
+    "scripts/colab_compute.py": "407d2f91d1626d828b038aeb266bdbcc7f9312dcd5c2547ac0dca679a142a906",
+    "scripts/freeze_v5_colab_runtime.py": "e8ec4bbc496e1c9d4e5675b2cf07631ff88c4794b89eb8bbbb29d41ecab395de",
+    "versions/sem2act-v5/compute/lightning/job_entrypoint.py": "864f85abb6e7707b2c4134fc90368002d84d99d77b42bff9f04a5a3edc78f908",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_consumer.py": "dbc4f81b24ad71bf48bba573f9f12a6b346bbf0e9b2b89943e12ee87584f9905",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_qwen_consumer.py": "7dd967a6efff2476320edc5d0c33e0ab3018f56a793d1cf0c5400e068acf566f",
+    "versions/sem2act-v5/compute/lightning/kernels/p2_v5_rerank.py": "9b436f30b1b444c86f79f9c26a45fc9df9a57506253476bb47fcf86d648bcc66",
+    "versions/sem2act-v5/compute/lightning/model_smoke.py": "a6a32ddede899b60b6b1f21bb6f8a90e11fcd75b36ccdff3664f87f316720fa5",
+    "versions/sem2act-v5/compute/lightning/runtime_contract.py": "d0d48d668a67ab58794c8f6b678fbb2ed562b104348def1b2332b38cbb00f26a"
+  },
+  "status": "frozen-before-result-bearing-execution;input-gated"
+}

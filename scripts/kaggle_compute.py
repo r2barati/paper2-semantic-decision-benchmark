@@ -34,23 +34,84 @@ import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 TOKEN_PATH = pathlib.Path.home() / ".kaggle" / "access_token"
-if not TOKEN_PATH.exists():
-    raise SystemExit(f"missing machine credential {TOKEN_PATH} (ADIA pattern); refusing to run")
-os.environ.setdefault("KAGGLE_API_TOKEN", TOKEN_PATH.read_text().strip())
+KaggleClient = None
+ApiBlobType = ApiStartBlobUploadRequest = None
+ApiCreateDatasetRequest = ApiCreateDatasetVersionRequest = None
+ApiCreateDatasetVersionRequestBody = ApiDatasetNewFile = None
+ApiDownloadKernelOutputRequest = ApiGetKernelSessionStatusRequest = None
+ApiSaveKernelRequest = None
 
-from kagglesdk import KaggleClient  # noqa: E402
-from kagglesdk.blobs.types.blob_api_service import (  # noqa: E402
-    ApiBlobType, ApiStartBlobUploadRequest)
-from kagglesdk.datasets.types.dataset_api_service import (  # noqa: E402
-    ApiCreateDatasetRequest, ApiCreateDatasetVersionRequest,
-    ApiCreateDatasetVersionRequestBody, ApiDatasetNewFile)
-from kagglesdk.kernels.types.kernels_api_service import (  # noqa: E402
-    ApiDownloadKernelOutputRequest, ApiGetKernelSessionStatusRequest,
-    ApiSaveKernelRequest)
+
+def _require_kaggle_sdk():
+    """Load the machine-authenticated SDK only for remote operations.
+
+    Local freeze/quota checks must remain usable without credentials; remote
+    operations fail closed at the point where authentication is required.
+    """
+    global KaggleClient, ApiBlobType, ApiStartBlobUploadRequest
+    global ApiCreateDatasetRequest, ApiCreateDatasetVersionRequest
+    global ApiCreateDatasetVersionRequestBody, ApiDatasetNewFile
+    global ApiDownloadKernelOutputRequest, ApiGetKernelSessionStatusRequest
+    global ApiSaveKernelRequest
+    if KaggleClient is not None:
+        return
+    if not TOKEN_PATH.exists():
+        raise SystemExit(
+            f"missing machine credential {TOKEN_PATH} (ADIA pattern); refusing remote operation"
+        )
+    token = TOKEN_PATH.read_text().strip()
+    if not token:
+        raise SystemExit(f"empty machine credential {TOKEN_PATH}; refusing remote operation")
+    os.environ.setdefault("KAGGLE_API_TOKEN", token)
+    try:
+        from kagglesdk import KaggleClient as _KaggleClient
+        from kagglesdk.blobs.types.blob_api_service import (
+            ApiBlobType as _ApiBlobType, ApiStartBlobUploadRequest as _ApiStartBlobUploadRequest)
+        from kagglesdk.datasets.types.dataset_api_service import (
+            ApiCreateDatasetRequest as _ApiCreateDatasetRequest,
+            ApiCreateDatasetVersionRequest as _ApiCreateDatasetVersionRequest,
+            ApiCreateDatasetVersionRequestBody as _ApiCreateDatasetVersionRequestBody,
+            ApiDatasetNewFile as _ApiDatasetNewFile)
+        from kagglesdk.kernels.types.kernels_api_service import (
+            ApiDownloadKernelOutputRequest as _ApiDownloadKernelOutputRequest,
+            ApiGetKernelSessionStatusRequest as _ApiGetKernelSessionStatusRequest,
+            ApiSaveKernelRequest as _ApiSaveKernelRequest)
+    except Exception as exc:
+        raise SystemExit(f"Kaggle SDK unavailable: {type(exc).__name__}: {exc}") from exc
+    KaggleClient = _KaggleClient
+    ApiBlobType = _ApiBlobType
+    ApiStartBlobUploadRequest = _ApiStartBlobUploadRequest
+    ApiCreateDatasetRequest = _ApiCreateDatasetRequest
+    ApiCreateDatasetVersionRequest = _ApiCreateDatasetVersionRequest
+    ApiCreateDatasetVersionRequestBody = _ApiCreateDatasetVersionRequestBody
+    ApiDatasetNewFile = _ApiDatasetNewFile
+    ApiDownloadKernelOutputRequest = _ApiDownloadKernelOutputRequest
+    ApiGetKernelSessionStatusRequest = _ApiGetKernelSessionStatusRequest
+    ApiSaveKernelRequest = _ApiSaveKernelRequest
 
 OWNER = "rezabarati2"
+V5_OWNER = "rezabarati2"
+V5_PROTOCOL_HASH = "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022"
+V5_KAGGLE_LOCK = ROOT / "versions/sem2act-v5/manifests/kaggle_runtime_lock.json"
+V5_KAGGLE_FREEZE = ROOT / "versions/sem2act-v5/manifests/kaggle_runtime_freeze.json"
+V5_KAGGLE_PREFLIGHT = ROOT / "versions/sem2act-v5/manifests/kaggle_preflight.json"
 
 JOBS = {
+    "v5-canary": {
+        "slug": "sem2act-v5-canary",
+        "title": "Sem2act v5 canary",
+        "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_canary.py",
+        "gpu": True,
+        "machine_shape": "NvidiaTeslaT4",
+        "owner": V5_OWNER,
+        "internet": False,
+        "dataset_slug": None,
+        "dataset_title": None,
+        "dataset_dir": None,
+        "outputs": ["canary_manifest.json"],
+        "dest_dir": "versions/sem2act-v5/runtime/kaggle_canary",
+        "verify": "v5canary",
+    },
     "rerank-1c": {
         "slug": "paper2-v3-rerank-1c",
         "title": "Paper2 v3 rerank 1c",
@@ -204,6 +265,19 @@ JOBS = {
         "dest_dir": "runs/v3main_phi4",
         "verify": "phi4probe",
     },
+    "v4-phi4-probe": {
+        "slug": "sem2act-v4-phi4-probe",
+        "title": "Sem2act v4 phi4 probe",
+        "script": "versions/sem2act-v4/compute/kaggle_kernel/p2_phi4_probe_strict.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "paper2-v3main-inputs",
+        "dataset_title": "paper2-v3main-inputs",
+        "dataset_dir": "kaggle/inputs_main",
+        "outputs": ["probe_report.json"],
+        "dest_dir": "versions/sem2act-v4/runtime/model_family/kaggle_out",
+        "verify": "v4phi4probe",
+    },
     "qwen14-probe": {
         "slug": "paper2-v3-qwen14-probe",
         "title": "Paper2 v3 qwen14 probe",
@@ -328,6 +402,111 @@ JOBS = {
                     "shard_manifest.json"],
         "dest_dir": "runs/v3main_phi4",
         "verify": "phi4beliefs",
+    },
+    "v4-phi4-b0": {
+        "slug": "sem2act-v4-phi4-b0",
+        "title": "Sem2act v4 phi4 b0",
+        "script": "kaggle_kernel/p2_phi4_beliefs.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "sem2act-v4-phi4-inputs",
+        "dataset_title": "Sem2act v4 Phi-4 inputs",
+        "dataset_dir": "kaggle/inputs_phi4",
+        "outputs": ["cache_shard_0_50.zip", "shard_manifest.json"],
+        "dest_dir": "versions/sem2act-v4/runtime/model_family/shards",
+        "verify": "v4phi4beliefs",
+        "expected_range": [0, 50],
+        "expected_n_queries": 50,
+        "expected_n_llm_calls": 2100,
+        "install_names": {"shard_manifest.json": "shard_manifest_b0.json"},
+        "fetch_manifest_name": "kaggle_fetch_manifest_b0.json",
+    },
+    "v4-phi4-b1": {
+        "slug": "sem2act-v4-phi4-b1",
+        "title": "Sem2act v4 phi4 b1",
+        "script": "kaggle_kernel/p2_phi4_beliefs.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "sem2act-v4-phi4-inputs",
+        "dataset_title": "Sem2act v4 Phi-4 inputs",
+        "dataset_dir": "kaggle/inputs_phi4",
+        "outputs": ["cache_shard_50_100.zip", "shard_manifest.json"],
+        "dest_dir": "versions/sem2act-v4/runtime/model_family/shards",
+        "verify": "v4phi4beliefs",
+        "expected_range": [50, 100],
+        "expected_n_queries": 50,
+        "expected_n_llm_calls": 2100,
+        "install_names": {"shard_manifest.json": "shard_manifest_b1.json"},
+        "fetch_manifest_name": "kaggle_fetch_manifest_b1.json",
+    },
+    "v4-phi4-b2": {
+        "slug": "sem2act-v4-phi4-b2",
+        "title": "Sem2act v4 phi4 b2",
+        "script": "kaggle_kernel/p2_phi4_beliefs.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "sem2act-v4-phi4-inputs",
+        "dataset_title": "Sem2act v4 Phi-4 inputs",
+        "dataset_dir": "kaggle/inputs_phi4",
+        "outputs": ["cache_shard_100_150.zip", "shard_manifest.json"],
+        "dest_dir": "versions/sem2act-v4/runtime/model_family/shards",
+        "verify": "v4phi4beliefs",
+        "expected_range": [100, 150],
+        "expected_n_queries": 50,
+        "expected_n_llm_calls": 2100,
+        "install_names": {"shard_manifest.json": "shard_manifest_b2.json"},
+        "fetch_manifest_name": "kaggle_fetch_manifest_b2.json",
+    },
+    "v4-phi4-b3": {
+        "slug": "sem2act-v4-phi4-b3",
+        "title": "Sem2act v4 phi4 b3",
+        "script": "kaggle_kernel/p2_phi4_beliefs.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "sem2act-v4-phi4-inputs",
+        "dataset_title": "Sem2act v4 Phi-4 inputs",
+        "dataset_dir": "kaggle/inputs_phi4",
+        "outputs": ["cache_shard_150_200.zip", "shard_manifest.json"],
+        "dest_dir": "versions/sem2act-v4/runtime/model_family/shards",
+        "verify": "v4phi4beliefs",
+        "expected_range": [150, 200],
+        "expected_n_queries": 50,
+        "expected_n_llm_calls": 2100,
+        "install_names": {"shard_manifest.json": "shard_manifest_b3.json"},
+        "fetch_manifest_name": "kaggle_fetch_manifest_b3.json",
+    },
+    "v4-qrel-calibration": {
+        "slug": "sem2act-v4-qrel-calibration",
+        "title": "Sem2act v4 qrel calibration",
+        "script": "versions/sem2act-v4/compute/kaggle_kernel/p2_qrel_judge.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "sem2act-v4-qrel-calibration-inputs",
+        "dataset_title": "Sem2act v4 QREL calibration inputs",
+        "dataset_dir": "kaggle/inputs_qrel_calibration",
+        "outputs": [
+            "raw_outputs.jsonl", "judge_labels.jsonl", "RUN_MANIFEST.json",
+            "calibration_result.json", "runtime_versions.json",
+            "qrel_kernel_manifest.json",
+        ],
+        "dest_dir": "versions/sem2act-v4/runtime/qrel_validation_v2/calibration_judge",
+        "verify": "qrelcalibration",
+    },
+    "v4-qrel-sem2act": {
+        "slug": "sem2act-v4-qrel-sem2act",
+        "title": "Sem2act v4 qrel sem2act judge",
+        "script": "versions/sem2act-v4/compute/kaggle_kernel/p2_qrel_judge.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "sem2act-v4-qrel-sem2act-inputs",
+        "dataset_title": "Sem2act v4 QREL Sem2Act inputs",
+        "dataset_dir": "kaggle/inputs_qrel_sem2act",
+        "outputs": [
+            "raw_outputs.jsonl", "judge_labels.jsonl", "RUN_MANIFEST.json",
+            "runtime_versions.json", "qrel_kernel_manifest.json",
+        ],
+        "dest_dir": "versions/sem2act-v4/runtime/qrel_validation_v2/sem2act_judge",
+        "verify": "qrelsem2act",
     },
     "loo-pilot-8b": {
         "slug": "paper2-v3-loo-pilot-8b",
@@ -538,6 +717,87 @@ JOBS = {
         "dest_dir": "runs/reasoning_agentic_dev2",
         "verify": "reasoningsmoke",
     },
+    "reasoning-final": {
+        "slug": "paper2-reasoning-final",
+        "title": "Paper2 reasoning final",
+        "script": "kaggle_kernel/p2_reasoning_smoke.py",
+        "gpu": True,
+        "internet": True,
+        "dataset_slug": "paper2-reasoning-final-inputs",
+        "dataset_title": "paper2-reasoning-final-inputs",
+        "dataset_dir": "kaggle/inputs_reasoning_final",
+        "outputs": ["cache_reasoning_smoke.zip",
+                    "smoke_manifest.json"],
+        "dest_dir": "runs/reasoning_agentic_final",
+        "verify": "reasoningfinal",
+    },
+    "v5-rerank": {
+        "slug": "sem2act-v5-rerank",
+        "title": "Sem2act v5 rerank",
+        "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py",
+        "gpu": True,
+        "machine_shape": "NvidiaTeslaT4",
+        "owner": V5_OWNER,
+        "internet": True,
+        "dataset_slug": "sem2act-v5-rerank-inputs",
+        "dataset_title": "Sem2act v5 rerank inputs",
+        "dataset_dir": "versions/sem2act-v5/runtime/kaggle_rerank_inputs",
+        "outputs": ["rerank.trec", "run_manifest.json", "runtime_versions.json"],
+        "dest_dir": "versions/sem2act-v5/runtime/retrieval_bundle",
+        "verify": "v5rerank",
+        "install_run_manifest": True,
+    },
+    "v5-qwen": {
+        "slug": "sem2act-v5-qwen",
+        "title": "Sem2act v5 Qwen primary consumer",
+        "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_qwen_consumer.py",
+        "gpu": True,
+        "machine_shape": "NvidiaTeslaT4",
+        "owner": V5_OWNER,
+        "internet": True,
+        "dataset_slug": "sem2act-v5-qwen-inputs",
+        "dataset_title": "Sem2act v5 Qwen inputs",
+        "dataset_dir": "versions/sem2act-v5/runtime/kaggle_qwen_inputs",
+        "outputs": ["raw_outputs.jsonl", "beliefs.jsonl", "run_manifest.json",
+                    "failures.json", "runtime_versions.json"],
+        "dest_dir": "versions/sem2act-v5/runtime/model_outputs/qwen",
+        "verify": "v5qwen",
+        "install_run_manifest": True,
+    },
+    "v5-llama": {
+        "slug": "sem2act-v5-llama",
+        "title": "Sem2act v5 Llama consumer",
+        "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_consumer.py",
+        "gpu": True,
+        "machine_shape": "NvidiaTeslaT4",
+        "owner": V5_OWNER,
+        "internet": True,
+        "dataset_slug": "sem2act-v5-llama-inputs",
+        "dataset_title": "Sem2act v5 Llama inputs",
+        "dataset_dir": "versions/sem2act-v5/runtime/kaggle_llama_inputs",
+        "outputs": ["raw_outputs.jsonl", "beliefs.jsonl", "run_manifest.json",
+                    "failures.json", "runtime_versions.json"],
+        "dest_dir": "versions/sem2act-v5/runtime/model_outputs/llama",
+        "verify": "v5consumer",
+        "install_run_manifest": True,
+    },
+    "v5-mistral": {
+        "slug": "sem2act-v5-mistral",
+        "title": "Sem2act v5 Mistral consumer",
+        "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_consumer.py",
+        "gpu": True,
+        "machine_shape": "NvidiaTeslaT4",
+        "owner": V5_OWNER,
+        "internet": True,
+        "dataset_slug": "sem2act-v5-mistral-inputs",
+        "dataset_title": "Sem2act v5 Mistral inputs",
+        "dataset_dir": "versions/sem2act-v5/runtime/kaggle_mistral_inputs",
+        "outputs": ["raw_outputs.jsonl", "beliefs.jsonl", "run_manifest.json",
+                    "failures.json", "runtime_versions.json"],
+        "dest_dir": "versions/sem2act-v5/runtime/model_outputs/mistral",
+        "verify": "v5consumer",
+        "install_run_manifest": True,
+    },
 }
 
 POLL_SECONDS = 120
@@ -550,14 +810,21 @@ def _slugify(title):
 
 
 def _lint_kernel(path):
-    r = subprocess.run([sys.executable, "-m", "pyflakes", str(path)],
-                       capture_output=True, text=True)
-    bad = [l for l in (r.stdout + r.stderr).splitlines()
-           if l.strip() and "imported but unused" not in l
-           and "unable to detect undefined names" not in l
-           and "redefinition of unused" not in l]
-    if bad:
-        raise SystemExit("lint failed, not pushing:\n  " + "\n  ".join(bad))
+    import shutil
+    pyflakes = shutil.which("pyflakes")
+    if pyflakes:
+        r = subprocess.run([pyflakes, str(path)], capture_output=True, text=True)
+        bad = [l for l in (r.stdout + r.stderr).splitlines()
+               if l.strip() and "imported but unused" not in l
+               and "unable to detect undefined names" not in l
+               and "redefinition of unused" not in l]
+        if bad:
+            raise SystemExit("lint failed, not pushing:\n  " + "\n  ".join(bad))
+        return
+    try:
+        compile(path.read_text(), str(path), "exec")
+    except SyntaxError as exc:
+        raise SystemExit(f"syntax lint failed, not pushing: {exc}") from exc
 
 
 # --- datasets ---------------------------------------------------------------
@@ -568,6 +835,10 @@ def _stage_files(job):
     if not files:
         raise SystemExit(f"nothing staged in {d}")
     return files
+
+
+def _job_owner(job):
+    return job.get("owner", OWNER)
 
 
 def _upload_blob(client, path):
@@ -588,10 +859,65 @@ def _upload_blob(client, path):
     return resp.token
 
 
-def cmd_dataset(job, create):
+def _v5_upload_manifest_path(job):
+    return ROOT / "versions/sem2act-v5/manifests/upload" / f"{job['slug']}-inputs.json"
+
+
+def _local_upload_record(job, files):
+    owner = _job_owner(job)
+    return {
+        "schema_version": 1,
+        "status": "upload-pending",
+        "job": job["slug"],
+        "dataset": f"{owner}/{job['dataset_slug']}",
+        "protocol_hash": V5_PROTOCOL_HASH,
+        "qrels_uploaded": False,
+        "local_files": {
+            path.name: {"sha256": _sha(path), "bytes": path.stat().st_size}
+            for path in files
+        },
+        "files": {path.name: _sha(path) for path in files},
+        "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+
+
+def _require_v5_dataset_verified(job):
+    manifest_path = _v5_upload_manifest_path(job)
+    if not manifest_path.exists():
+        raise SystemExit(f"missing verified Kaggle upload manifest: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("status") != "remote-verified":
+        raise SystemExit("Kaggle dataset upload is not remote-verified")
+    if manifest.get("protocol_hash") != V5_PROTOCOL_HASH:
+        raise SystemExit("Kaggle dataset manifest protocol hash drift")
+    if manifest.get("qrels_uploaded") is not False:
+        raise SystemExit("Kaggle dataset manifest does not prove qrels_uploaded=false")
+    expected_dataset = f"{_job_owner(job)}/{job['dataset_slug']}"
+    if manifest.get("dataset") != expected_dataset:
+        raise SystemExit("Kaggle dataset owner drift")
     files = _stage_files(job)
+    expected = {path.name: _sha(path) for path in files}
+    if manifest.get("files") != expected:
+        raise SystemExit("Kaggle dataset local file manifest drift")
+    if manifest.get("remote_file_list_match") is not True or manifest.get("remote_hash_match") is not True:
+        raise SystemExit("Kaggle dataset remote file/hash verification failed")
+    if manifest.get("remote_sha256") != expected:
+        raise SystemExit("Kaggle dataset remote SHA-256 drift")
+    return manifest
+
+
+def cmd_dataset(job, create):
+    _require_kaggle_sdk()
+    if not job.get("dataset_slug") or not job.get("dataset_dir"):
+        raise SystemExit("this job has no input dataset")
+    files = _stage_files(job)
+    upload_manifest_path = _v5_upload_manifest_path(job) if job["slug"].startswith("sem2act-v5-") else None
+    if upload_manifest_path is not None:
+        upload_manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        upload_manifest_path.write_text(json.dumps(_local_upload_record(job, files), indent=2, sort_keys=True) + "\n")
+    owner = _job_owner(job)
     print(f"uploading {len(files)} files as PRIVATE dataset "
-          f"{OWNER}/{job['dataset_slug']}")
+          f"{owner}/{job['dataset_slug']}")
     with KaggleClient() as client:
         tokens = [_upload_blob(client, p) for p in files]
         new_files = []
@@ -601,7 +927,7 @@ def cmd_dataset(job, create):
             new_files.append(f)
         if create:
             req = ApiCreateDatasetRequest()
-            req.owner_slug = OWNER
+            req.owner_slug = owner
             req.slug = job["dataset_slug"]
             req.title = job["dataset_title"]
             req.license_name = "other"
@@ -610,42 +936,117 @@ def cmd_dataset(job, create):
             resp = client.datasets.dataset_api_client.create_dataset(req)
         else:
             req = ApiCreateDatasetVersionRequest()
-            req.owner_slug = OWNER
+            req.owner_slug = owner
             req.dataset_slug = job["dataset_slug"]
             body = ApiCreateDatasetVersionRequestBody()
             body.version_notes = f"paper2 {job['dataset_slug']} refresh"
             body.files = new_files
             req.body = body
             resp = client.datasets.dataset_api_client.create_dataset_version(req)
+    record_dir = ROOT / "versions/sem2act-v5/manifests/dataset_versions"
+    if job["slug"].startswith("sem2act-v5-"):
+        record_dir.mkdir(parents=True, exist_ok=True)
+        fields = {}
+        for name in ("dataset_version_number", "version_number", "ref", "slug",
+                     "status", "message", "error"):
+            value = getattr(resp, name, None)
+            if value is not None:
+                fields[name] = str(value)
+        (record_dir / f"{job['slug']}.json").write_text(json.dumps({
+            "schema_version": 1,
+            "job": job["slug"],
+            "dataset": f"{owner}/{job['dataset_slug']}",
+            "recorded_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "response_fields": fields,
+            "response_repr": str(resp),
+        }, indent=2, sort_keys=True) + "\n")
     print("response:", resp)
+    if upload_manifest_path is not None:
+        manifest = json.loads(upload_manifest_path.read_text())
+        response_fields = {}
+        for name in ("dataset_version_number", "version_number", "ref", "slug", "status", "message", "error"):
+            value = getattr(resp, name, None)
+            if value is not None:
+                response_fields[name] = str(value)
+        manifest.update({
+            "status": "uploaded-unverified",
+            "response_fields": response_fields,
+            "uploaded_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "verification_command": (
+                "python3 scripts/verify_kaggle_dataset.py "
+                f"--manifest {upload_manifest_path.relative_to(ROOT)} "
+                f"--source-dir {job['dataset_dir']} --owner {owner} "
+                f"--slug {job['dataset_slug']} --version <DATASET_VERSION>"
+            ),
+        })
+        upload_manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 
 
 # --- kernels ----------------------------------------------------------------
 
 def cmd_push(job_name, job):
+    _require_kaggle_sdk()
+    if job_name.startswith("v5-") and job.get("gpu"):
+        _require_v5_kaggle_submission_gate(job_name)
     slug, title = job["slug"], job["title"]
     if _slugify(title) != slug:
         raise SystemExit(f"title {title!r} slugifies to {_slugify(title)!r}, not {slug!r}")
+    if job_name == "v4-qrel-sem2act":
+        calibration_freeze = ROOT / "versions/sem2act-v4/manifests/qrel_validation_v2_calibration_freeze.json"
+        calibration_result = ROOT / "versions/sem2act-v4/results/qrel_validation_v2/calibration_result.json"
+        submission_marker = ROOT / "versions/sem2act-v4/manifests/qrel_validation_v2_sem2act_submission.json"
+        if not calibration_freeze.is_file() or not calibration_result.is_file():
+            raise SystemExit("refusing Sem2Act judge: frozen calibration result is missing")
+        if submission_marker.exists():
+            raise SystemExit("refusing Sem2Act judge: the one permitted submission is already recorded")
+        gate = json.loads(calibration_freeze.read_text())
+        result = json.loads(calibration_result.read_text())
+        if gate.get("status") != "frozen" or gate.get("sem2act_judge_permitted") is not True:
+            raise SystemExit("refusing Sem2Act judge: calibration has not produced a frozen passing gate")
+        if result.get("status") != "pass":
+            raise SystemExit("refusing Sem2Act judge: calibration result is not pass")
+        actual = hashlib.sha256(calibration_result.read_bytes()).hexdigest()
+        if gate.get("calibration_result_sha256") != actual:
+            raise SystemExit("refusing Sem2Act judge: calibration freeze/result hash mismatch")
     path = ROOT / job["script"]
     _lint_kernel(path)
     req = ApiSaveKernelRequest()
-    req.slug = f"{OWNER}/{slug}"
+    owner = _job_owner(job)
+    req.slug = f"{owner}/{slug}"
     req.new_title = title
     req.text = path.read_text()
     req.language = "python"
     req.kernel_type = "script"
     req.is_private = True
     req.enable_gpu = job["gpu"]
+    if job.get("machine_shape"):
+        req.machine_shape = job["machine_shape"]
     req.enable_internet = job["internet"]
-    req.dataset_data_sources = [f"{OWNER}/{job['dataset_slug']}"]
+    req.dataset_data_sources = ([f"{owner}/{job['dataset_slug']}"]
+                                if job.get("dataset_slug") else [])
     req.category_ids = []
     with KaggleClient() as c:
-        print(job_name, "->", c.kernels.kernels_api_client.save_kernel(req))
+        resp = c.kernels.kernels_api_client.save_kernel(req)
+    print(job_name, "->", resp)
+    error = getattr(resp, "error", "") or getattr(resp, "_error", "")
+    if error:
+        raise RuntimeError(f"Kaggle rejected {job_name}: {error}")
+    if job_name == "v4-qrel-sem2act":
+        submission_marker = ROOT / "versions/sem2act-v4/manifests/qrel_validation_v2_sem2act_submission.json"
+        calibration_freeze = ROOT / "versions/sem2act-v4/manifests/qrel_validation_v2_calibration_freeze.json"
+        submission_marker.write_text(json.dumps({
+            "schema_version": 1,
+            "status": "submitted-once",
+            "submitted_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "job": job["slug"],
+            "calibration_freeze_sha256": _sha(calibration_freeze),
+        }, indent=2, sort_keys=True) + "\n")
 
 
 def cmd_status(job):
+    _require_kaggle_sdk()
     req = ApiGetKernelSessionStatusRequest()
-    req.user_name, req.kernel_slug = OWNER, job["slug"]
+    req.user_name, req.kernel_slug = _job_owner(job), job["slug"]
     with KaggleClient() as c:
         resp = c.kernels.kernels_api_client.get_kernel_session_status(req)
     print(f"{job['slug']}: {resp}")
@@ -680,28 +1081,46 @@ def _sha(p):
 
 
 def cmd_fetch(job):
+    _require_kaggle_sdk()
     req = ApiDownloadKernelOutputRequest()
-    req.owner_slug, req.kernel_slug = OWNER, job["slug"]
+    req.owner_slug, req.kernel_slug = _job_owner(job), job["slug"]
     dest = ROOT / "artifacts" / "kaggle_out" / job["slug"]
     dest.mkdir(parents=True, exist_ok=True)
-    with KaggleClient() as c:
-        resp = c.kernels.kernels_api_client.download_kernel_output(req)
-        data = resp.content if hasattr(resp, "content") else None
+    data = None
+    for attempt in range(1, 6):
+        try:
+            with KaggleClient() as c:
+                resp = c.kernels.kernels_api_client.download_kernel_output(req)
+                data = resp.content if hasattr(resp, "content") else None
+            if data:
+                break
+            raise RuntimeError(f"empty output response {getattr(resp, 'status_code', '?')}")
+        except Exception as exc:
+            if attempt == 5:
+                raise
+            print(f"download attempt {attempt} failed ({type(exc).__name__}); retrying", flush=True)
+            time.sleep(15)
     if not data:
         raise SystemExit(f"empty output response {getattr(resp, 'status_code', '?')}")
     zpath = dest / "output.zip"
     zpath.write_bytes(data)
     with zipfile.ZipFile(zpath) as z:
+        names = z.namelist()
         z.extractall(dest)
-        print("extracted:", z.namelist())
+        print(f"extracted {len(names)} files; expected outputs: {job['outputs']}")
     # verify: every expected output present + job-specific re-verification
     for name in job["outputs"]:
         if not (dest / name).exists():
             raise SystemExit(f"missing expected output {name} in kernel outputs")
-    {"rerank": _verify_rerank, "encode2b": _verify_encode2b,
+    verifier = {"v5canary": _verify_v5_canary, "v5rerank": _verify_v5_rerank, "v5qwen": _verify_v5_qwen,
+     "v5consumer": _verify_v5_consumer,
+     "rerank": _verify_rerank, "encode2b": _verify_encode2b,
      "refine": _verify_refine, "runsmain": _verify_runsmain,
      "probe": _verify_probe, "awqbeliefs": _verify_awqbeliefs,
-     "phi4probe": _verify_phi4probe, "phi4beliefs": _verify_phi4beliefs,
+     "phi4probe": _verify_phi4probe, "v4phi4probe": _verify_v4phi4probe,
+     "phi4beliefs": _verify_phi4beliefs, "v4phi4beliefs": _verify_v4phi4beliefs,
+      "qrelcalibration": _verify_qrel_calibration,
+      "qrelsem2act": _verify_qrel_sem2act,
       "qwen14probe": _verify_qwen14probe,
       "qwen14beliefs": _verify_qwen14beliefs,
       "loopilot8b": _verify_loopilot8b,
@@ -710,20 +1129,278 @@ def cmd_fetch(job):
       "lootest14b": _verify_lootest14b,
       "trackasim": _verify_trackasim,
       "agentickprobe": _verify_agentickprobe,
-      "reasoningsmoke": _verify_reasoningsmoke}[job["verify"]](dest, job)
+      "reasoningsmoke": _verify_reasoningsmoke,
+      "reasoningfinal": _verify_reasoningfinal}[job["verify"]]
+    verification = verifier(dest, job)
     # install into runs/ (only after verification passes)
     (ROOT / job["dest_dir"]).mkdir(parents=True, exist_ok=True)
+    install_names = job.get("install_names", {})
     for name in job["outputs"]:
-        if name == "run_manifest.json":
+        if name == "run_manifest.json" and not job.get("install_run_manifest"):
             continue
-        target = ROOT / job["dest_dir"] / name
+        target_name = install_names.get(name, name)
+        target = ROOT / job["dest_dir"] / target_name
         target.write_bytes((dest / name).read_bytes())
         print(f"installed {target} sha={_sha(target)[:12]}")
-    (ROOT / job["dest_dir"] / "kaggle_fetch_manifest.json").write_text(json.dumps({
+    fetch_manifest_name = job.get("fetch_manifest_name", "kaggle_fetch_manifest.json")
+    (ROOT / job["dest_dir"] / fetch_manifest_name).write_text(json.dumps({
         "job": job["slug"], "fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "files": {n: _sha(ROOT / job["dest_dir"] / n)
+        "files": {n: _sha(ROOT / job["dest_dir"] / install_names.get(n, n))
                   for n in job["outputs"] if n != "run_manifest.json"},
+        "verification": verification or {},
     }, indent=2))
+    if job.get("verify") == "v5canary":
+        record = _read_v5_preflight()
+        record.update({
+            "status": "canary-passed",
+            "canary_job": job["slug"],
+            "canary_output_sha256": _sha(dest / "canary_manifest.json"),
+            "canary_verification": verification,
+            "canary_fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        })
+        V5_KAGGLE_PREFLIGHT.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+
+
+def _verify_v5_canary(dest, job):
+    manifest = json.loads((dest / "canary_manifest.json").read_text())
+    if manifest.get("status") != "pass":
+        raise SystemExit("Kaggle canary did not pass")
+    if manifest.get("protocol_hash") != V5_PROTOCOL_HASH:
+        raise SystemExit("Kaggle canary protocol hash drift")
+    if manifest.get("amendment_id") != "sem2act-v5-kaggle-backend-v3":
+        raise SystemExit("Kaggle canary amendment drift")
+    if manifest.get("torch") != "2.10.0+cu128" or manifest.get("cuda") != "12.8":
+        raise SystemExit("Kaggle canary Torch/CUDA image gate failed")
+    if (manifest.get("device_count") != 1
+            or manifest.get("physical_device_count") != 2
+            or "t4" not in manifest.get("device_name", "").lower()):
+        raise SystemExit("Kaggle canary device gate failed")
+    if not manifest.get("real_cuda_matmul"):
+        raise SystemExit("Kaggle canary did not run a CUDA matmul")
+    return {"status": "pass", "device": manifest["device_name"], "torch": manifest["torch"], "cuda": manifest["cuda"]}
+
+
+def _read_v5_preflight():
+    if not V5_KAGGLE_PREFLIGHT.exists():
+        raise SystemExit("run the Kaggle quota preflight before v5 submission")
+    if not V5_KAGGLE_LOCK.exists() or not V5_KAGGLE_FREEZE.exists():
+        raise SystemExit("Kaggle runtime freeze is missing")
+    record = json.loads(V5_KAGGLE_PREFLIGHT.read_text())
+    if record.get("protocol_hash") != V5_PROTOCOL_HASH:
+        raise SystemExit("Kaggle preflight protocol hash drift")
+    if record.get("runtime_freeze_sha256") != _sha(V5_KAGGLE_FREEZE):
+        raise SystemExit("Kaggle preflight runtime freeze hash mismatch")
+    if record.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
+        raise SystemExit("Kaggle preflight runtime lock hash mismatch")
+    if record.get("owner") != V5_OWNER or record.get("owner_verified") is not True:
+        raise SystemExit("Kaggle authenticated owner was not verified as the frozen V5 owner")
+    return record
+
+
+def _require_v5_kaggle_submission_gate(job_name):
+    if os.environ.get("SEM2ACT_V5_QUOTA_CLI_CONFIRMED") != "1":
+        raise SystemExit("set SEM2ACT_V5_QUOTA_CLI_CONFIRMED=1 only after quota preflight passes")
+    record = _read_v5_preflight()
+    allowed = {"quota-passed"} if job_name == "v5-canary" else {"canary-passed"}
+    if record.get("status") not in allowed:
+        raise SystemExit(f"Kaggle v5 gate requires {sorted(allowed)}, got {record.get('status')!r}")
+    if record.get("gpu_remaining_hours", 0) <= 0:
+        raise SystemExit("Kaggle GPU quota is not positive")
+    if job_name != "v5-canary":
+        _require_v5_dataset_verified(JOBS[job_name])
+
+
+def _kaggle_cli_path():
+    import shutil
+    candidates = [
+        os.environ.get("SEM2ACT_KAGGLE_CLI"),
+        "/private/tmp/kaggle-cli-v2/bin/kaggle",
+        str(ROOT / ".venv-kaggle/bin/kaggle"),
+        str(pathlib.Path.home() / ".venv-kaggle/bin/kaggle"),
+        shutil.which("kaggle"),
+    ]
+    for candidate in candidates:
+        if candidate and pathlib.Path(candidate).is_file():
+            return candidate
+    raise SystemExit("Kaggle CLI is unavailable")
+
+
+def cmd_v5_preflight():
+    quota_cmd = _kaggle_cli_path()
+    owner_proc = subprocess.run(
+        [quota_cmd, "datasets", "list", "--mine", "--search", "sem2act-v5-rerank-inputs", "--format", "json"],
+        capture_output=True, text=True,
+    )
+    if owner_proc.returncode != 0:
+        raise SystemExit("Kaggle account identity probe failed; refusing V5 preflight")
+    try:
+        owner_payload = json.loads(owner_proc.stdout)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Kaggle account identity output was not JSON: {exc}") from exc
+    owner_rows = owner_payload if isinstance(owner_payload, list) else owner_payload.get(
+        "datasets", owner_payload.get("items", owner_payload.get("data", []))
+    )
+    owned_refs = set()
+    for row in owner_rows:
+        if not isinstance(row, dict):
+            continue
+        ref = str(row.get("ref", row.get("datasetRef", ""))).strip("/")
+        if ref.startswith("datasets/"):
+            ref = ref[len("datasets/"):]
+        owned_refs.add(ref)
+    expected_input = f"{V5_OWNER}/sem2act-v5-rerank-inputs"
+    if expected_input not in owned_refs:
+        raise SystemExit(
+            f"authenticated Kaggle account does not own the frozen V5 input dataset {expected_input}"
+        )
+    proc = subprocess.run([quota_cmd, "quota", "--format", "json"],
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        record = {
+            "schema_version": 1, "status": "unavailable",
+            "protocol_hash": V5_PROTOCOL_HASH,
+            "owner": V5_OWNER,
+            "owner_verified": True,
+            "identity_probe": "kaggle datasets list --mine --search sem2act-v5-rerank-inputs --format json",
+            "runtime_lock_sha256": _sha(V5_KAGGLE_LOCK),
+            "runtime_freeze_sha256": _sha(V5_KAGGLE_FREEZE),
+            "error": "Kaggle quota command failed before a result was returned",
+            "exit_code": proc.returncode,
+        }
+        V5_KAGGLE_PREFLIGHT.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+        raise SystemExit(record["error"])
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Kaggle quota output was not JSON: {exc}")
+    rows = payload if isinstance(payload, list) else payload.get("quota", [])
+    gpu = next((row for row in rows if str(row.get("resource", "")).upper() == "GPU"), None)
+    if gpu is None:
+        raise SystemExit("Kaggle quota response has no GPU row")
+    raw = str(gpu.get("remaining", "0")).lower().replace("h", "").strip()
+    try:
+        remaining = float(raw)
+    except ValueError as exc:
+        raise SystemExit(f"unparseable GPU remaining value: {raw!r}") from exc
+    record = {
+        "schema_version": 1,
+        "status": "quota-passed" if remaining > 0 else "blocked-no-gpu-quota",
+        "owner": V5_OWNER,
+        "owner_verified": True,
+        "identity_probe": "kaggle datasets list --mine --search sem2act-v5-rerank-inputs --format json",
+        "owned_input_dataset": expected_input,
+        "protocol_hash": V5_PROTOCOL_HASH,
+        "runtime_lock_sha256": _sha(V5_KAGGLE_LOCK),
+        "runtime_freeze_sha256": _sha(V5_KAGGLE_FREEZE),
+        "quota_command": "kaggle quota --format json",
+        "quota_cli": quota_cmd,
+        "gpu_remaining_hours": remaining,
+        "gpu": gpu,
+        "checked_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    V5_KAGGLE_PREFLIGHT.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(record, indent=2, sort_keys=True))
+    if remaining <= 0:
+        raise SystemExit("Kaggle GPU quota is zero")
+
+
+
+def _verify_v5_rerank(dest, job):
+    manifest = json.loads((dest / "run_manifest.json").read_text())
+    if manifest.get("experiment_id") != "v5-lockbox-rerank":
+        raise SystemExit("wrong v5 rerank experiment id")
+    if manifest.get("qrels_read") is not False:
+        raise SystemExit("v5 reranker manifest does not prove qrels_read=false")
+    if manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
+        raise SystemExit("v5 reranker runtime lock hash drift")
+    smoke = manifest.get("smoke", {})
+    if smoke.get("status") != "pass" or smoke.get("fixture_sha256") != _sha(ROOT / "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"):
+        raise SystemExit("v5 reranker smoke gate failed")
+    if manifest.get("n_queries") != 240 or manifest.get("n_fail") != 0:
+        raise SystemExit("v5 reranker coverage/failure gate failed")
+    rows = {}
+    with (dest / "rerank.trec").open() as handle:
+        for line in handle:
+            qid, _, did, rank, *_ = line.split()
+            rows.setdefault(qid, []).append((int(rank), did))
+    if set(rows) != {f"v5-lb-q{i:04d}" for i in range(1, 241)}:
+        raise SystemExit("v5 reranker query coverage failed")
+    if any(len(v) != 50 or [r for r, _ in v] != list(range(1, 51))
+           or len({d for _, d in v}) != 50 for v in rows.values()):
+        raise SystemExit("v5 reranker ranking schema failed")
+    return {"status": "pass", "n_queries": 240, "n_fail": 0}
+
+
+def _verify_v5_qwen(dest, job):
+    manifest = json.loads((dest / "run_manifest.json").read_text())
+    if manifest.get("experiment_id") != "v5-primary-qwen-consumer":
+        raise SystemExit("wrong v5 Qwen experiment id")
+    if manifest.get("status") != "pass" or manifest.get("qrels_read") is not False:
+        raise SystemExit("v5 Qwen failure/qrel gate failed")
+    if manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
+        raise SystemExit("v5 Qwen runtime lock hash drift")
+    smoke = manifest.get("smoke", {})
+    if smoke.get("status") != "pass" or smoke.get("fixture_sha256") != _sha(ROOT / "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"):
+        raise SystemExit("v5 Qwen smoke gate failed")
+    if manifest.get("expected_calls") != 2880 or manifest.get("actual_calls") != 2880:
+        raise SystemExit("v5 Qwen call-count gate failed")
+    if manifest.get("n_cache_files") != 2880 or manifest.get("n_fail") != 0:
+        raise SystemExit("v5 Qwen cache/failure gate failed")
+    if manifest.get("prompt_shas") != {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"}:
+        raise SystemExit("v5 Qwen prompt hash drift")
+    if len((dest / "raw_outputs.jsonl").read_text().splitlines()) != 2880:
+        raise SystemExit("v5 Qwen raw-output coverage failed")
+    rows = [json.loads(line) for line in (dest / "beliefs.jsonl").read_text().splitlines()]
+    if len(rows) != 1440:
+        raise SystemExit("v5 Qwen belief coverage failed")
+    keys = {(row["query_id"], row["system"], row["consumer"]) for row in rows}
+    expected = {
+        (f"v5-lb-q{i:04d}", system, consumer)
+        for i in range(1, 241)
+        for system in ("bm25", "rerank", "oracle")
+        for consumer in ("C1", "C3")
+    }
+    if keys != expected or len(keys) != len(rows):
+        raise SystemExit("v5 Qwen belief keyspace failed")
+    return {"status": "pass", "n_calls": 2880, "n_beliefs": 1440}
+
+
+def _verify_v5_consumer(dest, job):
+    manifest = json.loads((dest / "run_manifest.json").read_text())
+    if manifest.get("experiment_id") != "v5-cross-family-consumer":
+        raise SystemExit("wrong v5 consumer experiment id")
+    if manifest.get("status") != "pass" or manifest.get("qrels_read") is not False:
+        raise SystemExit("v5 consumer failure/qrel gate failed")
+    if manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
+        raise SystemExit("v5 consumer runtime lock hash drift")
+    smoke = manifest.get("smoke", {})
+    if smoke.get("status") != "pass" or smoke.get("fixture_sha256") != _sha(ROOT / "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"):
+        raise SystemExit("v5 consumer smoke gate failed")
+    if manifest.get("expected_calls") != 1920 or manifest.get("actual_calls") != 1920:
+        raise SystemExit("v5 consumer call-count gate failed")
+    if manifest.get("n_fail") != 0:
+        raise SystemExit("v5 consumer schema failure gate failed")
+    if manifest.get("prompt_shas") != {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"}:
+        raise SystemExit("v5 consumer prompt hash drift")
+    if len((dest / "raw_outputs.jsonl").read_text().splitlines()) != 1920:
+        raise SystemExit("v5 consumer raw-output coverage failed")
+    belief_rows = [json.loads(line) for line in (dest / "beliefs.jsonl").read_text().splitlines()]
+    if len(belief_rows) != 960:
+        raise SystemExit("v5 consumer belief coverage failed")
+    keys = {(row["query_id"], row["system"], row["consumer"]) for row in belief_rows}
+    expected = {
+        (f"v5-lb-q{i:04d}", system, consumer)
+        for i in range(1, 241)
+        for system in ("rerank", "oracle")
+        for consumer in ("C1", "C3")
+    }
+    if keys != expected or len(keys) != len(belief_rows):
+        raise SystemExit("v5 consumer belief keyspace failed")
+    for row in belief_rows:
+        probs = [row[name] for name in ("p_normal", "p_supplier_delay", "p_demand_surge")]
+        if any(not 0 <= float(value) <= 1 for value in probs) or abs(sum(probs) - 1) > 1e-6:
+            raise SystemExit("v5 consumer belief simplex failed")
+    return {"status": "pass", "n_calls": 1920, "n_beliefs": 960}
 
 
 def _verify_rerank(dest, job):
@@ -754,11 +1431,12 @@ def _verify_rerank(dest, job):
 
 
 def cmd_logs(job, out_path=None):
+    _require_kaggle_sdk()
     import json as _json
     from kagglesdk.kernels.types.kernels_api_service import (
         ApiListKernelSessionOutputRequest)
     req = ApiListKernelSessionOutputRequest()
-    req.user_name, req.kernel_slug = OWNER, job["slug"]
+    req.user_name, req.kernel_slug = _job_owner(job), job["slug"]
     with KaggleClient() as c:
         resp = c.kernels.kernels_api_client.list_kernel_session_output(req)
     raw = getattr(resp, "log", "") or ""
@@ -934,6 +1612,24 @@ def _verify_phi4probe(dest, job):
         raise SystemExit("phi4 probe failed: non-deterministic at temperature 0")
 
 
+def _verify_v4phi4probe(dest, job):
+    import json as _j
+    rep = _j.loads((dest / "probe_report.json").read_text())
+    print("v4 phi4 probe:", {k: v for k, v in rep.items()
+                              if k not in ("cases", "sample")})
+    assert rep.get("model") == PHI4_MODEL, rep
+    assert rep.get("revision") == PHI4_REVISION, rep
+    assert rep.get("prompt_shas") == {
+        "C1": "66e6890ba9c5464c",
+        "C3": "5966cadde90e8236",
+    }, rep
+    assert rep.get("pass") is True, rep
+    for name in ("c1", "c3"):
+        assert rep["cases"][name]["identical"] is True, rep
+        assert rep["cases"][name]["both_valid"] is True, rep
+    print("verify: v4 Phi-4 exact-schema probe passed")
+
+
 def _verify_qwen14beliefs(dest, job):
     import json as _j
     import random as _random
@@ -996,6 +1692,222 @@ def _verify_phi4beliefs(dest, job):
         print(f"WARNING: {man['n_fail']} kernel-side failures; "
               f"assembly will retry those keys explicitly")
     print("verify: phi4 shard cache ok")
+
+
+def _verify_v4phi4beliefs(dest, job):
+    """Strict v4 acceptance gate for one qrel-free cache shard.
+
+    The older Phi-4 verifier intentionally sampled twenty cache entries.  The
+    v4 wave is publication-bound, so this gate checks every returned payload,
+    the pre-registered range and invocation count, and the exact output-name
+    relation before anything is installed into the v4 runtime tree.
+    """
+    import json as _j
+    import math as _math
+    import re as _re
+    import zipfile as _zip
+
+    man = _j.loads((dest / "shard_manifest.json").read_text())
+    expected_range = list(job["expected_range"])
+    assert list(man.get("shard", [])) == expected_range, (man, expected_range)
+    assert man.get("n_llm_calls") == job["expected_n_llm_calls"], man
+    assert man.get("n_fail") == 0, man
+    assert man.get("model") == PHI4_MODEL, man
+    assert man.get("revision") == PHI4_REVISION, man
+    assert man.get("c1_sha") == "66e6890ba9c5464c", man
+    assert man.get("c3_sha") == "5966cadde90e8236", man
+    assert man.get("tau") == 0.5, man
+    assert man.get("seal") == "no qrels attached; guard passed", man
+    assert expected_range[1] - expected_range[0] == job["expected_n_queries"]
+    for f in ("consumers_v3.py", "interpreter.py", "events.py"):
+        frozen = _sha(ROOT / "src" / f)[:16]
+        assert man["src_snap_sha"].get(f) == frozen, (f, man)
+
+    zname = f"cache_shard_{expected_range[0]}_{expected_range[1]}.zip"
+    assert zname in job["outputs"], (zname, job["outputs"])
+    with _zip.ZipFile(dest / zname) as z:
+        names = z.namelist()
+        assert len(names) == len(set(names)), "duplicate cache names in shard"
+        assert all(n.endswith(".json") and "/" not in n for n in names), names[:3]
+        assert len(names) == man["n_cache_files"] and len(names) > 0, man
+
+        def strip_transport(raw):
+            raw = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.S).strip()
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+            return raw
+
+        def finite_number(value):
+            return isinstance(value, (int, float)) and not isinstance(value, bool) \
+                and _math.isfinite(float(value))
+
+        def validate_raw(prompt_sha, raw, filename):
+            try:
+                parsed = _j.loads(strip_transport(raw))
+            except Exception as exc:
+                raise AssertionError(f"invalid JSON in {filename}") from exc
+            if not isinstance(parsed, dict):
+                raise AssertionError(f"non-object response in {filename}")
+            if prompt_sha == "66e6890ba9c5464c":
+                required = {
+                    "normal", "supplier_delay", "demand_surge",
+                    "estimated_lt_increase", "estimated_duration",
+                    "estimated_demand_multiplier",
+                }
+                assert set(parsed) == required, (filename, sorted(parsed))
+                for key in required:
+                    assert finite_number(parsed[key]), (filename, key, parsed[key])
+                assert all(0.0 <= float(parsed[k]) <= 1.0
+                           for k in ("normal", "supplier_delay", "demand_surge")), \
+                    (filename, parsed)
+                # The frozen consumer normalizes these three probabilities.
+                # The prompt requests an approximate unit sum, but the
+                # pinned model sometimes returns a valid positive vector at a
+                # different scale (for example, [1, 1, 0]); rejecting that
+                # would change the pre-registered consumer semantics.
+                total = sum(float(parsed[k]) for k in
+                            ("normal", "supplier_delay", "demand_surge"))
+                assert total > 0.0, (filename, total)
+            elif prompt_sha == "5966cadde90e8236":
+                required = {"entity_match", "event", "fresh", "stance", "confidence"}
+                assert set(parsed) == required, (filename, sorted(parsed))
+                assert type(parsed["entity_match"]) is bool, (filename, parsed)
+                assert type(parsed["fresh"]) is bool, (filename, parsed)
+                assert parsed["event"] in {
+                    "supplier_delay", "demand_surge", "normal", "none"
+                }, (filename, parsed)
+                assert parsed["stance"] in {"support", "refute", "na"}, (filename, parsed)
+                assert finite_number(parsed["confidence"]), (filename, parsed)
+                assert 0.0 <= float(parsed["confidence"]) <= 1.0, (filename, parsed)
+            else:
+                raise AssertionError((filename, prompt_sha))
+
+        for filename in names:
+            payload = _j.loads(z.read(filename))
+            assert payload.get("model") == PHI4_MODEL, filename
+            assert payload.get("prompt_sha") in {
+                "66e6890ba9c5464c", "5966cadde90e8236"
+            }, filename
+            assert isinstance(payload.get("raw"), str) and payload["raw"].strip(), filename
+            assert isinstance(payload.get("usage"), dict), filename
+            validate_raw(payload["prompt_sha"], payload["raw"], filename)
+    print(json.dumps({
+        "verify": "v4 Phi-4 shard",
+        "range": expected_range,
+        "n_llm_calls": man["n_llm_calls"],
+        "n_cache_files": man["n_cache_files"],
+        "n_fail": man["n_fail"],
+        "schema_records_checked": man["n_cache_files"],
+    }, indent=2))
+    return {
+        "gate": "v4phi4beliefs",
+        "strict": True,
+        "expected_range": expected_range,
+        "expected_n_llm_calls": job["expected_n_llm_calls"],
+        "schema_records_checked": man["n_cache_files"],
+    }
+
+
+def _verify_qrel_calibration(dest, job):
+    """Accept a complete calibration or a frozen terminal calibration failure.
+
+    The latter is a valid scientific outcome: the external judge is excluded
+    downstream and no replacement model or threshold is permitted.
+    """
+    import hashlib as _hashlib
+    import json as _j
+
+    run = _j.loads((dest / "RUN_MANIFEST.json").read_text())
+    result = _j.loads((dest / "calibration_result.json").read_text())
+    kernel = _j.loads((dest / "qrel_kernel_manifest.json").read_text())
+    assert run.get("mode") == "calibration", run
+    assert run.get("model") == "Qwen/Qwen3-8B-AWQ", run
+    assert run.get("revision") == "4da05a8edb55c6046cce958586c33b61da07bb79", run
+    assert run.get("temperature") == 0, run
+    assert run.get("top_p") == 1.0, run
+    assert run.get("max_tokens") == 256, run
+    assert result.get("status") in {"pass", "failed_terminal"}, result
+    assert result.get("n_pairs") == 200, result
+    assert result.get("failure_is_terminal") is True, result
+    assert result.get("no_model_or_threshold_substitution") is True, result
+    assert kernel.get("mode") == "calibration", kernel
+    assert _sha(dest / "runtime_versions.json") == kernel.get("runtime_versions_sha256"), kernel
+
+    raw_rows = [_j.loads(line) for line in (dest / "raw_outputs.jsonl").read_text().splitlines() if line.strip()]
+    if run.get("status") == "complete":
+        assert len(raw_rows) == run.get("raw_outputs", {}).get("n_rows"), run
+    else:
+        print("terminal calibration failure: preserving observed raw-row count", len(raw_rows))
+    assert _sha(dest / "raw_outputs.jsonl") == run.get("raw_outputs", {}).get("sha256"), run
+    assert len({row.get("annotation_id") for row in raw_rows}) == len(raw_rows), "duplicate raw calibration keys"
+    assert all(isinstance(row.get("raw_output"), str) and row.get("raw_output_sha256") ==
+               _hashlib.sha256(row["raw_output"].encode()).hexdigest()
+               for row in raw_rows), "raw calibration hash mismatch"
+    if run.get("status") == "complete":
+        assert len(raw_rows) == 200, run
+        assert result.get("judge_run_manifest_sha256") == _sha(dest / "RUN_MANIFEST.json"), result
+    print(json.dumps({
+        "verify": "qrel calibration",
+        "status": result["status"],
+        "judge_run_status": run.get("status"),
+        "n_pairs": result["n_pairs"],
+        "raw_outputs_checked": len(raw_rows),
+        "external_judge_permitted_for_sem2act": result.get("external_judge_permitted_for_sem2act", False),
+    }, indent=2))
+    return {
+        "gate": "qrelcalibration",
+        "calibration_status": result["status"],
+        "judge_run_status": run.get("status"),
+        "raw_outputs_checked": len(raw_rows),
+        "terminal_failure_policy_verified": result.get("failure_is_terminal") is True,
+    }
+
+
+def _verify_qrel_sem2act(dest, job):
+    """Strict acceptance gate for the one conditional 160-pair judge run."""
+    import hashlib as _hashlib
+    import json as _j
+
+    run = _j.loads((dest / "RUN_MANIFEST.json").read_text())
+    kernel = _j.loads((dest / "qrel_kernel_manifest.json").read_text())
+    assert run.get("mode") == "sem2act", run
+    assert run.get("status") == "complete", run
+    assert run.get("model") == "Qwen/Qwen3-8B-AWQ", run
+    assert run.get("revision") == "4da05a8edb55c6046cce958586c33b61da07bb79", run
+    assert run.get("temperature") == 0, run
+    assert run.get("top_p") == 1.0, run
+    assert run.get("max_tokens") == 256, run
+    assert not run.get("errors"), run
+    assert run.get("input", {}).get("n_rows") == 160, run
+    assert run.get("raw_outputs", {}).get("n_rows") == 160, run
+    assert run.get("parsed_labels", {}).get("n_rows") == 160, run
+    assert kernel.get("mode") == "sem2act", kernel
+    assert _sha(dest / "runtime_versions.json") == kernel.get("runtime_versions_sha256"), kernel
+    for filename, expected in (("raw_outputs.jsonl", 160), ("judge_labels.jsonl", 160)):
+        rows = [_j.loads(line) for line in (dest / filename).read_text().splitlines() if line.strip()]
+        assert len(rows) == expected, (filename, len(rows))
+    raw_rows = [_j.loads(line) for line in (dest / "raw_outputs.jsonl").read_text().splitlines() if line.strip()]
+    assert _sha(dest / "raw_outputs.jsonl") == run["raw_outputs"]["sha256"], run
+    assert all(isinstance(row.get("raw_output"), str) and row.get("raw_output_sha256") ==
+               _hashlib.sha256(row["raw_output"].encode()).hexdigest()
+               for row in raw_rows), "raw Sem2Act hash mismatch"
+    label_rows = [_j.loads(line) for line in (dest / "judge_labels.jsonl").read_text().splitlines() if line.strip()]
+    assert _sha(dest / "judge_labels.jsonl") == run["parsed_labels"]["sha256"], run
+    assert len({row.get("annotation_id") for row in label_rows}) == 160, "duplicate Sem2Act labels"
+    assert all(isinstance(row.get("label"), int) and row["label"] in range(4) for row in label_rows)
+    print(json.dumps({
+        "verify": "qrel Sem2Act judge",
+        "status": run["status"],
+        "n_pairs": 160,
+        "raw_outputs_checked": len(raw_rows),
+        "labels_checked": len(label_rows),
+    }, indent=2))
+    return {
+        "gate": "qrelsem2act",
+        "status": run["status"],
+        "raw_outputs_checked": len(raw_rows),
+        "labels_checked": len(label_rows),
+    }
 
 
 def _verify_loopilot(dest, job, model, revision, scope="c1-loo-dev40-rerank-k3",
@@ -1206,6 +2118,35 @@ def _verify_reasoningsmoke(dest, job):
     print(f"verify: reasoning smoke ok ({len(keys)} beliefs, 0 failures, prompts match frozen DEV)")
 
 
+def _verify_reasoningfinal(dest, job):
+    """Final-run fetch gate: 27 warnings x 5 arms = 135 beliefs, zero failures."""
+    import json as _j
+    import zipfile as _zf
+    man = _j.loads((dest / "smoke_manifest.json").read_text())
+    assert man["n_failures"] == 0, man["failures"]
+    assert man["gate_zero_parse_failures"] == "PASS", man
+    assert man["budgets"] == {"A0": 0, "A1": 0, "A2": 0, "R0": 1, "A3": 2}, man["budgets"]
+    assert man["n_warnings"] == 27, man
+    assert man["model"] == "Qwen/Qwen3-8B-AWQ", man
+    assert man["revision"] == "4da05a8edb55c6046cce958586c33b61da07bb79", man
+    sys.path.insert(0, str(ROOT))
+    from experiments.reasoning_agentic.prompts import prompt_hashes
+    frozen = prompt_hashes()
+    got = man["prompt_shas"]
+    for k, h in (("A0", "A0_DIRECT_SYS"), ("A1", "A1_DELIB_SYS"), ("A2", "A2_VERIFY_SYS"),
+                 ("R0", "R0_SYNTH_SYS"), ("A3H", "A3_HYPO_SYS"), ("A3S", "A3_SYNTH_SYS")):
+        assert got[k] == frozen[h], (k, got[k], frozen[h])
+    for row in man["call_logs"]:
+        if row["arm"] == "A3":
+            assert 1 <= row["retrieval_calls"] <= 2, row
+        else:
+            assert row["retrieval_calls"] == {"A0": 0, "A1": 0, "A2": 0, "R0": 1}[row["arm"]], row
+    with _zf.ZipFile(dest / "cache_reasoning_smoke.zip") as z:
+        keys = {n[:-5] for n in z.namelist() if n.endswith(".json")}
+    assert len(keys) == 135, len(keys)
+    print(f"verify: reasoning final ok ({len(keys)} beliefs, 0 failures, prompts+model match v1.1)")
+
+
 def cmd_test(job):
     r = subprocess.run([sys.executable, "-m", "pytest", "tests/test_v3proto.py", "-q"],
                        cwd=str(ROOT))
@@ -1214,7 +2155,7 @@ def cmd_test(job):
 
 def main():
     ap = argparse.ArgumentParser(description="Paper-2 Kaggle remote-compute runner")
-    ap.add_argument("job", choices=list(JOBS))
+    ap.add_argument("job", nargs="?", choices=list(JOBS))
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dataset", choices=["create", "version"])
     g.add_argument("--push", action="store_true")
@@ -1223,7 +2164,13 @@ def main():
     g.add_argument("--fetch", action="store_true")
     g.add_argument("--test", action="store_true")
     g.add_argument("--logs", action="store_true")
+    g.add_argument("--preflight", action="store_true")
     a = ap.parse_args()
+    if a.preflight:
+        cmd_v5_preflight()
+        return
+    if not a.job:
+        ap.error("a job is required unless --preflight is used")
     job = JOBS[a.job]
     if a.dataset:
         cmd_dataset(job, create=(a.dataset == "create"))

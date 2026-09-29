@@ -1,0 +1,24 @@
+{
+  "amendment_sha256": "04e2c6de2efbe71d74f48ae95b7e36981d58303c02a12512ebba0922beca05fc",
+  "failure_policy": "stop-before-lockbox-scoring-on-any-preflight-or-parity-failure",
+  "frozen_utc": "2026-09-29T09:50:15.917051+00:00",
+  "lock_id": "sem2act-v5-moon-reranker-runtime-v1",
+  "lock_sha256": "6585a859629c589337a0af0abf4bc758bbd60005922d64f5310a92038ab0224a",
+  "manifest_id": "sem2act-v5-moon-reranker-runtime-freeze-v1",
+  "no_result_dependent_runtime_changes": true,
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "protocol_sha256": "05d2d30a74b263839028bebff9e59d24957ca2d72a45183109dc5adeb3025328",
+  "schema_version": 1,
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "source_contract_sha256": {
+    "scripts/freeze_v5_moon_runtime.py": "473fa43f3abe8be47892b4344b3ce9a8a34cf534128ac6dae0e88f56ea16d592",
+    "scripts/plan_v5_cpu_rerank_shards.py": "19e18139d7aa54d5b538b659df6bf5416e38be97d057b11afc3f5c177bf58ac0",
+    "scripts/run_v5_cpu_rerank_shard.py": "43acd4a21f6f607f43982fdbbcd225ad35298934e3bee5b31923f975d474012d",
+    "scripts/run_v5_moon_reranker_pilot.py": "8511d6b0613c6b16dd13887c1ac05d0780114e93e07c9a657dc284bd1a352066",
+    "versions/sem2act-v5/compute/cpu/contract.py": "7c9d7d6a8be60c482933ebdda15d00bcac899c747d48629600bc155a8216cfdf",
+    "versions/sem2act-v5/fixtures/runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+    "versions/sem2act-v5/manifests/cpu_reranker_canary.json": "d37e0aa7852bb8023a03fa6ad87409375965df216e2ea8ced492e9ebeef1ffb5",
+    "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json": "486c9763aa29d6000620bac9762cf9d5b261833226fc8bbddc5a96c138bbee24"
+  },
+  "status": "frozen-before-result-bearing-execution;host-and-parity-gated"
+}

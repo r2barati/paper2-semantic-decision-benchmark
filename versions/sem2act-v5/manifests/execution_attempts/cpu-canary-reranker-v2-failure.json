@@ -1,0 +1,31 @@
+{
+  "downloaded_output_files": {
+    "preflight_manifest.json": {
+      "bytes": 274,
+      "sha256": "92569ef1ff0f761f133be4688ef25462b08c2edc5cc779276dfceaf7993e5d26"
+    },
+    "sem2act-v5-cpu-preflight-reranker.log": {
+      "bytes": 1610,
+      "sha256": "d811a527d23e9d45cb4cf41742bee94778308c8c4739aa411d87c184e050e4d4"
+    }
+  },
+  "family": "reranker",
+  "kaggle_kernel_version": 2,
+  "manifest_id": "sem2act-v5-kaggle-cpu-reranker-canary-v2-failure",
+  "qrels_read": false,
+  "reason": "RuntimeError: HF_TOKEN Kaggle secret unavailable: ConnectionError",
+  "remote_manifest": {
+    "error": "RuntimeError: HF_TOKEN Kaggle secret unavailable: ConnectionError",
+    "manifest_id": "sem2act-v5-kaggle-cpu-canary-v1",
+    "qrels_read": false,
+    "result_bearing_execution_started": false,
+    "schema_version": 1,
+    "status": "failed",
+    "wall_seconds": 32.035
+  },
+  "remote_manifest_sha256": "92569ef1ff0f761f133be4688ef25462b08c2edc5cc779276dfceaf7993e5d26",
+  "result_bearing_execution_started": false,
+  "schema_version": 1,
+  "slug": "siavashsimin/sem2act-v5-cpu-preflight-reranker",
+  "status": "failed-before-model-load"
+}

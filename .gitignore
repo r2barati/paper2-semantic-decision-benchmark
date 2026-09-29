@@ -79,3 +79,6 @@ kaggle.json
 **/*api*key*.json
 kaggle/access_token
 kaggle_kernel/**/.kaggle/
+
+# V5 runtime data and model/output caches are operator-local artifacts.
+/versions/sem2act-v5/runtime/

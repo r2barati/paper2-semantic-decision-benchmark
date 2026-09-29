@@ -56,3 +56,48 @@ under `versions/sem2act-v5/amendments/`.
 - **Canonical record path and hash:**
   `versions/sem2act-v5/amendments/moon_reranker_backend_v1.yaml`, SHA-256
   `8ed3e398e472bcb8e46c24c1b32bdd0a27aec02879b4f45ef89f6a36933680ee`.
+
+## 2026-09-29 — Moon pilot closed as blocked; Kaggle authorized for the 20-query shard
+
+- **Issue:** The operator executed the Moon replacement pilot. It did not
+  produce a result: model integrity passed and the fixed non-lockbox 4-vs-16
+  thread fixture matched exactly (`max_absolute_score_delta: 0.0`), but the
+  first query's capped subprocess exited `-24` / `SIGXCPU`. The CPU route
+  therefore has no accepted query or pair and cannot be retried into a
+  scientific result within its process budget.
+- **Previous frozen state:** Moon was the authorized first reranker pilot
+  backend under `moon_reranker_backend_v1.yaml`. The Kaggle V3 lock authorized
+  owner/quota/runtime canary work only, with no result stage.
+- **Approved amendment:** Record the Moon attempt as a blocked, non-result
+  record. Add a Kaggle pilot amendment that authorizes exactly the same
+  unchanged 20-query / 1,000-candidate reranker shard on GPU, under its own
+  pilot lock referencing the existing V3 lock rather than mutating it. The full
+  240-query job is gated behind Codex acceptance of the pilot. Implementation
+  notes that are not scientific changes: the pilot kernel embeds the
+  non-result-bearing smoke fixture by SHA-256 because the frozen input dataset
+  version 1 does not carry it; the pilot attaches that already remote-verified
+  dataset and so does not require a local copy to push; and both rerank jobs
+  name their shared upload manifest explicitly instead of deriving it from the
+  kernel job slug.
+- **Rationale:** A blocked backend must be preserved as evidence, not silently
+  replaced. Re-running the identical frozen shard on a GPU backend keeps the
+  protocol, prompt, model revision, decoding, context, batch, candidate order,
+  and estimand identical, so the pilot remains a valid single smallest
+  authorized result step.
+- **Affected files:** `versions/sem2act-v5/amendments/kaggle_reranker_pilot_v1.yaml`,
+  `versions/sem2act-v5/manifests/kaggle_reranker_runtime_lock.json` and its
+  freeze, `versions/sem2act-v5/manifests/moon_reranker_pilot_blocked.json`,
+  `versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py`,
+  `scripts/freeze_v5_kaggle_reranker_pilot.py`, `scripts/kaggle_compute.py`,
+  `tests/test_v5_kaggle_reranker_pilot.py`, and the operator documentation.
+- **Scientific interpretation changes:** No. The protocol hash remains
+  `2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022`. No
+  qrels were read or attached, and no result-bearing job was run by Codex.
+- **Approval/status:** User-authorized on 2026-09-29; implemented and
+  fixture-tested locally by Codex. Awaiting the operator's fresh preflight,
+  canary, and pilot run.
+- **Canonical record path and hash:**
+  `versions/sem2act-v5/amendments/kaggle_reranker_pilot_v1.yaml`, SHA-256
+  `9c90f8745721e5fe4bc06f93299ac37cff26f512af6eda7f4cb0c22b4c655fe8`; lock
+  `versions/sem2act-v5/manifests/kaggle_reranker_runtime_lock.json`, SHA-256
+  `6c144ac7d1e36ba2d68914466b054aab1dd9e73e52127411d0a652680a3db34c`.

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "record_id": "sem2act-v5-moon-reranker-pilot-blocked-001",
+  "status": "blocked-infrastructure-result-no-scientific-output",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "scientific_protocol_unchanged": true,
+  "stage": "reranker",
+  "shard_index": 0,
+  "backend": {
+    "provider": "tmu-moon",
+    "operator": "OpenCode",
+    "execution": "cpu-only",
+    "runtime_lock": "versions/sem2act-v5/manifests/moon_reranker_runtime_lock.json",
+    "runtime_lock_sha256": "cb88a5323ddec3520a3af6807e7e67015968d5da66072446cc11784caf771edb",
+    "runtime_freeze_sha256": "2cf5e8cecef3de68d0426cbff40158786850cd83d37f73ee82e7ad3e43d67bee"
+  },
+  "execution_sha": "3f8926ca841e9750de6e68e5e6b994a3b0faf287",
+  "output_root": "/home/r2barati/sem2act-v5/pilot-reranker-001",
+  "gates": {
+    "model_integrity": {
+      "result": "pass",
+      "detail": "exactly the 12 frozen snapshot files were staged; no README.md or .gitattributes",
+      "accepted_file_count": 12,
+      "model_snapshot_sha256": "5219a20fa423e1054c34b93a5a8c0ffa640ca52320181603be32d7afe26de353"
+    },
+    "thread_parity_4_vs_16": {
+      "result": "pass",
+      "detail": "all three fixed non-lockbox fixture documents matched at 4 and 16 threads with exact repeat equality and exact ranking equality",
+      "fixture": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+      "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+      "max_absolute_score_delta": 0.0,
+      "score_absolute_tolerance": 0.000001
+    },
+    "host_runtime_preflight": {
+      "result": "pass",
+      "detail": "Linux x86_64 host with 16 visible vCPUs, masked AVX2/AVX512F, 62.8 GiB RAM, and a writable NFS output path"
+    },
+    "input_and_query_hash_gate": {
+      "result": "pass",
+      "detail": "qrel-free input bundle matched the frozen version-1 SHA-256 manifest",
+      "files": {
+        "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+        "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+        "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+      }
+    },
+    "cpu_scoring_feasibility": {
+      "result": "fail",
+      "detail": "the first result-bearing query subprocess was killed by SIGXCPU (return code -24) under the observed host CPU-time accounting, so no query completed",
+      "failing_query_index": 0,
+      "failing_query_id": "v5-lb-q0001",
+      "failing_chunk": "chunks/query-0000",
+      "return_code": -24,
+      "signal": "SIGXCPU",
+      "child_wall_seconds": 43.926,
+      "estimated_cpu_seconds_per_pair_operator_measured": 8.99,
+      "estimated_scoring_cpu_seconds_per_query": 449.5,
+      "child_cpu_limit_soft_seconds": 540,
+      "child_cpu_limit_hard_seconds": 600,
+      "observed_host_cpu_limit_soft_seconds": 600,
+      "observed_host_cpu_limit_hard_seconds": 1200,
+      "total_elapsed_seconds": 90
+    }
+  },
+  "result_bearing_execution_started": true,
+  "accepted_queries": 0,
+  "accepted_pairs": 0,
+  "ranking_rows_emitted": 0,
+  "throughput_pairs_per_second": 0,
+  "concatenation_performed": false,
+  "qrels_read": false,
+  "scientific_output_accepted": false,
+  "admissibility": {
+    "usable_as_scientific_output": false,
+    "usable_as_infrastructure_evidence": true,
+    "reason": "the run produced zero completed query rankings, so it carries no retrieval evidence; it only establishes that a 0.6B cross-encoder cannot finish 50 pairs inside the Moon CPU-time accounting"
+  },
+  "consequence": "Moon is demoted from the critical path. The same frozen 20-query pilot is authorized on the Kaggle GPU backend; see versions/sem2act-v5/amendments/kaggle_reranker_pilot_v1.yaml and versions/sem2act-v5/manifests/kaggle_reranker_runtime_lock.json.",
+  "evidence_sha256": {
+    "failures.json": "c9cff837214dc53dca39babbe21c8cbad98b64c951780cafb1eeb19a5e1a219c",
+    "moon_preflight.json": "88edd015cfdc639b7282c894b4e700472f018b7024dfa71cef07cb47dcaa38c2",
+    "moon_reranker_canary.json": "a2bbc447811f6e91f24aae546fac6030952c6d0c59af28d2f08e690eda122411",
+    "pilot_authorization.json": "ddafa2bc082561171521601189abc56cecc86d4fc220515bb8a4c793b6eb6f73",
+    "pilot_manifest.json": "cc19668b5528975af8e1fa2b3e4c170857e1a0c1abc5cc2e59b4b40fa5a311d7",
+    "result_bearing_started.json": "5393017f66d003d62a9cdeb310496961e4b9886cbfaa6e207fe858a1047e7ab3",
+    "run_manifest.json": "8c575a8757aadff0eb884d3dab611f0be4912a4e9d91c36a29082aae668e482a",
+    "model_staging_manifest_reference": "ddde18b67b847b215fa4c52130772af0b8599a5261c8827b20b0b3efbdc620b4",
+    "pilot_shard_output": "29ebd5dcd9cd8c3473a25c9131323af3985b474e9458ef0318a2f2190badc901",
+    "chunk_started_marker": "a8a3fa42f2b04603fcb2024826ee7608b0d4d35813d9a96e2c04870ff05a77ca",
+    "chunk_stderr": "6442c2d8bb70efd1e54f5da98d56c8506252de592f471794e2e9c4dae45c3def",
+    "chunk_stdout_empty": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chunk_rankings_empty": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "earlier_attempt": {
+    "execution_sha": "6d97cd0fe11cc87cd38661ac3a3646ebb36b7599",
+    "outcome": "stopped-before-scoring",
+    "reason": "generic model staging added .gitattributes and README.md, so the frozen exact-snapshot validator correctly refused the directory"
+  }
+}

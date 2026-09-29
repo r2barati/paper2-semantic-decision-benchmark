@@ -200,7 +200,57 @@ python3 scripts/kaggle_compute.py v5-canary --fetch
 runtime manifest, and hashes to Codex. A passing canary does not authorize a
 Kaggle result stage in this handoff.
 
-Do not submit `v5-rerank`, Qwen, Llama, or Mistral in this handoff. The
+## 4a. Kaggle 20-query reranker pilot (`v5-rerank-pilot`)
+
+The Moon route is blocked and retained as evidence only; see
+`versions/sem2act-v5/manifests/moon_reranker_pilot_blocked.json`. Kaggle is
+therefore the authorized backend for the same unchanged 20-query / 1,000-candidate
+shard. Authorization is
+`versions/sem2act-v5/amendments/kaggle_reranker_pilot_v1.yaml`
+(SHA-256 `9c90f8745721e5fe4bc06f93299ac37cff26f512af6eda7f4cb0c22b4c655fe8`),
+locked by `kaggle_reranker_runtime_lock.json`
+(SHA-256 `6c144ac7d1e36ba2d68914466b054aab1dd9e73e52127411d0a652680a3db34c`).
+The protocol, prompt, model revision, dtype, 1,024-token context, batch 32,
+candidate order, and qrel exclusion are unchanged from the full kernel.
+
+The pilot kernel embeds the non-result-bearing smoke fixture by hash, because
+the frozen input dataset version 1 carries only `corpus.jsonl`, `queries.jsonl`,
+and `rerank_candidates.jsonl`. It attaches that already remote-verified dataset
+directly, so no local dataset copy is needed to push.
+
+Confirm the working tree and freeze first:
+
+```sh
+git status --porcelain          # must be empty
+git rev-parse HEAD              # must be the canonical execution SHA
+python3 scripts/freeze_v5_kaggle_reranker_pilot.py --check
+python3 -m pytest tests/test_v5_kaggle_reranker_pilot.py -q
+```
+
+Then run the pilot, in order. The push gate refuses without a fresh positive
+owner/quota preflight and a `canary-passed` record:
+
+```sh
+python3 scripts/kaggle_compute.py --preflight
+SEM2ACT_V5_QUOTA_CLI_CONFIRMED=1 python3 scripts/kaggle_compute.py v5-canary --push
+python3 scripts/kaggle_compute.py v5-canary --watch
+python3 scripts/kaggle_compute.py v5-canary --fetch
+SEM2ACT_V5_QUOTA_CLI_CONFIRMED=1 python3 scripts/kaggle_compute.py v5-rerank-pilot --push
+python3 scripts/kaggle_compute.py v5-rerank-pilot --watch
+python3 scripts/kaggle_compute.py v5-rerank-pilot --fetch
+```
+
+`--fetch` re-verifies provenance and writes
+`versions/sem2act-v5/runtime/kaggle_rerank_pilot/pilot_pending_acceptance.json`.
+It is pending, not accepted.
+
+**STOP after the pilot.** Do not run the full 240-query `v5-rerank` job. Return
+`rerank.trec`, `run_manifest.json`, `runtime_versions.json`, the pending record,
+and all SHA-256 hashes to Codex. The full job stays blocked until Codex writes
+`versions/sem2act-v5/manifests/kaggle_reranker_pilot_acceptance.json`; the gate
+fails with `v5-rerank is not authorized` until then.
+
+Do not submit Qwen, Llama, or Mistral in this handoff. The
 Qwen/Llama/Mistral consumer bundles do not exist yet. Kaggle consumer stages
 also require a later Codex handoff naming one exact remote dataset version and
 upload-manifest SHA.

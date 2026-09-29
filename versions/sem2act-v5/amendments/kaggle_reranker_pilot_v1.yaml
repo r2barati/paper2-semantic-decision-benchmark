@@ -1,0 +1,149 @@
+schema_version: 1
+amendment_id: sem2act-v5-kaggle-reranker-pilot-v1
+status: authorized-before-result-bearing-execution
+effective_utc: 2026-09-29T00:00:00Z
+parent_protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+scope: reranker-execution-only
+scientific_protocol_unchanged: true
+parent_backend_amendment: versions/sem2act-v5/amendments/kaggle_backend_v3.yaml
+reason_for_amendment: >-
+  The frozen Moon reranker pilot produced zero completed query rankings because
+  the 0.6B cross-encoder could not finish 50 pairs inside the observed Moon
+  CPU-time accounting; see
+  versions/sem2act-v5/manifests/moon_reranker_pilot_blocked.json. The already
+  defined Kaggle runtime policy under kaggle_backend_v3 is reused unchanged for
+  the reranker model, revision, dtype, context, batch, and device placement. The
+  only new decision is which backend executes the identical 20-query pilot and
+  which kernel script performs it. No prompt, model revision, scoring rule,
+  candidate order, query keyspace, decoding, coverage, or estimand changes.
+
+backend_routing:
+  previous_primary_reranker_backend: tmu-moon
+  new_primary_reranker_backend: kaggle
+  moon_status: demoted-from-critical-path
+  moon_evidence: versions/sem2act-v5/manifests/moon_reranker_pilot_blocked.json
+  moon_result_usable_as_scientific_output: false
+  reason: >-
+    The Moon run accepted 0 queries and 0 pairs. It is retained only as
+    infrastructure evidence that a CPU 0.6B reranker is not schedulable within
+    the host's CPU-time limit for this candidate depth.
+
+platform:
+  provider: kaggle
+  owner: rezabarati2
+  entitlement_observed: 2x-NvidiaTeslaT4
+  job_kind: private-script-kernel
+  machine: NvidiaTeslaT4
+  machine_shape_request: NvidiaTeslaT4
+  gpu_count: 2
+  visible_gpu_count: 1
+  secondary_gpu_policy: allocated-but-masked;not-used
+  device: cuda:0
+  internet: true
+  authentication: machine-credential-only
+  qrel_free_inputs_only: true
+
+runtime:
+  source: versions/sem2act-v5/amendments/kaggle_backend_v3.yaml
+  python: "3.12"
+  cuda: "12.8"
+  torch: "2.10.0+cu128"
+  transformers: "4.57.6"
+  torch_dtype: float16
+  cuda_required: true
+  cpu_offload: false
+  package_install_policy: exact-pins; preserve-image-torch-cuda-tuple
+  no_runtime_fallbacks: true
+  torch_dtype_and_attention: eager
+
+model:
+  model_id: Qwen/Qwen3-Reranker-0.6B
+  revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+  tokenizer_revision: e61197ed45024b0ed8a2d74b80b4d909f1255473
+  dtype: float16
+  quantization: none
+  device_map: {"": cuda:0}
+  attention_backend: eager
+  max_context_tokens: 1024
+  batch_size: 32
+  model_snapshot_reference: versions/sem2act-v5/manifests/cpu_reranker_canary.json
+  model_snapshot_file_count: 12
+  model_snapshot_files_sha256: 5219a20fa423e1054c34b93a5a8c0ffa640ca52320181603be32d7afe26de353
+  model_snapshot_policy: >-
+    The kernel downloads only the 12 manifest-authorized paths at the pinned
+    revision and requires the per-file and aggregate hashes to match the frozen
+    accepted snapshot. It never weakens the validator and never copies
+    README.md or .gitattributes into the scored model directory.
+
+instruction:
+  text: >-
+    Given an operational supply-chain information need, retrieve documents
+    relevant to the described entity, event, and time context.
+  source: versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py
+  unchanged_from_frozen_full_kernel: true
+  scoring_recipe: qwen3-reranker-yes-no-logit; identical to the frozen full kernel
+  template_prefix: '<|im_start|>system\nJudge whether the Document meets the requirements based on the Query and the Instruct provided. Note that the answer can only be "yes" or "no".<|im_end|>\n<|im_start|>user\n'
+  template_suffix: '<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+  tie_break: descending score then ascending doc_id
+
+input_bundle:
+  dataset: rezabarati2/sem2act-v5-rerank-inputs
+  version: 1
+  upload_manifest: versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json
+  protocol_hash: 2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022
+  files:
+    corpus.jsonl: 6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1
+    queries.jsonl: c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986
+    rerank_candidates.jsonl: 11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803
+
+pilot:
+  stage: reranker
+  shard_index: 0
+  queries: 20
+  query_id_first: v5-lb-q0001
+  query_id_last: v5-lb-q0020
+  candidate_depth: 50
+  expected_scores: 1000
+  execution_order: frozen_query_order_sequential
+  resume: one-shot-empty-output-only
+  stop_point: stop-after-pilot-000;return-provenance-to-codex
+  next_shard_requires_codex_handoff: true
+
+preflight:
+  quota_command: kaggle quota --format json
+  quota_requirement: GPU.remaining > 0
+  owner_requirement: authenticated account owns rezabarati2/sem2act-v5-rerank-inputs
+  cuda_canary: v5-canary
+  smoke_fixture: versions/sem2act-v5/fixtures/runtime_smoke_v1.json
+  smoke_fixture_is_lockbox_query: false
+  required_gates_in_order:
+    - authenticated_owner_match
+    - quota_preflight
+    - cuda_canary
+    - qrel_free_input_hash_check
+    - exact_base_runtime_check
+    - exact_12_file_model_snapshot_check
+    - non_lockbox_model_smoke
+  failure_policy: stop-before-any-lockbox-pair
+  oom_policy: no-parameter-reduction-and-no-fallback
+
+full_reranker_conditional_authorization:
+  status: not-authorized-until-pilot-accepted-by-codex
+  job: v5-rerank
+  scope_when_unlocked: all 240 queries at the same frozen 50-candidate depth
+  preconditions:
+    - pilot job v5-rerank-pilot fetched and verified with status pass
+    - Codex written acceptance record
+    - all other existing v5 gates still pass
+  explicit_prohibition: >-
+    This amendment does not authorize submitting v5-rerank. It only records
+    that a full 240-query run becomes eligible after Codex accepts the
+    20-query pilot. No full reranker, consumer stage, analysis, or qrel access
+    is authorized by this handoff.
+
+failure_policy: >-
+  Stop before scoring any lockbox pair if the SHA, worktree, owner, quota, CUDA
+  canary, base Torch/CUDA tuple, input hash, model snapshot, or non-lockbox
+  smoke check fails. Never alter the model, dtype, context length, batch size,
+  instruction, scoring rule, candidate set, candidate order, query keyspace, or
+  query count to recover. Never read or attach qrels.

@@ -95,6 +95,11 @@ V5_PROTOCOL_HASH = "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf
 V5_KAGGLE_LOCK = ROOT / "versions/sem2act-v5/manifests/kaggle_runtime_lock.json"
 V5_KAGGLE_FREEZE = ROOT / "versions/sem2act-v5/manifests/kaggle_runtime_freeze.json"
 V5_KAGGLE_PREFLIGHT = ROOT / "versions/sem2act-v5/manifests/kaggle_preflight.json"
+V5_PILOT_LOCK = ROOT / "versions/sem2act-v5/manifests/kaggle_reranker_runtime_lock.json"
+V5_PILOT_FREEZE = ROOT / "versions/sem2act-v5/manifests/kaggle_reranker_runtime_freeze.json"
+V5_PILOT_ACCEPTANCE = ROOT / "versions/sem2act-v5/manifests/kaggle_reranker_pilot_acceptance.json"
+V5_PILOT_KERNEL = ROOT / "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py"
+V5_PILOT_QUERY_IDS = tuple(f"v5-lb-q{index:04d}" for index in range(1, 21))
 
 JOBS = {
     "v5-canary": {
@@ -731,6 +736,27 @@ JOBS = {
         "dest_dir": "runs/reasoning_agentic_final",
         "verify": "reasoningfinal",
     },
+    "v5-rerank-pilot": {
+        "slug": "sem2act-v5-rerank-pilot",
+        "title": "Sem2act v5 rerank pilot",
+        "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py",
+        "gpu": True,
+        "machine_shape": "NvidiaTeslaT4",
+        "owner": V5_OWNER,
+        "internet": True,
+        "dataset_slug": "sem2act-v5-rerank-inputs",
+        "dataset_title": "Sem2act v5 rerank inputs",
+        "dataset_dir": "versions/sem2act-v5/runtime/kaggle_rerank_inputs",
+        # The pilot pushes against the already remote-verified input dataset
+        # v1, whose exact bytes are pinned in the upload manifest, so it does
+        # not require the gitignored local copy to be staged just to push.
+        "require_local_dataset_stage": False,
+        "upload_manifest": "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
+        "outputs": ["rerank.trec", "run_manifest.json", "runtime_versions.json"],
+        "dest_dir": "versions/sem2act-v5/runtime/kaggle_rerank_pilot",
+        "verify": "v5rerankpilot",
+        "install_run_manifest": True,
+    },
     "v5-rerank": {
         "slug": "sem2act-v5-rerank",
         "title": "Sem2act v5 rerank",
@@ -742,6 +768,10 @@ JOBS = {
         "dataset_slug": "sem2act-v5-rerank-inputs",
         "dataset_title": "Sem2act v5 rerank inputs",
         "dataset_dir": "versions/sem2act-v5/runtime/kaggle_rerank_inputs",
+        # Same already remote-verified dataset as the pilot; the local copy is
+        # only needed to (re)upload, not to push a kernel against it.
+        "require_local_dataset_stage": False,
+        "upload_manifest": "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
         "outputs": ["rerank.trec", "run_manifest.json", "runtime_versions.json"],
         "dest_dir": "versions/sem2act-v5/runtime/retrieval_bundle",
         "verify": "v5rerank",
@@ -860,6 +890,11 @@ def _upload_blob(client, path):
 
 
 def _v5_upload_manifest_path(job):
+    # Several jobs share one uploaded dataset, so the verified manifest may be
+    # named explicitly instead of being derived from the job slug.
+    explicit = job.get("upload_manifest")
+    if explicit:
+        return ROOT / explicit
     return ROOT / "versions/sem2act-v5/manifests/upload" / f"{job['slug']}-inputs.json"
 
 
@@ -895,10 +930,19 @@ def _require_v5_dataset_verified(job):
     expected_dataset = f"{_job_owner(job)}/{job['dataset_slug']}"
     if manifest.get("dataset") != expected_dataset:
         raise SystemExit("Kaggle dataset owner drift")
-    files = _stage_files(job)
-    expected = {path.name: _sha(path) for path in files}
-    if manifest.get("files") != expected:
-        raise SystemExit("Kaggle dataset local file manifest drift")
+    # The remote-verified manifest pins the exact dataset bytes, so a job may
+    # rely on it alone. Jobs that also (re)stage the dataset locally (upload
+    # path, or an operator-managed local copy) keep the stricter check that
+    # the local files match the pinned remote hashes.
+    if job.get("require_local_dataset_stage", True):
+        files = _stage_files(job)
+        expected = {path.name: _sha(path) for path in files}
+        if manifest.get("files") != expected:
+            raise SystemExit("Kaggle dataset local file manifest drift")
+    else:
+        expected = manifest.get("files")
+        if not isinstance(expected, dict) or not expected:
+            raise SystemExit("Kaggle dataset manifest does not pin any file hashes")
     if manifest.get("remote_file_list_match") is not True or manifest.get("remote_hash_match") is not True:
         raise SystemExit("Kaggle dataset remote file/hash verification failed")
     if manifest.get("remote_sha256") != expected:
@@ -1113,7 +1157,7 @@ def cmd_fetch(job):
         if not (dest / name).exists():
             raise SystemExit(f"missing expected output {name} in kernel outputs")
     verifier = {"v5canary": _verify_v5_canary, "v5rerank": _verify_v5_rerank, "v5qwen": _verify_v5_qwen,
-     "v5consumer": _verify_v5_consumer,
+                "v5rerankpilot": _verify_v5_rerank_pilot, "v5consumer": _verify_v5_consumer,
      "rerank": _verify_rerank, "encode2b": _verify_encode2b,
      "refine": _verify_refine, "runsmain": _verify_runsmain,
      "probe": _verify_probe, "awqbeliefs": _verify_awqbeliefs,
@@ -1159,6 +1203,26 @@ def cmd_fetch(job):
             "canary_fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         })
         V5_KAGGLE_PREFLIGHT.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+    if job.get("verify") == "v5rerankpilot":
+        # A verified pilot is only a candidate for acceptance.  Codex writes the
+        # acceptance record; until then the full reranker stays locked.
+        pending = ROOT / job["dest_dir"] / "pilot_pending_acceptance.json"
+        pending.write_text(json.dumps({
+            "schema_version": 1,
+            "status": "verified-awaiting-codex-acceptance",
+            "job": job["slug"],
+            "protocol_hash": V5_PROTOCOL_HASH,
+            "runtime_lock_sha256": _sha(V5_PILOT_LOCK),
+            "runtime_freeze_sha256": _sha(V5_PILOT_FREEZE),
+            "rerank_trec_sha256": _sha(ROOT / job["dest_dir"] / "rerank.trec"),
+            "n_queries": verification["n_queries"],
+            "n_scores": verification["n_scores"],
+            "n_fail": verification["n_fail"],
+            "fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "full_reranker_authorized": False,
+            "next_action": "Codex reviews the pilot evidence and, if acceptable, writes "
+                           f"{V5_PILOT_ACCEPTANCE.relative_to(ROOT)}",
+        }, indent=2, sort_keys=True) + "\n")
 
 
 def _verify_v5_canary(dest, job):
@@ -1197,6 +1261,52 @@ def _read_v5_preflight():
     return record
 
 
+def _require_v5_pilot_freeze():
+    if not V5_PILOT_LOCK.is_file() or not V5_PILOT_FREEZE.is_file():
+        raise SystemExit("Kaggle reranker pilot lock/freeze is missing")
+    freeze = json.loads(V5_PILOT_FREEZE.read_text())
+    if freeze.get("protocol_hash") != V5_PROTOCOL_HASH:
+        raise SystemExit("Kaggle reranker pilot freeze protocol hash drift")
+    if freeze.get("lock_sha256") != _sha(V5_PILOT_LOCK):
+        raise SystemExit("Kaggle reranker pilot lock hash does not match its freeze")
+    if freeze.get("pilot_kernel_sha256") != _sha(V5_PILOT_KERNEL):
+        raise SystemExit("Kaggle reranker pilot kernel changed after the freeze")
+    if freeze.get("authorized_pilot_queries") != 20 or freeze.get("authorized_pilot_scores") != 1000:
+        raise SystemExit("Kaggle reranker pilot freeze does not authorize exactly 20 queries / 1,000 scores")
+    if freeze.get("full_reranker_authorized") is not False:
+        raise SystemExit("Kaggle reranker pilot freeze must not authorize the full reranker")
+    return freeze
+
+
+def _require_v5_full_reranker_acceptance(job_name):
+    """The full 240-query reranker stays locked until Codex accepts the pilot."""
+    if job_name != "v5-rerank":
+        return
+    if not V5_PILOT_ACCEPTANCE.is_file():
+        raise SystemExit(
+            "v5-rerank is not authorized: Codex acceptance of the 20-query Kaggle pilot is required"
+        )
+    acceptance = json.loads(V5_PILOT_ACCEPTANCE.read_text())
+    if acceptance.get("status") != "accepted":
+        raise SystemExit("Kaggle reranker pilot acceptance record is not accepted")
+    if acceptance.get("protocol_hash") != V5_PROTOCOL_HASH:
+        raise SystemExit("Kaggle reranker pilot acceptance protocol hash drift")
+    if acceptance.get("job") != JOBS["v5-rerank-pilot"]["slug"]:
+        raise SystemExit("Kaggle reranker pilot acceptance names the wrong job")
+    freeze = _require_v5_pilot_freeze()
+    if acceptance.get("lock_id") != freeze.get("lock_id"):
+        raise SystemExit("Kaggle reranker pilot acceptance names a different lock")
+    if acceptance.get("runtime_lock_sha256") != _sha(V5_PILOT_LOCK):
+        raise SystemExit("Kaggle reranker pilot acceptance lock hash drift")
+    if acceptance.get("runtime_freeze_sha256") != _sha(V5_PILOT_FREEZE):
+        raise SystemExit("Kaggle reranker pilot acceptance freeze hash drift")
+    if acceptance.get("rerank_trec_sha256") != _sha(
+            ROOT / JOBS["v5-rerank-pilot"]["dest_dir"] / "rerank.trec"):
+        raise SystemExit("accepted pilot rerank.trec is missing or has drifted since acceptance")
+    if acceptance.get("n_queries") != 20 or acceptance.get("n_scores") != 1000:
+        raise SystemExit("accepted pilot coverage drift")
+
+
 def _require_v5_kaggle_submission_gate(job_name):
     if os.environ.get("SEM2ACT_V5_QUOTA_CLI_CONFIRMED") != "1":
         raise SystemExit("set SEM2ACT_V5_QUOTA_CLI_CONFIRMED=1 only after quota preflight passes")
@@ -1208,6 +1318,9 @@ def _require_v5_kaggle_submission_gate(job_name):
         raise SystemExit("Kaggle GPU quota is not positive")
     if job_name != "v5-canary":
         _require_v5_dataset_verified(JOBS[job_name])
+    if job_name in {"v5-rerank-pilot", "v5-rerank"}:
+        _require_v5_pilot_freeze()
+        _require_v5_full_reranker_acceptance(job_name)
 
 
 def _kaggle_cli_path():
@@ -1303,6 +1416,84 @@ def cmd_v5_preflight():
     if remaining <= 0:
         raise SystemExit("Kaggle GPU quota is zero")
 
+
+
+def _verify_v5_rerank_pilot(dest, job):
+    """Accept the 20-query / 1,000-score pilot only against the frozen pilot lock."""
+    manifest = json.loads((dest / "run_manifest.json").read_text())
+    if manifest.get("experiment_id") != "v5-reranker-pilot":
+        raise SystemExit("wrong v5 reranker pilot experiment id")
+    if manifest.get("status") != "pass" or manifest.get("qrels_read") is not False:
+        raise SystemExit("v5 reranker pilot failure/qrel gate failed")
+    if manifest.get("protocol_hash") != V5_PROTOCOL_HASH:
+        raise SystemExit("v5 reranker pilot protocol hash drift")
+    if manifest.get("amendment_id") != "sem2act-v5-kaggle-reranker-pilot-v1":
+        raise SystemExit("v5 reranker pilot amendment drift")
+    if manifest.get("lock_id") != "sem2act-v5-kaggle-reranker-pilot-v1":
+        raise SystemExit("v5 reranker pilot lock id drift")
+    if manifest.get("runtime_lock_sha256") != _sha(V5_PILOT_LOCK):
+        raise SystemExit("v5 reranker pilot runtime lock hash drift")
+    if manifest.get("parent_runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
+        raise SystemExit("v5 reranker pilot parent runtime lock hash drift")
+    if manifest.get("model") != "Qwen/Qwen3-Reranker-0.6B":
+        raise SystemExit("v5 reranker pilot model drift")
+    if manifest.get("revision") != "e61197ed45024b0ed8a2d74b80b4d909f1255473":
+        raise SystemExit("v5 reranker pilot model revision drift")
+    if manifest.get("dtype") != "float16" or manifest.get("attention_backend") != "eager":
+        raise SystemExit("v5 reranker pilot dtype/attention drift")
+    if manifest.get("candidate_depth") != 50 or manifest.get("batch_size") != 32:
+        raise SystemExit("v5 reranker pilot candidate depth or batch size drift")
+    if manifest.get("max_context_tokens") != 1024:
+        raise SystemExit("v5 reranker pilot max context drift")
+    lock = json.loads(V5_PILOT_LOCK.read_text())
+    if manifest.get("instruction_sha256") != lock["scoring"]["instruction_sha256"]:
+        raise SystemExit("v5 reranker pilot instruction hash drift")
+    snapshot = manifest.get("model_snapshot", {})
+    if snapshot.get("file_count") != 12:
+        raise SystemExit("v5 reranker pilot model snapshot file count drift")
+    if snapshot.get("files_sha256") != lock["model"]["snapshot_files_sha256"]:
+        raise SystemExit("v5 reranker pilot model snapshot aggregate drift")
+    smoke = manifest.get("smoke", {})
+    if smoke.get("status") != "pass" or smoke.get("fixture_sha256") != _sha(
+            ROOT / "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"):
+        raise SystemExit("v5 reranker pilot smoke gate failed")
+    upload = json.loads((ROOT / "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json").read_text())
+    inputs = {name: value for name, value in manifest.get("input_sha256", {}).items()
+              if name != "runtime_smoke_v1.json"}
+    if inputs != upload["remote_sha256"]:
+        raise SystemExit("v5 reranker pilot input hash gate failed")
+    if manifest.get("n_fail") != 0:
+        raise SystemExit("v5 reranker pilot reported kernel-side failures")
+    if tuple(manifest.get("query_ids", ())) != V5_PILOT_QUERY_IDS:
+        raise SystemExit("v5 reranker pilot query keyspace drift")
+    if (manifest.get("n_queries") != 20 or manifest.get("n_scores") != 1000
+            or manifest.get("n_ranking_rows") != 1000):
+        raise SystemExit("v5 reranker pilot coverage gate failed")
+    if manifest.get("rerank_trec_sha256") != _sha(dest / "rerank.trec"):
+        raise SystemExit("v5 reranker pilot trec hash drift")
+    rows = {}
+    with (dest / "rerank.trec").open() as handle:
+        for line in handle:
+            parts = line.split()
+            if len(parts) != 6 or parts[1] != "Q0" or parts[5] != "v5-rerank-pilot":
+                raise SystemExit("v5 reranker pilot trec schema drift")
+            rows.setdefault(parts[0], []).append((int(parts[3]), parts[2]))
+    if set(rows) != set(V5_PILOT_QUERY_IDS):
+        raise SystemExit("v5 reranker pilot query coverage failed")
+    upload_candidates = {
+        row["query_id"]: row["doc_ids"] for row in
+        (json.loads(line) for line in (ROOT / job["dataset_dir"] / "rerank_candidates.jsonl")
+         .read_text().splitlines() if line.strip())
+    } if (ROOT / job["dataset_dir"] / "rerank_candidates.jsonl").is_file() else None
+    for qid, ranking in rows.items():
+        if len(ranking) != 50 or [rank for rank, _ in ranking] != list(range(1, 51)):
+            raise SystemExit("v5 reranker pilot ranking depth or order failed")
+        if len({did for _, did in ranking}) != 50:
+            raise SystemExit("v5 reranker pilot ranking contains duplicate doc ids")
+        if upload_candidates is not None and set(did for _, did in ranking) != set(upload_candidates.get(qid, [])):
+            raise SystemExit("v5 reranker pilot ranking is not a permutation of the frozen candidates")
+    return {"status": "pass", "n_queries": 20, "n_scores": 1000, "n_fail": 0,
+            "n_accepted_queries": 20, "full_reranker_authorized": False}
 
 
 def _verify_v5_rerank(dest, job):

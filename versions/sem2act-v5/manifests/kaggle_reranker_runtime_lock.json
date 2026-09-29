@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "lock_id": "sem2act-v5-kaggle-reranker-pilot-v1",
+  "status": "authorized-before-result-bearing-execution",
+  "amendment": "versions/sem2act-v5/amendments/kaggle_reranker_pilot_v1.yaml",
+  "parent_lock": "versions/sem2act-v5/manifests/kaggle_runtime_lock.json",
+  "parent_lock_id": "sem2act-v5-kaggle-runtime-v3",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "backend_routing": {
+    "primary_reranker_backend": "kaggle",
+    "demoted_backend": "tmu-moon",
+    "demotion_evidence": "versions/sem2act-v5/manifests/moon_reranker_pilot_blocked.json",
+    "inherits_runtime_policy_from": "sem2act-v5-kaggle-runtime-v3",
+    "runtime_parameters_changed": false
+  },
+  "platform": {
+    "provider": "kaggle",
+    "owner": "rezabarati2",
+    "entitlement_observed": "2x-NvidiaTeslaT4",
+    "machine": "NvidiaTeslaT4",
+    "machine_shape_request": "NvidiaTeslaT4",
+    "gpu_count": 2,
+    "visible_gpu_count": 1,
+    "secondary_gpu_policy": "allocated-but-masked;not-used",
+    "device": "cuda:0",
+    "internet": true,
+    "authentication": "machine-credential-only",
+    "qrel_free_inputs_only": true
+  },
+  "runtime": {
+    "python": "3.12",
+    "cuda": "12.8",
+    "torch": "2.10.0+cu128",
+    "transformers": "4.57.6",
+    "torch_dtype": "float16",
+    "cuda_required": true,
+    "cpu_offload": false,
+    "package_install_policy": "exact-pins-preserve-image-torch-cuda-tuple",
+    "no_runtime_fallbacks": true
+  },
+  "model": {
+    "model_id": "Qwen/Qwen3-Reranker-0.6B",
+    "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "tokenizer_revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "backend": "transformers",
+    "dtype": "float16",
+    "quantization": {"method": "none"},
+    "device_map": {"": "cuda:0"},
+    "attention_backend": "eager",
+    "max_context_tokens": 1024,
+    "batch_size": 32,
+    "snapshot_reference": "versions/sem2act-v5/manifests/cpu_reranker_canary.json",
+    "snapshot_file_count": 12,
+    "snapshot_files_sha256": "5219a20fa423e1054c34b93a5a8c0ffa640ca52320181603be32d7afe26de353"
+  },
+  "scoring": {
+    "instruction_source": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py",
+    "instruction_sha256": "27878869801ce25ce6722edf80f57169fc72ee528863f82e9a4a942e755f0ea0",
+    "recipe": "qwen3-reranker-yes-no-logit",
+    "template_prefix": "<|im_start|>system\nJudge whether the Document meets the requirements based on the Query and the Instruct provided. Note that the answer can only be \"yes\" or \"no\".<|im_end|>\n<|im_start|>user\n",
+    "template_suffix": "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+    "yes_token": "yes",
+    "no_token": "no",
+    "softmax": "log_softmax_over_[no,yes]; return yes-probability",
+    "tie_break": "descending score then ascending doc_id",
+    "candidate_order": "frozen input order; no reordering before scoring"
+  },
+  "inputs": {
+    "dataset": "rezabarati2/sem2act-v5-rerank-inputs",
+    "version": 1,
+    "upload_manifest": "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
+    "files": {
+      "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+      "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+      "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+    }
+  },
+  "pilot": {
+    "stage": "reranker",
+    "shard_index": 0,
+    "queries": 20,
+    "query_ids": [
+      "v5-lb-q0001", "v5-lb-q0002", "v5-lb-q0003", "v5-lb-q0004", "v5-lb-q0005",
+      "v5-lb-q0006", "v5-lb-q0007", "v5-lb-q0008", "v5-lb-q0009", "v5-lb-q0010",
+      "v5-lb-q0011", "v5-lb-q0012", "v5-lb-q0013", "v5-lb-q0014", "v5-lb-q0015",
+      "v5-lb-q0016", "v5-lb-q0017", "v5-lb-q0018", "v5-lb-q0019", "v5-lb-q0020"
+    ],
+    "candidate_depth": 50,
+    "expected_scores": 1000,
+    "expected_ranking_rows": 1000,
+    "execution_order": "frozen_query_order_sequential",
+    "resume_policy": "one-shot-empty-output-only",
+    "stop_point": "stop-after-pilot-000"
+  },
+  "preflight": {
+    "quota_command": "kaggle quota --format json",
+    "quota_requirement": "GPU.remaining > 0",
+    "owner_requirement": "authenticated account owns rezabarati2/sem2act-v5-rerank-inputs",
+    "cuda_canary_job": "v5-canary",
+    "smoke_fixture": "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+    "smoke_fixture_is_lockbox_query": false,
+    "gate_order": [
+      "authenticated_owner_match",
+      "quota_preflight",
+      "cuda_canary",
+      "qrel_free_input_hash_check",
+      "exact_base_runtime_check",
+      "exact_12_file_model_snapshot_check",
+      "non_lockbox_model_smoke"
+    ],
+    "failure_policy": "stop-before-any-lockbox-pair"
+  },
+  "full_reranker_conditional_authorization": {
+    "status": "not-authorized-until-pilot-accepted-by-codex",
+    "job": "v5-rerank",
+    "scope_when_unlocked": "all 240 queries at the same frozen 50-candidate depth",
+    "preconditions": [
+      "pilot job v5-rerank-pilot fetched and verified with status pass",
+      "Codex written acceptance record at versions/sem2act-v5/manifests/kaggle_reranker_pilot_acceptance.json",
+      "all existing v5 owner, quota, canary, runtime, and dataset gates still pass"
+    ]
+  },
+  "source_contract": [
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_canary.py",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank.py",
+    "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_rerank_pilot.py",
+    "versions/sem2act-v5/manifests/moon_reranker_pilot_blocked.json",
+    "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
+    "versions/sem2act-v5/manifests/cpu_reranker_canary.json",
+    "versions/sem2act-v5/manifests/upload/v5-rerank-inputs.json",
+    "scripts/kaggle_compute.py",
+    "scripts/freeze_v5_kaggle_reranker_pilot.py"
+  ],
+  "failure_policy": "Any owner, quota, canary, runtime, input-hash, model-snapshot, smoke, coverage, or schema failure stops before result-bearing execution. No runtime, model, dtype, context, batch, instruction, candidate, or query-coverage substitution is allowed. Qrels are never read or attached."
+}

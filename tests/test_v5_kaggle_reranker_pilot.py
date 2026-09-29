@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import os
 import unittest
 from pathlib import Path
 
@@ -366,6 +367,87 @@ class tempfile_lock:
         freeze.LOCK = self.original
         self.directory.cleanup()
         return False
+
+
+class ModelCredentialPolicyTests(unittest.TestCase):
+    """The pilot must not hard-fail on an ungated pin when the secrets
+    backend is unreachable; it must still hard-fail for a gated model."""
+
+    def _kernel(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "p2_v5_rerank_pilot_under_test", ROOT / KERNEL_REL
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def _with_fake_secrets(self, behaviour):
+        import sys
+        import types
+
+        class FakeClient:
+            def get_secret(self, key):
+                if isinstance(behaviour, BaseException):
+                    raise behaviour
+                if behaviour is None:
+                    return ""
+                return behaviour
+
+        sys.modules["kaggle_secrets"] = types.SimpleNamespace(UserSecretsClient=FakeClient)
+        self.addCleanup(sys.modules.pop, "kaggle_secrets", None)
+        return FakeClient
+
+    def test_transport_failure_falls_back_to_anonymous_for_ungated_pin(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(ConnectionError("secrets backend unreachable"))
+        saved = os.environ.pop("HF_TOKEN", None)
+        self.addCleanup(lambda: os.environ.__setitem__("HF_TOKEN", saved) if saved else None)
+        self.assertEqual(kernel.resolve_model_token(), "public_unauthenticated")
+        self.assertNotIn("HF_TOKEN", os.environ)
+
+    def test_readable_secret_is_used_and_recorded(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets("hf_example_token")
+        self.addCleanup(os.environ.pop, "HF_TOKEN", None)
+        self.assertEqual(kernel.resolve_model_token(), "kaggle_secret")
+        self.assertEqual(os.environ["HF_TOKEN"], "hf_example_token")
+
+    def test_empty_secret_falls_back_to_anonymous(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(None)
+        saved = os.environ.pop("HF_TOKEN", None)
+        self.addCleanup(lambda: os.environ.__setitem__("HF_TOKEN", saved) if saved else None)
+        self.assertEqual(kernel.resolve_model_token(), "public_unauthenticated")
+
+    def test_gated_model_still_hard_fails_on_transport_failure(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(ConnectionError("secrets backend unreachable"))
+        original = kernel.MODEL_ID
+        kernel.MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
+        self.addCleanup(setattr, kernel, "MODEL_ID", original)
+        with self.assertRaises(SystemExit) as caught:
+            kernel.resolve_model_token()
+        self.assertIn("ConnectionError", str(caught.exception))
+
+    def test_gated_model_still_hard_fails_on_empty_secret(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(None)
+        original = kernel.MODEL_ID
+        kernel.MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
+        self.addCleanup(setattr, kernel, "MODEL_ID", original)
+        with self.assertRaises(SystemExit):
+            kernel.resolve_model_token()
+
+    def test_kernel_uses_the_ungated_policy_not_the_old_hard_fail(self) -> None:
+        source = (ROOT / KERNEL_REL).read_text()
+        self.assertNotIn("require_hf_secret", source)
+        self.assertIn("resolve_model_token", source)
+
+    def test_manifest_records_the_credential_source(self) -> None:
+        source = (ROOT / KERNEL_REL).read_text()
+        self.assertIn('"credential_source": credential_source', source)
 
 
 if __name__ == "__main__":

@@ -109,16 +109,30 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def require_hf_secret() -> None:
+def resolve_model_token() -> str:
+    """Use the Kaggle secret when it is readable; ungated pins may load anonymously.
+
+    Mirrors the CPU canary policy. A transport-level failure from the secrets
+    backend must not hard-fail an ungated pin, but must still hard-fail a gated
+    one so a gated model is never silently fetched without credentials.
+    """
+    gated = MODEL_ID.startswith("meta-llama/")
     try:
         from kaggle_secrets import UserSecretsClient
 
         token = UserSecretsClient().get_secret("HF_TOKEN")
     except Exception as exc:
-        raise SystemExit(f"HF_TOKEN Kaggle secret is unavailable: {type(exc).__name__}") from exc
+        if gated:
+            raise SystemExit(f"HF_TOKEN Kaggle secret unavailable: {type(exc).__name__}") from exc
+        os.environ.pop("HF_TOKEN", None)
+        return "public_unauthenticated"
     if not token:
-        raise SystemExit("HF_TOKEN Kaggle secret is empty")
+        if gated:
+            raise SystemExit("HF_TOKEN Kaggle secret is empty")
+        os.environ.pop("HF_TOKEN", None)
+        return "public_unauthenticated"
     os.environ["HF_TOKEN"] = token
+    return "kaggle_secret"
 
 
 def install_runtime_pins() -> None:
@@ -292,7 +306,7 @@ def main() -> int:
         raise SystemExit("frozen reranker instruction drift")
     input_names = assert_no_qrels()
     device = require_single_t4()
-    require_hf_secret()
+    credential_source = resolve_model_token()
     install_runtime_pins()
 
     import torch
@@ -406,6 +420,7 @@ def main() -> int:
         "parent_runtime_lock_sha256": PARENT_LOCK_SHA256,
         "model": MODEL_ID,
         "revision": REVISION,
+        "credential_source": credential_source,
         "model_snapshot": snapshot,
         "dtype": DTYPE,
         "attention_backend": "eager",

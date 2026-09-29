@@ -1,12 +1,31 @@
 {
-  "schema_version": 1,
-  "status": "fresh-preflight-required",
-  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "canary_fetched_utc": "2026-09-29T20:46:23Z",
+  "canary_job": "sem2act-v5-canary",
+  "canary_output_sha256": "551e6c8a484dc30ae23862d1a160ecc28646b369d9dc5e68e3344a05b911772a",
+  "canary_verification": {
+    "cuda": "12.8",
+    "device": "Tesla T4",
+    "status": "pass",
+    "torch": "2.10.0+cu128"
+  },
+  "checked_utc": "2026-09-29T20:43:51Z",
+  "gpu": {
+    "refreshAt": "2026-10-03T00:00:00",
+    "remaining": "29.99h",
+    "resource": "GPU",
+    "total": "30.00h",
+    "used": "0.01h"
+  },
+  "gpu_remaining_hours": 29.99,
+  "identity_probe": "kaggle datasets list --mine --search sem2act-v5-rerank-inputs --format json",
+  "owned_input_dataset": "rezabarati2/sem2act-v5-rerank-inputs",
   "owner": "rezabarati2",
-  "owner_verified": false,
-  "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+  "owner_verified": true,
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "quota_cli": "/private/tmp/kaggle-cli-v2/bin/kaggle",
+  "quota_command": "kaggle quota --format json",
   "runtime_freeze_sha256": "80b3a6b9f77807be41cdf22edf5b5fa1f22a212009fff4392fabcb1655005832",
-  "gpu_remaining_hours": null,
-  "result_bearing_execution_started": false,
-  "historical_quota_record": "versions/sem2act-v5/manifests/kaggle_preflight_v2_historical.json"
+  "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+  "schema_version": 1,
+  "status": "canary-passed"
 }

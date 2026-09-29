@@ -36,6 +36,8 @@ def main() -> int:
     parser.add_argument("--corpus", type=Path, required=True)
     parser.add_argument("--candidates", type=Path, required=True)
     parser.add_argument("--queries-per-shard", type=int, default=20)
+    parser.add_argument("--resume-policy", choices=("missing-key-only", "one-shot-empty-output-only"),
+                        default="missing-key-only")
     parser.add_argument("--output-root", type=Path, default=OUT_ROOT)
     args = parser.parse_args()
     queries = [json.loads(line) for line in args.queries.read_text().splitlines() if line.strip()]
@@ -72,7 +74,7 @@ def main() -> int:
             "queries_sha256": sha(args.queries),
             "corpus_sha256": sha(args.corpus),
             "candidates_sha256": sha(args.candidates),
-            "resume_policy": "missing-key-only",
+            "resume_policy": args.resume_policy,
         }
         path = args.output_root / f"shard-{index:03d}.json"
         path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

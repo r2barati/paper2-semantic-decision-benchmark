@@ -61,12 +61,25 @@
     "queries": 20,
     "candidate_depth": 50,
     "expected_scores": 1000,
-    "resume_policy": "missing-key-only"
+    "resume_policy": "one-shot-empty-output-only",
+    "subprocess_policy": {
+      "queries_per_subprocess": 1,
+      "subprocesses": 20,
+      "observed_host_cpu_limit_soft_seconds": 600,
+      "observed_host_cpu_limit_hard_seconds": 1200,
+      "child_cpu_limit_soft_seconds": 540,
+      "child_cpu_limit_hard_seconds": 600,
+      "operator_measured_cpu_seconds_per_pair": 8.99,
+      "estimated_scoring_cpu_seconds_per_query": 449.5,
+      "execution_order": "sequential frozen query order",
+      "query_boundary": "complete query with all 50 frozen candidates"
+    }
   },
   "source_contract": [
     "versions/sem2act-v5/compute/cpu/contract.py",
     "scripts/run_v5_cpu_rerank_shard.py",
     "scripts/run_v5_moon_reranker_pilot.py",
+    "scripts/stage_v5_moon_reranker_model.py",
     "scripts/plan_v5_cpu_rerank_shards.py",
     "versions/sem2act-v5/fixtures/runtime_smoke_v1.json",
     "versions/sem2act-v5/manifests/cpu_reranker_canary.json",

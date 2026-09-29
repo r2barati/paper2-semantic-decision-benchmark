@@ -67,10 +67,48 @@ pilot:
   queries: 20
   candidate_depth: 50
   expected_scores: 1000
-  resume: missing-key-only
+  resume: one-shot-empty-output-only
   next_shard_requires_codex_handoff: true
 
 failure_policy: >-
   Stop before scoring any lockbox pair if SHA/worktree, host profile, runtime,
   input hashes, model snapshot, thread parity, disk, NFS, or qrel-free checks
   fail. Never alter model, scoring, or query coverage to recover.
+
+execution_correction_2026_09_29:
+  status: approved-for-implementation-by-user
+  scope: staging-and-process-scheduling-only
+  scientific_protocol_unchanged: true
+  model_amendment: false
+  reason: >-
+    The accepted snapshot validator requires the exact 12-file manifest while
+    the prior Hugging Face download command also staged .gitattributes and
+    README.md. The observed Moon RLIMIT_CPU of 600 soft / 1200 hard seconds
+    also cannot support one 1000-pair process at the operator-measured 8.99
+    CPU seconds per pair. Stage only the manifest-authorized paths and invoke
+    the existing scorer in sequential, complete-query subprocesses.
+  model_staging:
+    source_of_allowlist: versions/sem2act-v5/manifests/cpu_reranker_canary.json
+    allow_only_manifest_files: true
+    accepted_file_count: 12
+    accepted_hashes_changed: false
+    extras_including_readme_and_gitattributes: excluded
+    snapshot_validator_relaxed: false
+  moon_process_policy:
+    query_count_per_process: 1
+    candidate_count_per_process: 50
+    subprocess_count: 20
+    resume_policy: one-shot-empty-output-only
+    order: frozen_query_order_sequential
+    child_cpu_limit_soft_seconds: 540
+    child_cpu_limit_hard_seconds: 600
+    expected_scoring_cpu_seconds_per_query: 449.5
+    same_model_scoring_threads_candidate_order_and_numerical_settings: true
+    4_vs_16_parity_gate_remains_required: true
+  provenance:
+    blocked_preflight_manifest: pilot_blocked.json
+    all_subprocess_commands_and_logs_hashed: true
+    final_pair_and_query_coverage_verified: true
+  approval:
+    source: user_instruction_2026_09_29
+    execution: Codex_commit_required_before_OpenCode_rerun

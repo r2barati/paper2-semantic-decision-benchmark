@@ -7,10 +7,12 @@ import hashlib
 import json
 import os
 import platform
+import resource
 import shutil
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,6 +25,11 @@ MODEL_REFERENCE_REL = Path("versions/sem2act-v5/manifests/cpu_reranker_canary.js
 FIXTURE_REL = Path("versions/sem2act-v5/fixtures/runtime_smoke_v1.json")
 MODEL_ID = "Qwen/Qwen3-Reranker-0.6B"
 MODEL_REVISION = "e61197ed45024b0ed8a2d74b80b4d909f1255473"
+QUERY_CHUNK_SIZE = 1
+CHILD_CPU_SOFT_SECONDS = 540
+CHILD_CPU_HARD_SECONDS = 600
+ESTIMATED_CPU_SECONDS_PER_PAIR = 8.99
+PILOT_CANDIDATE_DEPTH = 50
 INSTRUCTION = (
     "Given an operational supply-chain information need, retrieve documents "
     "relevant to the described entity, event, and time context."
@@ -59,9 +66,9 @@ def require_checkout(expected_sha: str) -> str:
         ["git", "status", "--porcelain", "-uall"], cwd=ROOT, text=True
     )
     if head != expected_sha:
-        raise SystemExit(f"checkout SHA mismatch: expected {expected_sha}, got {head}")
+        raise RuntimeError(f"checkout SHA mismatch: expected {expected_sha}, got {head}")
     if status:
-        raise SystemExit("checkout is dirty; refusing Moon pilot")
+        raise RuntimeError("checkout is dirty; refusing Moon pilot")
     return subprocess.check_output(["git", "branch", "--show-current"], cwd=ROOT, text=True).strip()
 
 
@@ -141,13 +148,22 @@ def validate_inputs(input_root: Path) -> dict:
     if qids != {f"v5-lb-q{i:04d}" for i in range(1, 241)}:
         raise RuntimeError("reranker query keyspace differs from the frozen lockbox")
     candidate_map = {row.get("query_id"): row.get("doc_ids", []) for row in candidates}
-    if set(candidate_map) != qids or any(len(ids) != 50 for ids in candidate_map.values()):
+    if (set(candidate_map) != qids
+            or any(len(ids) != PILOT_CANDIDATE_DEPTH
+                   or len(set(ids)) != PILOT_CANDIDATE_DEPTH
+                   for ids in candidate_map.values())):
         raise RuntimeError("reranker candidate coverage/depth differs from the frozen protocol")
+    corpus_ids = {
+        json.loads(line)["_id"]
+        for line in (input_root / "corpus.jsonl").read_text().splitlines() if line
+    }
+    if any(doc_id not in corpus_ids for ids in candidate_map.values() for doc_id in ids):
+        raise RuntimeError("reranker candidate references a document missing from the corpus")
     return {"manifest_sha256": sha(ROOT / INPUT_MANIFEST_REL), "files": actual,
-            "query_count": len(queries), "candidate_depth": 50}
+            "query_count": len(queries), "candidate_depth": PILOT_CANDIDATE_DEPTH}
 
 
-def validate_model(model_path: Path) -> dict:
+def validate_model(model_path: Path, staging_manifest_path: Path) -> tuple[dict, str]:
     expected_manifest = json.loads((ROOT / MODEL_REFERENCE_REL).read_text())
     if (expected_manifest.get("status") != "pass"
             or expected_manifest.get("model_id") != MODEL_ID
@@ -157,7 +173,108 @@ def validate_model(model_path: Path) -> dict:
     actual_snapshot = snapshot(model_path)
     if actual_snapshot != expected_snapshot:
         raise RuntimeError("local reranker files do not match the pinned accepted model snapshot")
-    return actual_snapshot
+    staging = json.loads(staging_manifest_path.read_text())
+    if (staging.get("status") != "pass"
+            or staging.get("manifest_id") != "sem2act-v5-moon-reranker-model-staging-v1"
+            or staging.get("model_id") != MODEL_ID
+            or staging.get("revision") != MODEL_REVISION
+            or staging.get("model_path") != str(model_path)
+            or staging.get("reference_manifest_sha256") != sha(ROOT / MODEL_REFERENCE_REL)
+            or staging.get("allow_patterns") != [entry["path"] for entry in expected_snapshot["files"]]
+            or staging.get("model_snapshot") != expected_snapshot
+            or staging.get("model_snapshot_sha256") != expected_snapshot["files_sha256"]):
+        raise RuntimeError("model staging manifest does not attest the accepted 12-file snapshot")
+    return actual_snapshot, sha(staging_manifest_path)
+
+
+def cpu_child_limits(parent_soft: int, parent_hard: int) -> tuple[int, int]:
+    """Return the fixed safe child limits, refusing a host with tighter limits."""
+    infinity = resource.RLIM_INFINITY
+    effective_soft = CHILD_CPU_SOFT_SECONDS if parent_soft == infinity else int(parent_soft)
+    effective_hard = CHILD_CPU_HARD_SECONDS if parent_hard == infinity else int(parent_hard)
+    if effective_soft < CHILD_CPU_SOFT_SECONDS or effective_hard < CHILD_CPU_HARD_SECONDS:
+        raise RuntimeError(
+            "Moon CPU-time limit is tighter than the authorized per-query subprocess policy: "
+            f"soft={effective_soft}, hard={effective_hard}"
+        )
+    return CHILD_CPU_SOFT_SECONDS, CHILD_CPU_HARD_SECONDS
+
+
+def install_child_cpu_limits() -> None:
+    current_soft, current_hard = resource.getrlimit(resource.RLIMIT_CPU)
+    soft, hard = cpu_child_limits(current_soft, current_hard)
+    resource.setrlimit(resource.RLIMIT_CPU, (soft, hard))
+
+
+def query_chunks(query_ids: list[str]) -> list[tuple[str, list[str]]]:
+    if QUERY_CHUNK_SIZE != 1:
+        raise RuntimeError("Moon CPU safety policy requires one complete query per subprocess")
+    return [
+        (f"query-{index:04d}", query_ids[index:index + QUERY_CHUNK_SIZE])
+        for index in range(0, len(query_ids), QUERY_CHUNK_SIZE)
+    ]
+
+
+def deterministic_rankings(query_ids: list[str], candidate_map: dict[str, list[str]],
+                           records: list[dict]) -> bytes:
+    actual_ids = [record.get("query_id") for record in records]
+    if actual_ids != query_ids:
+        raise RuntimeError("chunk ranking query order has a duplicate, omission, or permutation")
+    expected_pairs = Counter()
+    observed_pairs = Counter()
+    for qid in query_ids:
+        if qid not in candidate_map:
+            raise RuntimeError(f"authorized query has no frozen candidates: {qid}")
+        candidates = candidate_map[qid]
+        if (len(candidates) != PILOT_CANDIDATE_DEPTH
+                or len(set(candidates)) != PILOT_CANDIDATE_DEPTH):
+            raise RuntimeError(f"frozen candidate set is not 50 unique documents: {qid}")
+        expected_pairs.update((qid, doc_id) for doc_id in candidates)
+    for qid, record in zip(query_ids, records):
+        if record.get("key") != f"reranker|{qid}":
+            raise RuntimeError(f"chunk ranking key mismatch for {qid}")
+        ranking = record.get("ranking")
+        if (not isinstance(ranking, list) or len(ranking) != PILOT_CANDIDATE_DEPTH
+                or len(set(ranking)) != PILOT_CANDIDATE_DEPTH
+                or set(ranking) != set(candidate_map[qid])):
+            raise RuntimeError(f"expected candidate pair coverage failed for {qid}")
+        observed_pairs.update((qid, doc_id) for doc_id in ranking)
+    if observed_pairs != expected_pairs:
+        raise RuntimeError("pilot pair coverage has a duplicate or omission")
+    return b"".join(
+        (json.dumps(record, sort_keys=True) + "\n").encode() for record in records
+    )
+
+
+def write_blocked(output_root: Path, expected_sha: str, stage: str,
+                  exc: Exception) -> str | None:
+    marker = output_root / "result_bearing_started.json"
+    if marker.exists():
+        return None
+    try:
+        output_root.mkdir(parents=True, exist_ok=True)
+        blocked_path = output_root / "pilot_blocked.json"
+        if blocked_path.exists():
+            return sha(blocked_path)
+        blocked = {
+            "schema_version": 1,
+            "manifest_id": "sem2act-v5-moon-reranker-pilot-blocked-v1",
+            "status": "blocked-before-lockbox-scoring",
+            "created_utc": datetime.now(timezone.utc).isoformat(),
+            "execution_sha": expected_sha,
+            "protocol_hash": PROTOCOL_HASH,
+            "runtime_lock_sha256": sha(ROOT / LOCK_REL),
+            "runtime_freeze_sha256": sha(ROOT / FREEZE_REL),
+            "blocked_stage": stage,
+            "error": f"{type(exc).__name__}: {exc}",
+            "result_bearing_execution_started": False,
+            "qrels_read": False,
+        }
+        blocked_path.write_text(json.dumps(blocked, indent=2, sort_keys=True) + "\n")
+        return sha(blocked_path)
+    except OSError as write_error:
+        print(f"could not persist pilot_blocked.json: {write_error}", file=sys.stderr)
+        return None
 
 
 def host_preflight(args: argparse.Namespace, branch: str, inputs: dict, model_snapshot: dict) -> dict:
@@ -177,6 +294,8 @@ def host_preflight(args: argparse.Namespace, branch: str, inputs: dict, model_sn
         raise RuntimeError("Moon reranker route requires CPU-only execution")
     if os.cpu_count() != 16:
         raise RuntimeError(f"Moon profile requires exactly 16 visible vCPUs, got {os.cpu_count()}")
+    cpu_limit_soft, cpu_limit_hard = resource.getrlimit(resource.RLIMIT_CPU)
+    cpu_child_limits(cpu_limit_soft, cpu_limit_hard)
     total_memory = memory_total_bytes()
     if total_memory < 60_000_000_000:
         raise RuntimeError(f"Moon profile requires at least 60 GB RAM, got {total_memory} bytes")
@@ -273,6 +392,23 @@ def host_preflight(args: argparse.Namespace, branch: str, inputs: dict, model_sn
         "runtime_freeze_sha256": sha(ROOT / FREEZE_REL),
         "python": sys.version.split()[0], "platform": platform.platform(),
         "machine": platform.machine(), "logical_vcpus": os.cpu_count(),
+        "process_cpu_limit_soft_seconds": (
+            None if cpu_limit_soft == resource.RLIM_INFINITY else cpu_limit_soft
+        ),
+        "process_cpu_limit_hard_seconds": (
+            None if cpu_limit_hard == resource.RLIM_INFINITY else cpu_limit_hard
+        ),
+        "moon_query_chunk_policy": {
+            "queries_per_subprocess": QUERY_CHUNK_SIZE,
+            "subprocesses_expected": 20,
+            "candidate_depth": PILOT_CANDIDATE_DEPTH,
+            "estimated_scoring_cpu_seconds_per_pair": ESTIMATED_CPU_SECONDS_PER_PAIR,
+            "estimated_scoring_cpu_seconds_per_query": (
+                ESTIMATED_CPU_SECONDS_PER_PAIR * PILOT_CANDIDATE_DEPTH
+            ),
+            "subprocess_soft_limit_seconds": CHILD_CPU_SOFT_SECONDS,
+            "subprocess_hard_limit_seconds": CHILD_CPU_HARD_SECONDS,
+        },
         "memory_bytes": total_memory, "cpu_flags_records": len(per_cpu_flags),
         "cpu_flags_sha256": hashlib.sha256(json.dumps(
             [sorted(flags) for flags in per_cpu_flags], separators=(",", ":")
@@ -307,6 +443,7 @@ def main() -> int:
     parser.add_argument("--expected-sha", required=True)
     parser.add_argument("--input-root", type=Path, required=True)
     parser.add_argument("--model-path", type=Path, required=True)
+    parser.add_argument("--model-staging-manifest", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
     args = parser.parse_args()
     if len(args.expected_sha) != 40 or any(c not in "0123456789abcdef" for c in args.expected_sha):
@@ -318,128 +455,365 @@ def main() -> int:
     os.environ["HF_HOME"] = "/tmp/sem2act-v5/cache/huggingface"
     os.environ["HUGGINGFACE_HUB_CACHE"] = "/tmp/sem2act-v5/cache/huggingface/hub"
     os.environ["TORCH_HOME"] = "/tmp/sem2act-v5/cache/torch"
-
-    branch = require_checkout(args.expected_sha)
-    freeze = subprocess.run(
-        [sys.executable, str(ROOT / "scripts/freeze_v5_moon_runtime.py"), "--check"],
-        cwd=ROOT, check=False,
-    )
-    if freeze.returncode != 0:
-        raise SystemExit("Moon static runtime freeze check failed")
     input_root = args.input_root.resolve()
     model_path = args.model_path.resolve()
-    inputs = validate_inputs(input_root)
-    model_snapshot = validate_model(model_path)
     output_root = args.output_root.resolve()
+    safe_to_write_blocker = True
+    if output_root.exists():
+        safe_to_write_blocker = output_root.is_dir() and not any(output_root.iterdir())
+    stage = "checkout"
     try:
+        if not safe_to_write_blocker:
+            raise RuntimeError(f"refusing to overwrite non-empty pilot output directory: {output_root}")
+        branch = require_checkout(args.expected_sha)
+        stage = "runtime-freeze"
+        freeze = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/freeze_v5_moon_runtime.py"), "--check"],
+            cwd=ROOT, check=False,
+        )
+        if freeze.returncode != 0:
+            raise RuntimeError("Moon static runtime freeze check failed")
+        stage = "input-validation"
+        inputs = validate_inputs(input_root)
+        stage = "model-snapshot-validation"
+        model_snapshot, staging_manifest_sha256 = validate_model(
+            model_path, args.model_staging_manifest.resolve()
+        )
+        stage = "Moon-host-and-parity-preflight"
         host, canary = host_preflight(args, branch, inputs, model_snapshot)
+        output_root.mkdir(parents=True, exist_ok=True)
+        host_path = output_root / "moon_preflight.json"
+        canary_path = output_root / "moon_reranker_canary.json"
+        host_path.write_text(json.dumps(host, indent=2, sort_keys=True) + "\n")
+        canary_path.write_text(json.dumps(canary, indent=2, sort_keys=True) + "\n")
+
+        stage = "pilot-shard-planning"
+        scratch = Path("/tmp/sem2act-v5").resolve()
+        shard_root = scratch / f"{output_root.name}-shards"
+        if shard_root.exists():
+            raise RuntimeError(f"refusing to overwrite existing shard plan: {shard_root}")
+        plan = subprocess.run([
+            sys.executable, str(ROOT / "scripts/plan_v5_cpu_rerank_shards.py"),
+            "--queries", str(input_root / "queries.jsonl"),
+            "--corpus", str(input_root / "corpus.jsonl"),
+            "--candidates", str(input_root / "rerank_candidates.jsonl"),
+            "--queries-per-shard", "20",
+            "--resume-policy", "one-shot-empty-output-only",
+            "--output-root", str(shard_root),
+        ], cwd=ROOT, check=False)
+        if plan.returncode != 0:
+            raise RuntimeError("could not plan the frozen 20-query reranker shard")
+        shard_path = shard_root / "shard-000.json"
+        shard = json.loads(shard_path.read_text())
+        authorized_qids = [f"v5-lb-q{i:04d}" for i in range(1, 21)]
+        if (shard.get("query_ids") != authorized_qids
+                or shard.get("expected_query_keys") != [f"reranker|{qid}" for qid in authorized_qids]
+                or shard.get("resume_policy") != "one-shot-empty-output-only"):
+            raise RuntimeError("shard 000 does not match the frozen first 20 query IDs and keys")
+        chunks = query_chunks(authorized_qids)
+        if len(chunks) != 20 or any(len(qids) != 1 for _, qids in chunks):
+            raise RuntimeError("Moon subprocess plan is not 20 deterministic one-query chunks")
+
+        authorization = {
+            "schema_version": 1,
+            "manifest_id": "sem2act-v5-moon-reranker-pilot-authorization-v1",
+            "status": "authorized-after-gates",
+            "created_utc": datetime.now(timezone.utc).isoformat(),
+            "execution_sha": args.expected_sha,
+            "execution_branch": branch,
+            "protocol_hash": PROTOCOL_HASH,
+            "runtime_lock_sha256": sha(ROOT / LOCK_REL),
+            "runtime_freeze_sha256": sha(ROOT / FREEZE_REL),
+            "thread_count": 16,
+            "parity_status": "pass",
+            "host_preflight": {"path": str(host_path), "sha256": sha(host_path)},
+            "thread_canary": {"path": str(canary_path), "sha256": sha(canary_path)},
+            "input_manifest_sha256": inputs["manifest_sha256"],
+            "input_files": inputs["files"],
+            "model_snapshot_sha256": host["model_snapshot_sha256"],
+            "model_staging_manifest_sha256": staging_manifest_sha256,
+            "pilot_shard_sha256": sha(shard_path),
+            "authorized_query_ids": authorized_qids,
+            "candidate_depth": PILOT_CANDIDATE_DEPTH,
+            "subprocess_query_chunk_size": QUERY_CHUNK_SIZE,
+            "resume_policy": "one-shot-empty-output-only",
+            "result_bearing_execution_started": False,
+            "qrels_read": False,
+        }
+        authorization_path = output_root / "pilot_authorization.json"
+        authorization_path.write_text(json.dumps(authorization, indent=2, sort_keys=True) + "\n")
+        started_path = output_root / "result_bearing_started.json"
     except Exception as exc:
-        if not output_root.exists() or not any(output_root.iterdir()):
-            try:
-                output_root.parent.mkdir(parents=True, exist_ok=True)
-                if nfs_type(output_root.parent).startswith("nfs"):
-                    output_root.mkdir(parents=True, exist_ok=True)
-                    blocked = {
-                        "schema_version": 1,
-                        "manifest_id": "sem2act-v5-moon-reranker-pilot-blocked-v1",
-                        "status": "blocked-before-lockbox-scoring",
-                        "created_utc": datetime.now(timezone.utc).isoformat(),
-                        "execution_sha": args.expected_sha,
-                        "protocol_hash": PROTOCOL_HASH,
-                        "runtime_lock_sha256": sha(ROOT / LOCK_REL),
-                        "runtime_freeze_sha256": sha(ROOT / FREEZE_REL),
-                        "error": f"{type(exc).__name__}: {exc}",
-                        "result_bearing_execution_started": False,
-                        "qrels_read": False,
-                    }
-                    (output_root / "pilot_blocked.json").write_text(
-                        json.dumps(blocked, indent=2, sort_keys=True) + "\n"
-                    )
-            except Exception:
-                pass
-        raise SystemExit(f"Moon pilot stopped before lockbox scoring: {type(exc).__name__}: {exc}") from exc
-    output_root.mkdir(parents=True, exist_ok=True)
-    host_path = output_root / "moon_preflight.json"
-    canary_path = output_root / "moon_reranker_canary.json"
-    host_path.write_text(json.dumps(host, indent=2, sort_keys=True) + "\n")
-    canary_path.write_text(json.dumps(canary, indent=2, sort_keys=True) + "\n")
+        blocker_sha = write_blocked(output_root, args.expected_sha, stage, exc) if safe_to_write_blocker else None
+        print(
+            f"Moon pilot stopped before lockbox scoring at {stage}: "
+            f"{type(exc).__name__}: {exc}"
+            + (f"; pilot_blocked.json sha256={blocker_sha}" if blocker_sha else ""),
+            file=sys.stderr,
+        )
+        return 2
 
-    scratch = Path("/tmp/sem2act-v5").resolve()
-    shard_root = scratch / "pilot-reranker-000-shards"
-    if shard_root.exists():
-        raise SystemExit(f"refusing to overwrite existing shard plan: {shard_root}")
-    plan = subprocess.run([
-        sys.executable, str(ROOT / "scripts/plan_v5_cpu_rerank_shards.py"),
-        "--queries", str(input_root / "queries.jsonl"),
-        "--corpus", str(input_root / "corpus.jsonl"),
-        "--candidates", str(input_root / "rerank_candidates.jsonl"),
-        "--queries-per-shard", "20", "--output-root", str(shard_root),
-    ], cwd=ROOT, check=False)
-    if plan.returncode != 0:
-        raise SystemExit("could not plan the frozen 20-query reranker shards")
-    shard = json.loads((shard_root / "shard-000.json").read_text())
-    if shard.get("query_ids") != [f"v5-lb-q{i:04d}" for i in range(1, 21)]:
-        raise SystemExit("shard 000 does not match the frozen first 20 query IDs")
+    candidate_rows = [
+        json.loads(line) for line in (input_root / "rerank_candidates.jsonl").read_text().splitlines()
+        if line
+    ]
+    candidate_map = {row["query_id"]: row["doc_ids"] for row in candidate_rows}
+    expected_qids = [qid for _, qids in chunks for qid in qids]
+    chunk_records = []
+    ranking_records = []
+    failures = []
+    for chunk_index, (chunk_id, chunk_qids) in enumerate(chunks):
+        qid = chunk_qids[0]
+        chunk_dir = output_root / "chunks" / chunk_id
+        record = {
+            "chunk_id": chunk_id,
+            "query_ids": chunk_qids,
+            "expected_pairs": len(candidate_map[qid]),
+            "started_utc": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            chunk_dir.mkdir(parents=True, exist_ok=False)
+            stdout_path = chunk_dir / "stdout.log"
+            stderr_path = chunk_dir / "stderr.log"
+            command = [
+                sys.executable, str(ROOT / "scripts/run_v5_cpu_rerank_shard.py"),
+                "--moon-pilot-manifest", str(authorization_path),
+                "--shard", str(shard_path),
+                "--queries", str(input_root / "queries.jsonl"),
+                "--corpus", str(input_root / "corpus.jsonl"),
+                "--candidates", str(input_root / "rerank_candidates.jsonl"),
+                "--model-path", str(model_path),
+                "--output-dir", str(chunk_dir),
+                "--moon-query-id", qid,
+            ]
+            record["command"] = command
+            record["cpu_limit_soft_seconds"] = CHILD_CPU_SOFT_SECONDS
+            record["cpu_limit_hard_seconds"] = CHILD_CPU_HARD_SECONDS
+            record["started_utc"] = datetime.now(timezone.utc).isoformat()
+            with stdout_path.open("wb") as stdout_handle, stderr_path.open("wb") as stderr_handle:
+                child = subprocess.run(
+                    command, cwd=ROOT, check=False,
+                    stdout=stdout_handle, stderr=stderr_handle,
+                    preexec_fn=install_child_cpu_limits,
+                )
+            record["return_code"] = child.returncode
+            record["completed_utc"] = datetime.now(timezone.utc).isoformat()
+            child_started_path = chunk_dir / "result_bearing_started.json"
+            if child_started_path.is_file() and not started_path.exists():
+                child_started = json.loads(child_started_path.read_text())
+                started_path.write_text(json.dumps({
+                    "schema_version": 1,
+                    "manifest_id": "sem2act-v5-moon-reranker-pilot-started-v1",
+                    "status": "started",
+                    "created_utc": child_started["created_utc"],
+                    "execution_sha": args.expected_sha,
+                    "protocol_hash": PROTOCOL_HASH,
+                    "pilot_shard_sha256": sha(shard_path),
+                    "first_chunk_id": chunk_id,
+                    "first_query_id": qid,
+                    "expected_queries": len(expected_qids),
+                    "expected_pairs": len(expected_qids) * PILOT_CANDIDATE_DEPTH,
+                    "subprocess_query_chunk_size": QUERY_CHUNK_SIZE,
+                    "subprocesses_expected": len(chunks),
+                    "first_child_marker_sha256": sha(child_started_path),
+                    "qrels_read": False,
+                }, indent=2, sort_keys=True) + "\n")
+            record["stdout_sha256"] = sha(stdout_path)
+            record["stderr_sha256"] = sha(stderr_path)
+            record["run_manifest_sha256"] = (
+                sha(chunk_dir / "run_manifest.json")
+                if (chunk_dir / "run_manifest.json").is_file() else None
+            )
+            record["failures_sha256"] = (
+                sha(chunk_dir / "failures.json")
+                if (chunk_dir / "failures.json").is_file() else None
+            )
+            record["result_bearing_started_sha256"] = (
+                sha(chunk_dir / "result_bearing_started.json")
+                if (chunk_dir / "result_bearing_started.json").is_file() else None
+            )
+            if child.returncode != 0:
+                raise RuntimeError(f"query subprocess exited with code {child.returncode}")
+            run_manifest_path = chunk_dir / "run_manifest.json"
+            failures_path = chunk_dir / "failures.json"
+            rankings_path = chunk_dir / "rankings.jsonl"
+            if not all(path.is_file() for path in (run_manifest_path, failures_path, rankings_path)):
+                raise RuntimeError("query subprocess omitted a required output")
+            child_manifest = json.loads(run_manifest_path.read_text())
+            child_failures = json.loads(failures_path.read_text())
+            if (child_manifest.get("status") != "pass"
+                    or child_manifest.get("execution_sha") != args.expected_sha
+                    or child_manifest.get("runtime_profile") != "moon-reranker-only-v1"
+                    or child_manifest.get("runtime_lock_sha256") != authorization["runtime_lock_sha256"]
+                    or child_manifest.get("runtime_freeze_sha256") != authorization["runtime_freeze_sha256"]
+                    or child_manifest.get("host_preflight_sha256") != authorization["host_preflight"]["sha256"]
+                    or child_manifest.get("thread_canary_sha256") != authorization["thread_canary"]["sha256"]
+                    or child_manifest.get("model_id") != MODEL_ID
+                    or child_manifest.get("revision") != MODEL_REVISION
+                    or child_manifest.get("dtype") != "float32"
+                    or child_manifest.get("device") != "cpu"
+                    or child_manifest.get("thread_count") != 16
+                    or child_manifest.get("inter_op_threads") != 1
+                    or child_manifest.get("chunk_query_id") != qid
+                    or child_manifest.get("expected_query_ids") != [qid]
+                    or child_manifest.get("expected_pairs") != PILOT_CANDIDATE_DEPTH
+                    or child_manifest.get("accepted_queries") != 1
+                    or child_manifest.get("accepted_pairs") != PILOT_CANDIDATE_DEPTH
+                    or child_manifest.get("n_fail") != 0
+                    or child_manifest.get("model_staging_manifest_sha256") != staging_manifest_sha256
+                    or child_manifest.get("process_cpu_limit_soft_seconds") != CHILD_CPU_SOFT_SECONDS
+                    or child_manifest.get("process_cpu_limit_hard_seconds") != CHILD_CPU_HARD_SECONDS
+                    or child_manifest.get("process_cpu_seconds", CHILD_CPU_SOFT_SECONDS + 1)
+                    > CHILD_CPU_SOFT_SECONDS
+                    or child_failures):
+                raise RuntimeError("query subprocess manifest/status/CPU budget did not pass")
+            lines = [line for line in rankings_path.read_text().splitlines() if line]
+            if len(lines) != 1:
+                raise RuntimeError("query subprocess must produce exactly one ranking record")
+            ranking_record = json.loads(lines[0])
+            deterministic_rankings([qid], candidate_map, [ranking_record])
+            record["process_cpu_seconds"] = child_manifest["process_cpu_seconds"]
+            record["ranking_sha256"] = sha(rankings_path)
+            record["chunk_outputs"] = {
+                str(path.relative_to(chunk_dir)): sha(path)
+                for path in sorted(chunk_dir.rglob("*")) if path.is_file()
+            }
+            ranking_records.append(ranking_record)
+            record["status"] = "pass"
+        except Exception as exc:
+            record["completed_utc"] = datetime.now(timezone.utc).isoformat()
+            record["status"] = "failed"
+            record["error"] = f"{type(exc).__name__}: {exc}"
+            failures.append({"chunk_id": chunk_id, "query_id": qid, "error": record["error"]})
+        chunk_records.append(record)
+        if record["status"] != "pass":
+            break
 
-    authorization = {
-        "schema_version": 1, "manifest_id": "sem2act-v5-moon-reranker-pilot-authorization-v1",
-        "status": "authorized-after-gates", "created_utc": datetime.now(timezone.utc).isoformat(),
-        "execution_sha": args.expected_sha, "execution_branch": branch,
-        "protocol_hash": PROTOCOL_HASH, "runtime_lock_sha256": sha(ROOT / LOCK_REL),
-        "runtime_freeze_sha256": sha(ROOT / FREEZE_REL), "thread_count": 16,
-        "parity_status": "pass",
-        "host_preflight": {"path": str(host_path), "sha256": sha(host_path)},
-        "thread_canary": {"path": str(canary_path), "sha256": sha(canary_path)},
+    expected_pairs = len(expected_qids) * PILOT_CANDIDATE_DEPTH
+    rankings_path = output_root / "rankings.jsonl"
+    concatenation_sha256 = None
+    if not failures and len(ranking_records) == len(expected_qids):
+        try:
+            combined = deterministic_rankings(expected_qids, candidate_map, ranking_records)
+            repeated = deterministic_rankings(expected_qids, candidate_map, ranking_records)
+            if combined != repeated:
+                raise RuntimeError("chunk output concatenation was not deterministic")
+            rankings_path.write_bytes(combined)
+            if rankings_path.read_bytes() != combined:
+                raise RuntimeError("concatenated ranking bytes failed verification")
+            concatenation_sha256 = sha(rankings_path)
+        except Exception as exc:
+            failures.append({"stage": "deterministic-concatenation", "error": f"{type(exc).__name__}: {exc}"})
+    elif not failures:
+        failures.append({"stage": "query-coverage", "error": "one or more authorized query subprocesses are missing"})
+
+    if not started_path.exists() and failures:
+        write_blocked(
+            output_root, args.expected_sha, "query-subprocess-before-scoring",
+            RuntimeError(failures[0].get("error", "query subprocess failed before scoring")),
+        )
+
+    pass_status = not failures and len(chunk_records) == 20 and len(ranking_records) == 20
+    if pass_status:
+        try:
+            merged = [json.loads(line) for line in rankings_path.read_text().splitlines() if line]
+            deterministic_rankings(expected_qids, candidate_map, merged)
+            if len(merged) != 20 or len({record["query_id"] for record in merged}) != 20:
+                raise RuntimeError("final output does not contain 20 unique authorized queries")
+        except Exception as exc:
+            pass_status = False
+            failures.append({"stage": "final-coverage-verification", "error": f"{type(exc).__name__}: {exc}"})
+
+    failure_path = output_root / "failures.json"
+    failure_path.write_text(json.dumps(failures, indent=2, sort_keys=True) + "\n")
+    run_manifest = {
+        "schema_version": 1,
+        "manifest_id": "sem2act-v5-moon-reranker-pilot-run-v1",
+        "status": "pass" if pass_status else "failed",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "execution_sha": args.expected_sha,
+        "execution_branch": branch,
+        "protocol_hash": PROTOCOL_HASH,
+        "runtime_lock_sha256": sha(ROOT / LOCK_REL),
+        "runtime_freeze_sha256": sha(ROOT / FREEZE_REL),
+        "host_preflight_sha256": sha(host_path),
+        "thread_canary_sha256": sha(canary_path),
+        "pilot_authorization_sha256": sha(authorization_path),
         "input_manifest_sha256": inputs["manifest_sha256"],
         "input_files": inputs["files"],
         "model_snapshot_sha256": host["model_snapshot_sha256"],
-        "pilot_shard_sha256": sha(shard_root / "shard-000.json"),
-        "result_bearing_execution_started": False,
+        "model_staging_manifest_sha256": staging_manifest_sha256,
+        "shard_id": shard["manifest_id"],
+        "expected_query_ids": expected_qids,
+        "expected_queries": len(expected_qids),
+        "expected_pairs": expected_pairs,
+        "accepted_queries": len(ranking_records),
+        "accepted_pairs": len(ranking_records) * PILOT_CANDIDATE_DEPTH,
+        "query_chunk_size": QUERY_CHUNK_SIZE,
+        "pair_coverage_verified": pass_status,
+        "deterministic_concatenation": {
+            "verified_twice": bool(concatenation_sha256),
+            "output_sha256": concatenation_sha256,
+            "query_order": expected_qids,
+        },
+        "subprocesses": chunk_records,
+        "outputs": {
+            str(path.relative_to(output_root)): sha(path)
+            for path in sorted(output_root.rglob("*"))
+            if path.is_file() and path.name not in ("run_manifest.json", "pilot_manifest.json")
+        },
+        "failure_count": len(failures),
         "qrels_read": False,
+        "result_bearing_execution_started": started_path.is_file(),
+        "stop_after_this_pilot": True,
+        "next_action": "return evidence to Codex; do not run another shard",
     }
-    authorization_path = output_root / "pilot_authorization.json"
-    authorization_path.write_text(json.dumps(authorization, indent=2, sort_keys=True) + "\n")
-
-    run = subprocess.run([
-        sys.executable, str(ROOT / "scripts/run_v5_cpu_rerank_shard.py"),
-        "--moon-pilot-manifest", str(authorization_path),
-        "--shard", str(shard_root / "shard-000.json"),
-        "--queries", str(input_root / "queries.jsonl"),
-        "--corpus", str(input_root / "corpus.jsonl"),
-        "--candidates", str(input_root / "rerank_candidates.jsonl"),
-        "--model-path", str(model_path), "--output-dir", str(output_root),
-    ], cwd=ROOT, check=False)
-    run_manifest = output_root / "run_manifest.json"
-    rankings = output_root / "rankings.jsonl"
-    pass_status = run.returncode == 0 and run_manifest.is_file() and rankings.is_file()
+    run_manifest_path = output_root / "run_manifest.json"
+    run_manifest_path.write_text(json.dumps(run_manifest, indent=2, sort_keys=True) + "\n")
     final = {
-        "schema_version": 1, "manifest_id": "sem2act-v5-moon-reranker-pilot-v1",
+        "schema_version": 1,
+        "manifest_id": "sem2act-v5-moon-reranker-pilot-v1",
         "status": "pass" if pass_status else "failed",
         "created_utc": datetime.now(timezone.utc).isoformat(),
-        "execution_sha": args.expected_sha, "execution_branch": branch,
-        "protocol_hash": PROTOCOL_HASH, "runtime_lock_sha256": sha(ROOT / LOCK_REL),
+        "execution_sha": args.expected_sha,
+        "execution_branch": branch,
+        "protocol_hash": PROTOCOL_HASH,
+        "runtime_lock_sha256": sha(ROOT / LOCK_REL),
         "runtime_freeze_sha256": sha(ROOT / FREEZE_REL),
-        "host_preflight_sha256": sha(host_path), "thread_canary_sha256": sha(canary_path),
+        "host_preflight_sha256": sha(host_path),
+        "thread_canary_sha256": sha(canary_path),
         "pilot_authorization_sha256": sha(authorization_path),
-        "input_manifest_sha256": inputs["manifest_sha256"], "input_files": inputs["files"],
+        "input_manifest_sha256": inputs["manifest_sha256"],
+        "input_files": inputs["files"],
         "model_snapshot_sha256": host["model_snapshot_sha256"],
-        "shard_id": shard["manifest_id"], "expected_queries": 20,
-        "expected_candidate_scores": 1000, "qrels_read": False,
-        "result_bearing_execution_started": (output_root / "result_bearing_started.json").is_file(),
+        "model_staging_manifest_sha256": staging_manifest_sha256,
+        "shard_id": shard["manifest_id"],
+        "expected_queries": len(expected_qids),
+        "expected_candidate_scores": expected_pairs,
+        "accepted_queries": len(ranking_records),
+        "accepted_pairs": len(ranking_records) * PILOT_CANDIDATE_DEPTH,
+        "pair_coverage_verified": pass_status,
+        "deterministic_concatenation_sha256": concatenation_sha256,
+        "subprocesses": chunk_records,
+        "qrels_read": False,
+        "result_bearing_execution_started": started_path.is_file(),
         "outputs": {
-            path.name: sha(path) for path in (
-                host_path, canary_path, authorization_path, rankings,
-                output_root / "failures.json", run_manifest,
-                output_root / "result_bearing_started.json",
-            ) if path.is_file()
+            "run_manifest.json": sha(run_manifest_path),
+            "failures.json": sha(failure_path),
+            "rankings.jsonl": sha(rankings_path) if rankings_path.is_file() else None,
+            "result_bearing_started.json": sha(started_path) if started_path.is_file() else None,
+            "pilot_blocked.json": sha(output_root / "pilot_blocked.json")
+            if (output_root / "pilot_blocked.json").is_file() else None,
+            "moon_preflight.json": sha(host_path),
+            "moon_reranker_canary.json": sha(canary_path),
+            "pilot_authorization.json": sha(authorization_path),
         },
         "stop_after_this_pilot": True,
         "next_action": "return evidence to Codex; do not run another shard",
-        "launcher_exit_code": run.returncode,
     }
     (output_root / "pilot_manifest.json").write_text(json.dumps(final, indent=2, sort_keys=True) + "\n")
     print(json.dumps(final, indent=2, sort_keys=True), flush=True)
-    return 0 if pass_status else (run.returncode or 1)
+    return 0 if pass_status else 1
 
 
 if __name__ == "__main__":

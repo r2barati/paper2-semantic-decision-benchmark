@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
+import resource
 import sys
 import time
 from datetime import datetime, timezone
@@ -40,6 +42,30 @@ def load_jsonl(path: Path) -> list[dict]:
     return rows
 
 
+def validate_moon_parity(payload: dict) -> None:
+    profiles = payload.get("profiles", {})
+    reference = profiles.get("4", {})
+    candidate = profiles.get("16", {})
+    scores4 = reference.get("scores", [])
+    scores16 = candidate.get("scores", [])
+    delta = payload.get("max_absolute_score_delta", float("inf"))
+    if (payload.get("status") != "pass"
+            or payload.get("exact_repeat_equality") is not True
+            or payload.get("ranking_equal") is not True
+            or payload.get("authorized_threads") != 16
+            or payload.get("score_tolerance") != 1e-6
+            or not isinstance(delta, (int, float)) or not math.isfinite(delta) or delta > 1e-6
+            or reference.get("repeat_equal") is not True
+            or candidate.get("repeat_equal") is not True
+            or not isinstance(scores4, list) or len(scores4) != 3
+            or not isinstance(scores16, list) or len(scores16) != 3
+            or any(not isinstance(score, (int, float)) or not math.isfinite(score)
+                   for score in scores4 + scores16)
+            or reference.get("ranking") != candidate.get("ranking")
+            or max((abs(a - b) for a, b in zip(scores4, scores16)), default=float("inf")) > 1e-6):
+        raise RuntimeError("Moon 4-vs-16 parity evidence is incomplete or failed")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--shard", type=Path, required=True)
@@ -50,6 +76,8 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--moon-pilot-manifest", type=Path,
                         help="required for the separately frozen Moon reranker-only route")
+    parser.add_argument("--moon-query-id",
+                        help="score one complete authorized query in its own Moon subprocess")
     args = parser.parse_args()
     moon_runtime = None
     if args.moon_pilot_manifest:
@@ -60,6 +88,18 @@ def main() -> int:
             raise SystemExit("Moon pilot protocol hash drift")
         if moon_runtime.get("thread_count") != 16 or moon_runtime.get("parity_status") != "pass":
             raise SystemExit("Moon pilot 16-thread parity authorization is missing")
+        if (moon_runtime.get("subprocess_query_chunk_size") != 1
+                or moon_runtime.get("candidate_depth") != TOPN
+                or moon_runtime.get("resume_policy") != "one-shot-empty-output-only"
+                or not args.moon_query_id
+                or args.moon_query_id not in moon_runtime.get("authorized_query_ids", [])):
+            raise SystemExit("Moon authorization does not permit this one-query subprocess")
+        if (moon_runtime.get("subprocess_query_chunk_size") != 1
+                or moon_runtime.get("candidate_depth") != TOPN
+                or moon_runtime.get("resume_policy") != "one-shot-empty-output-only"
+                or not args.moon_query_id
+                or args.moon_query_id not in moon_runtime.get("authorized_query_ids", [])):
+            raise SystemExit("Moon authorization does not permit this one-query subprocess")
         lock_path = ROOT / "versions/sem2act-v5/manifests/moon_reranker_runtime_lock.json"
         freeze_path = ROOT / "versions/sem2act-v5/manifests/moon_reranker_runtime_freeze.json"
         if moon_runtime.get("runtime_lock_sha256") != sha256_file(lock_path):
@@ -82,9 +122,18 @@ def main() -> int:
             payload = json.loads(path.read_text())
             if payload.get("status") != "pass":
                 raise SystemExit(f"Moon {field} did not pass")
+            if payload.get("execution_sha") != moon_runtime.get("execution_sha"):
+                raise SystemExit(f"Moon {field} execution SHA mismatch")
+        canary_record = json.loads(Path(moon_runtime["thread_canary"]["path"]).read_text())
+        try:
+            validate_moon_parity(canary_record)
+        except RuntimeError as exc:
+            raise SystemExit(str(exc)) from exc
         freeze = {"frozen_threads": 16, "frozen_threads_batch": 16}
         runtime_freeze_sha256 = moon_runtime["runtime_freeze_sha256"]
     else:
+        if args.moon_query_id:
+            raise SystemExit("--moon-query-id is only valid for the authorized Moon route")
         freeze = load_cpu_freeze(require_frozen=True)
         runtime_freeze_sha256 = sha256_file(ROOT / "versions/sem2act-v5/manifests/cpu_runtime_freeze.json")
     lock = load_cpu_lock()
@@ -93,6 +142,10 @@ def main() -> int:
     shard = json.loads(args.shard.read_text())
     if shard.get("stage") != "reranker":
         raise SystemExit("not a reranker shard")
+    if moon_runtime and shard.get("resume_policy") != "one-shot-empty-output-only":
+        raise SystemExit("Moon shard must use the one-shot empty-output policy")
+    if moon_runtime and shard.get("resume_policy") != "one-shot-empty-output-only":
+        raise SystemExit("Moon shard must use the one-shot empty-output policy")
     for name, path in (
         ("queries_sha256", args.queries), ("corpus_sha256", args.corpus),
         ("candidates_sha256", args.candidates),
@@ -105,6 +158,10 @@ def main() -> int:
     selected = [row for row in queries if row["_id"] in set(shard["query_ids"])]
     if {row["_id"] for row in selected} != set(shard["query_ids"]):
         raise SystemExit("reranker shard query coverage mismatch")
+    if args.moon_query_id:
+        if args.moon_query_id not in shard["query_ids"]:
+            raise SystemExit("Moon subprocess query is outside the authorized pilot shard")
+        selected = [row for row in selected if row["_id"] == args.moon_query_id]
     args.output_dir.mkdir(parents=True, exist_ok=True)
     accepted_path = args.output_dir / "rankings.jsonl"
     accepted: dict[str, dict] = {}
@@ -115,6 +172,8 @@ def main() -> int:
             if key in accepted:
                 raise SystemExit(f"duplicate accepted reranker key: {key}")
             accepted[key] = row
+    if args.moon_query_id and accepted:
+        raise SystemExit("Moon query subprocess output directory must start empty")
     missing = [row for row in sorted(selected, key=lambda item: item["_id"])
                if f"reranker|{row['_id']}" not in accepted]
     started = time.monotonic()
@@ -152,6 +211,8 @@ def main() -> int:
                 "runtime_freeze_sha256": moon_runtime["runtime_freeze_sha256"],
                 "shard_sha256": sha256_file(args.shard),
                 "thread_count": int(freeze["frozen_threads"]),
+                "chunk_query_id": args.moon_query_id,
+                "candidate_count": len(candidates[args.moon_query_id]),
                 "qrels_read": False,
             }, indent=2, sort_keys=True) + "\n")
         yes = tokenizer.convert_tokens_to_ids("yes")
@@ -179,13 +240,17 @@ def main() -> int:
                 qid = row["_id"]
                 scored = [(score(row["text"], corpus[doc_id]), doc_id) for doc_id in candidates[qid]]
                 ranking = [doc_id for _, doc_id in sorted(scored, key=lambda pair: (-pair[0], pair[1]))]
+                expected_docs = candidates[qid]
                 record = {
                     "key": f"reranker|{qid}",
                     "query_id": qid,
                     "ranking": ranking,
                     "scores_sha256": sha256_bytes(json.dumps(scored, sort_keys=True).encode()),
                     "ranking_sha256": sha256_bytes(json.dumps(ranking, separators=(",", ":")).encode()),
-                    "valid": len(ranking) == TOPN and len(set(ranking)) == TOPN,
+                    "valid": (len(ranking) == TOPN and len(set(ranking)) == TOPN
+                              and len(expected_docs) == TOPN
+                              and len(set(expected_docs)) == TOPN
+                              and set(ranking) == set(expected_docs)),
                 }
                 if not record["valid"]:
                     failures.append({"key": record["key"], "error": "ranking schema failure"})
@@ -193,9 +258,13 @@ def main() -> int:
                     handle.write(json.dumps(record, sort_keys=True) + "\n")
                     handle.flush()
                     accepted[record["key"]] = record
-    expected = set(shard["expected_query_keys"])
+    expected = ({f"reranker|{args.moon_query_id}"} if args.moon_query_id
+                else set(shard["expected_query_keys"]))
     if set(accepted) != expected:
         failures.append({"error": "reranker shard keyspace failed", "missing": sorted(expected - set(accepted))})
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    cpu_soft, cpu_hard = resource.getrlimit(resource.RLIMIT_CPU)
+    expected_query_ids = [args.moon_query_id] if args.moon_query_id else shard["query_ids"]
     manifest = {
         "schema_version": 1,
         "manifest_id": shard["manifest_id"],
@@ -212,13 +281,29 @@ def main() -> int:
         "thread_canary_sha256": moon_runtime["thread_canary"]["sha256"] if moon_runtime else None,
         "stage": "reranker",
         "expected_queries": len(expected),
+        "expected_query_ids": expected_query_ids,
+        "expected_pairs": sum(len(candidates[qid]) for qid in expected_query_ids),
         "accepted_queries": len(accepted),
+        "accepted_pairs": sum(
+            len(accepted[f"reranker|{qid}"].get("ranking", []))
+            for qid in expected_query_ids
+            if f"reranker|{qid}" in accepted
+        ),
         "n_fail": len(failures),
         "model_id": MODEL_ID,
         "revision": REVISION,
         "dtype": "float32",
         "device": "cpu",
+        "thread_count": int(freeze["frozen_threads"]),
+        "inter_op_threads": 1,
         "elapsed_seconds": round(time.monotonic() - started, 3),
+        "process_cpu_seconds": round(usage.ru_utime + usage.ru_stime, 3),
+        "process_cpu_limit_soft_seconds": None if cpu_soft == resource.RLIM_INFINITY else cpu_soft,
+        "process_cpu_limit_hard_seconds": None if cpu_hard == resource.RLIM_INFINITY else cpu_hard,
+        "chunk_query_id": args.moon_query_id,
+        "model_staging_manifest_sha256": (
+            moon_runtime.get("model_staging_manifest_sha256") if moon_runtime else None
+        ),
         "result_bearing_execution_started": bool(moon_runtime and missing),
         "qrels_read": False,
     }

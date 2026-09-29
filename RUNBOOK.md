@@ -23,6 +23,14 @@ git log -1 --format='%H%n%ci%n%s'
 put tokens or credentials in command arguments, output archives, or logs. Keep
 weights, package/build caches, temporary files, and inputs on node-local disk
 unless a section below explicitly names a persistent output directory.
+After cloning the branch, check out the supplied SHA in detached mode and
+repeat the clean-worktree check before staging or execution:
+
+```sh
+git checkout --detach <CANONICAL_EXECUTION_SHA>
+git rev-parse HEAD
+git status --porcelain -uall
+```
 
 ## 2. Authorized first result pilot: OpenCode / Moon reranker
 
@@ -34,6 +42,15 @@ non-lockbox fixture parity gate. It compares all three fixed fixture documents
 at 4 and 16 threads; repeats must be exact, rankings must match, and each score
 must differ by at most `1e-6`. A failed gate stops before lockbox scoring.
 
+The prior authorized handoff SHA `6d97cd0fe11cc87cd38661ac3a3646ebb36b7599`
+is superseded for Moon execution. OpenCode reported that its attempt stopped
+before scoring: all accepted model files were present and hash-identical, but
+the downloader also staged `.gitattributes` and `README.md`; the validator
+correctly rejected those extra files. The same report measured 600 soft / 1200
+hard CPU seconds per process and about 8.99 CPU seconds per scored pair. This
+is resolved by the replacement staging helper and sequential one-query
+subprocesses. No model hashes or scoring rules change.
+
 Moon profile: Linux x86_64, 16 visible vCPUs, at least 60 GB RAM, AVX2/AVX512F
 masked, Python `3.9.19`, `torch==2.8.0+cpu`, `transformers==4.57.6`, CPU only.
 Weights, inputs, Hugging Face cache, and temporary files must be under
@@ -43,15 +60,32 @@ check this account's effective quota. It checks the AVX2/AVX512 mask on every
 processor record. Do not build on NFS.
 
 Stage the exact qrel-free Kaggle input version and pinned model snapshot on
-node-local scratch. The launcher checks all files against the committed
-version-1 SHA-256 manifest and checks the model against the accepted snapshot
-manifest:
+node-local scratch. The launcher checks all inputs against the committed
+version-1 SHA-256 manifest. The staging helper derives its allowlist from the
+frozen `cpu_reranker_canary.json` snapshot manifest, downloads only those 12
+paths, and verifies the unchanged per-file and aggregate hashes. Use a fresh
+model directory; it refuses to stage into a non-empty directory. Do not copy
+in README or `.gitattributes` and do not weaken `validate_model`.
 
 ```sh
 mkdir -p /tmp/sem2act-v5/rerank-inputs
 kaggle datasets download rezabarati2/sem2act-v5-rerank-inputs --path /tmp/sem2act-v5/rerank-inputs --unzip
-python3 -c 'from huggingface_hub import snapshot_download; snapshot_download(repo_id="Qwen/Qwen3-Reranker-0.6B", revision="e61197ed45024b0ed8a2d74b80b4d909f1255473", local_dir="/tmp/sem2act-v5/models/qwen3-reranker-0.6b")'
+python3 scripts/stage_v5_moon_reranker_model.py \
+  --output /tmp/sem2act-v5/models/qwen3-reranker-0.6b-12files-pilot-001 \
+  --manifest-output /tmp/sem2act-v5/model-staging-pilot-001.json
 ```
+
+The frozen shard is still 20 queries × 50 candidates. Moon executes one whole
+query (50 pairs) per sequential subprocess, preserving the frozen query and
+candidate order and reusing the same scoring implementation and 16-thread
+float32 settings. The operator measurement implies about 449.5 scoring CPU
+seconds per query. The launcher caps each child at 540 soft / 600 hard CPU
+seconds and refuses a host limit too tight for that cap. Each child records its
+CPU use and limit; aggregation verifies exactly one record per query, all 50
+unique candidates per query, all 1,000 expected pairs, deterministic
+concatenation, and the existing 4-vs-16 parity gate. The complete subprocess
+commands, timestamps, return codes, logs and output hashes are recorded in the
+run manifest.
 
 Run exactly one pilot:
 
@@ -59,17 +93,22 @@ Run exactly one pilot:
 python3 scripts/run_v5_moon_reranker_pilot.py \
   --expected-sha <CANONICAL_EXECUTION_SHA> \
   --input-root /tmp/sem2act-v5/rerank-inputs \
-  --model-path /tmp/sem2act-v5/models/qwen3-reranker-0.6b \
-  --output-root "${HOME}/sem2act-v5/pilot-reranker-000"
+  --model-path /tmp/sem2act-v5/models/qwen3-reranker-0.6b-12files-pilot-001 \
+  --model-staging-manifest /tmp/sem2act-v5/model-staging-pilot-001.json \
+  --output-root "${HOME}/sem2act-v5/pilot-reranker-001"
 ```
 
-Return `pilot_manifest.json`, `pilot_authorization.json`, `moon_preflight.json`,
-`moon_reranker_canary.json`, `result_bearing_started.json` (if present),
-`rankings.jsonl`, `failures.json`, and `run_manifest.json`, with SHA-256 for
-each. If the host/parity gate fails, return `pilot_blocked.json`; if an earlier
-checkout, freeze, input, or model hash check stops the launcher, return its
-command and stderr. Preserve partial checkpoints and failures. Do not retry a
-failed/interrupted pilot until Codex has reviewed its evidence.
+Use the fresh `pilot-reranker-001` output path so the previous stopped attempt
+remains intact. Return the model staging manifest and SHA-256, plus
+`pilot_manifest.json`, `pilot_authorization.json`, `moon_preflight.json`,
+`moon_reranker_canary.json`, `failures.json`, `run_manifest.json`, and every
+`chunks/query-*/` output and log. Return `result_bearing_started.json` and
+`rankings.jsonl` when present; a pre-scoring block should instead include
+`pilot_blocked.json`. The top-level run manifest must list all launched subprocesses and the
+hashes of their manifests, ranking files, failure files, start markers, stdout,
+and stderr. If any preflight step—including model validation—fails, return
+`pilot_blocked.json` and stderr. Preserve partial checkpoints and failures. Do
+not retry a failed/interrupted pilot until Codex has reviewed its evidence.
 
 **STOP after shard 000.** Do not run shard 001 or any later shard, stage
 consumer inputs, or inspect qrels. Send the output archive and provenance to

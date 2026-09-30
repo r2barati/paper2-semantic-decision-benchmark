@@ -779,7 +779,7 @@ JOBS = {
     },
     "v5-qwen": {
         "slug": "sem2act-v5-qwen",
-        "title": "Sem2act v5 Qwen primary consumer",
+        "title": "Sem2act v5 Qwen",
         "script": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_qwen_consumer.py",
         "gpu": True,
         "machine_shape": "NvidiaTeslaT4",

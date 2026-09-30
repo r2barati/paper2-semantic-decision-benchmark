@@ -4,6 +4,7 @@ Reads only queries, corpus, and BM25 candidate IDs. No qrels are attached or
 read. The scoring recipe is the frozen Qwen3-Reranker-0.6B yes/no-logit method.
 """
 
+import base64
 import hashlib
 import json
 import os
@@ -24,6 +25,32 @@ EXPECTED_CUDA = "12.8"
 EXPECTED_PYTHON = "3.12"
 EXPECTED_RUNTIME_LOCK_SHA256 = "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10"
 EXPECTED_SMOKE_FIXTURE_SHA256 = "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+# The frozen ``sem2act-v5-rerank-inputs`` dataset v1 carries exactly three
+# result-bearing files and no smoke fixture, so the non-result-bearing smoke
+# gate is embedded here and pinned by hash instead of being read from disk.
+SMOKE_FIXTURE_B64 = (
+    "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgImZpeHR1cmVfaWQiOiAic2VtMmFjdC12NS1ydW50"
+    "aW1lLXNtb2tlLXYxIiwKICAicHVycG9zZSI6ICJub24tcmVzdWx0LWJlYXJpbmcgbW9kZWwgbG9h"
+    "ZCwgdG9rZW5pemF0aW9uLCBzY2hlbWEsIGFuZCBDVURBIHNtb2tlIiwKICAicXVlcnlfaWQiOiAi"
+    "cnVudGltZS1zbW9rZS1xMDAwMCIsCiAgInF1ZXJ5X3RleHQiOiAiQXNzZXNzIHRoZSBjdXJyZW50"
+    "IG9wZXJhdGlvbmFsIHJpc2sgZm9yIHRoZSBOb3J0aHdpbmQgZGlzdHJpYnV0aW9uIG5vZGUgZHVy"
+    "aW5nIHRoaXMgcGxhbm5pbmcgd2luZG93LiIsCiAgImVudGl0eV9ub2RlIjogIk5vcnRod2luZCBk"
+    "aXN0cmlidXRpb24gbm9kZSIsCiAgImRvY3VtZW50cyI6IFsKICAgIHsKICAgICAgImRvY19pZCI6"
+    "ICJydW50aW1lLXNtb2tlLWQwMDAxIiwKICAgICAgInRleHQiOiAiTm9ydGh3aW5kIHN1cHBsaWVy"
+    "IGJ1bGxldGluOiBpbmJvdW5kIHJlcGxlbmlzaG1lbnQgaXMgZGVsYXllZCBieSBmb3VyIHBlcmlv"
+    "ZHMgYmVjYXVzZSBvZiBhIGN1cnJlbnQgcG9ydCBkaXNydXB0aW9uLiIKICAgIH0sCiAgICB7CiAg"
+    "ICAgICJkb2NfaWQiOiAicnVudGltZS1zbW9rZS1kMDAwMiIsCiAgICAgICJ0ZXh0IjogIk5vcnRo"
+    "d2luZCBvcGVyYXRpb25zIG5vdGU6IGN1c3RvbWVyIG9yZGVycyByZW1haW4gd2l0aGluIHRoZSBu"
+    "b3JtYWwgc2Vhc29uYWwgcmFuZ2UgZm9yIHRoaXMgcGxhbm5pbmcgd2luZG93LiIKICAgIH0sCiAg"
+    "ICB7CiAgICAgICJkb2NfaWQiOiAicnVudGltZS1zbW9rZS1kMDAwMyIsCiAgICAgICJ0ZXh0Ijog"
+    "Ik5vcnRod2luZCBtYXJrZXQgYnJpZWY6IGEgY3VycmVudCBwcm9tb3Rpb24gaXMgYXNzb2NpYXRl"
+    "ZCB3aXRoIGEgcG9zc2libGUgZGVtYW5kIGluY3JlYXNlIGF0IG5lYXJieSBvdXRsZXRzLiIKICAg"
+    "IH0KICBdLAogICJleHBlY3RlZCI6IHsKICAgICJyZXJhbmtlciI6ICJmaW5pdGVfeWVzX25vX3Nj"
+    "b3JlIiwKICAgICJDMSI6IFsibm9ybWFsIiwgInN1cHBsaWVyX2RlbGF5IiwgImRlbWFuZF9zdXJn"
+    "ZSIsICJlc3RpbWF0ZWRfbHRfaW5jcmVhc2UiLCAiZXN0aW1hdGVkX2R1cmF0aW9uIiwgImVzdGlt"
+    "YXRlZF9kZW1hbmRfbXVsdGlwbGllciJdLAogICAgIkMzIjogWyJlbnRpdHlfbWF0Y2giLCAiZXZl"
+    "bnQiLCAiZnJlc2giLCAic3RhbmNlIiwgImNvbmZpZGVuY2UiXQogIH0KfQo="
+)
 
 
 def resolve_model_token() -> str:
@@ -88,6 +115,14 @@ def strip_transport(text):
 
 def sha(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()
+
+
+def load_smoke_fixture() -> dict:
+    raw = base64.b64decode(SMOKE_FIXTURE_B64)
+    digest = hashlib.sha256(raw).hexdigest()
+    if digest != EXPECTED_SMOKE_FIXTURE_SHA256:
+        raise SystemExit(f"embedded smoke fixture hash drift: {digest}")
+    return json.loads(raw.decode())
 
 
 def main():
@@ -162,15 +197,13 @@ def main():
             dim=1
         )[:, 1].exp().tolist()
 
-    smoke_path = find_input("runtime_smoke_v1.json")
-    if sha(smoke_path) != EXPECTED_SMOKE_FIXTURE_SHA256:
-        raise SystemExit("reranker smoke fixture hash drift")
-    smoke = json.loads(open(smoke_path).read())
+    smoke = load_smoke_fixture()
     smoke_scores = score_batch([(smoke["query_text"], smoke["documents"][0]["text"])])
     if len(smoke_scores) != 1 or not __import__("math").isfinite(smoke_scores[0]):
         raise SystemExit("reranker smoke schema/execution failure")
     smoke_manifest = {
         "status": "pass", "fixture_sha256": EXPECTED_SMOKE_FIXTURE_SHA256,
+        "fixture_source": "embedded",
         "schema": "one finite reranker score", "n_calls": 1,
     }
 

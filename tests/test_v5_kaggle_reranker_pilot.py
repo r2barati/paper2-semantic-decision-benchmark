@@ -586,6 +586,25 @@ class FullRerankerPolicyTests(unittest.TestCase):
         self.assertIn('os.environ["HF_HOME"] = "/tmp/hf-cache"', source)
         self.assertIn('os.environ["HF_HUB_CACHE"] = "/tmp/hf-cache/hub"', source)
 
+    def test_smoke_gate_is_embedded_and_hash_pinned(self) -> None:
+        """The frozen input dataset v1 has no smoke fixture; the full kernel
+        must embed the exact accepted fixture bytes by hash, never read them
+        from the inputs (FileNotFoundError-regression)."""
+        import base64
+
+        constants = _module_constants(FULL_KERNEL_REL)
+        fixture = ROOT / "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"
+        decoded = base64.b64decode(constants["SMOKE_FIXTURE_B64"])
+        self.assertEqual(hashlib.sha256(decoded).hexdigest(),
+                         constants["EXPECTED_SMOKE_FIXTURE_SHA256"])
+        self.assertEqual(hashlib.sha256(fixture.read_bytes()).hexdigest(),
+                         constants["EXPECTED_SMOKE_FIXTURE_SHA256"])
+        self.assertEqual(decoded, fixture.read_bytes())
+        source = (ROOT / FULL_KERNEL_REL).read_text()
+        self.assertNotIn('find_input("runtime_smoke_v1.json")', source)
+        self.assertIn("load_smoke_fixture()", source)
+        self.assertIn('"fixture_source": "embedded"', source)
+
 
 if __name__ == "__main__":
     unittest.main()

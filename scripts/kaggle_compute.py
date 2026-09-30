@@ -1530,11 +1530,32 @@ def _verify_v5_qwen(dest, job):
         raise SystemExit("v5 Qwen failure/qrel gate failed")
     if manifest.get("credential_source") not in ("public_unauthenticated", "hf_token_kaggle_secret"):
         raise SystemExit("v5 Qwen credential source gate failed")
+    if manifest.get("runtime_amendment") != "sem2act-v5-qwen-runtime-amendment-2":
+        raise SystemExit("v5 Qwen runtime amendment gate failed")
+    rt = manifest.get("post_install_runtime", {})
+    if (rt.get("torch"), rt.get("cuda_reported")) != ("2.8.0+cu128", "12.8"):
+        raise SystemExit("v5 Qwen post-install runtime tuple gate failed")
+    if rt.get("vllm") != "0.11.0":
+        raise SystemExit("v5 Qwen inference package gate failed")
+    for _k, _v in (("transformers", "4.57.6"), ("tokenizers", "0.22.2"),
+                   ("triton", "3.4.0"), ("xformers", "0.0.32.post1"),
+                   ("torchvision", "0.23.0"), ("torchaudio", "2.8.0"),
+                   ("openai", "2.48.0"), ("pydantic", "2.12.5")):
+        if rt.get("packages", {}).get(_k) != _v:
+            raise SystemExit(f"v5 Qwen resolved-dependency gate failed: {_k}")
+    if rt.get("cuda_available") is not True or rt.get("matmul_pass") is not True:
+        raise SystemExit("v5 Qwen CUDA/matmul gate failed")
+    if "T4" not in str(rt.get("device_name", "")):
+        raise SystemExit("v5 Qwen GPU device gate failed")
     if manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
         raise SystemExit("v5 Qwen runtime lock hash drift")
     smoke = manifest.get("smoke", {})
     if smoke.get("status") != "pass" or smoke.get("fixture_sha256") != _sha(ROOT / "versions/sem2act-v5/fixtures/runtime_smoke_v1.json"):
         raise SystemExit("v5 Qwen smoke gate failed")
+    resp = smoke.get("response_sha256", [])
+    if (not isinstance(resp, list) or len(resp) != 2
+            or any(not isinstance(h, str) or len(h) != 64 for h in resp)):
+        raise SystemExit("v5 Qwen smoke response gate failed")
     if manifest.get("expected_calls") != 2880 or manifest.get("actual_calls") != 2880:
         raise SystemExit("v5 Qwen call-count gate failed")
     if manifest.get("n_cache_files") != 2880 or manifest.get("n_fail") != 0:

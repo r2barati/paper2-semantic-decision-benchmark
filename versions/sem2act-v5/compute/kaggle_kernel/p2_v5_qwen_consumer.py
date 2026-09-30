@@ -22,8 +22,21 @@ MODEL = "Qwen/Qwen3-8B-AWQ"
 EXPECTED_REVISION = "4da05a8edb55c6046cce958586c33b61da07bb79"
 EXPECTED_PROMPT_SHAS = {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"}
 PINNED_TRANSFORMERS = "4.57.6"
-EXPECTED_TORCH = "2.10.0+cu128"
+EXPECTED_IMAGE_TORCH = "2.10.0+cu128"
+EXPECTED_RUNTIME_TORCH = "2.8.0+cu128"
 EXPECTED_CUDA = "12.8"
+EXPECTED_VLLM = "0.11.0"
+EXPECTED_RUNTIME_PACKAGES = {
+    "transformers": "4.57.6",
+    "tokenizers": "0.22.2",
+    "triton": "3.4.0",
+    "xformers": "0.0.32.post1",
+    "torchvision": "0.23.0",
+    "torchaudio": "2.8.0",
+    "openai": "2.48.0",
+    "pydantic": "2.12.5",
+}
+RUNTIME_AMENDMENT_ID = "sem2act-v5-qwen-runtime-amendment-2"
 EXPECTED_RUNTIME_LOCK_SHA256 = "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10"
 EXPECTED_SMOKE_FIXTURE_SHA256 = "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
 SYSTEMS = ("bm25", "rerank", "oracle")
@@ -35,6 +48,68 @@ EXPECTED_PUBLIC_FILES = {
     "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
     "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
 }
+_POST_INSTALL_PROBE = (
+    "import json\n"
+    "info = {}\n"
+    "import torch\n"
+    "info['torch'] = torch.__version__\n"
+    "info['cuda_reported'] = str(torch.version.cuda or '')\n"
+    "info['cuda_available'] = bool(torch.cuda.is_available())\n"
+    "info['device_count'] = int(torch.cuda.device_count()) if info['cuda_available'] else 0\n"
+    "info['device_name'] = (torch.cuda.get_device_name(0) if (info['cuda_available'] and info['device_count'] > 0) else '')\n"
+    "info['matmul_pass'] = False\n"
+    "if info['cuda_available'] and info['device_count'] > 0:\n"
+    "    a = torch.randn(256, 256, device='cuda', dtype=torch.float16)\n"
+    "    b = torch.randn(256, 256, device='cuda', dtype=torch.float16)\n"
+    "    info['matmul_pass'] = bool(torch.isfinite(torch.matmul(a, b)).all().item())\n"
+    "import vllm\n"
+    "info['vllm'] = vllm.__version__\n"
+    "import importlib.metadata as _md\n"
+    "pkgs = {}\n"
+    "for _p in ['transformers', 'tokenizers', 'triton', 'xformers', 'torchvision', 'torchaudio', 'openai', 'pydantic']:\n"
+    "    try:\n"
+    "        pkgs[_p] = _md.version(_p)\n"
+    "    except Exception:\n"
+    "        pkgs[_p] = None\n"
+    "info['packages'] = pkgs\n"
+    "print(json.dumps(info))\n"
+)
+
+
+def verify_post_install_runtime() -> dict:
+    """Assert the frozen post-install inference runtime in a fresh interpreter.
+
+    Runs after pip install so the fresh process imports torch 2.8 + vLLM.
+    Returns the runtime record for the run manifest. Fails closed on drift.
+    """
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", _POST_INSTALL_PROBE],
+            capture_output=True, text=True, check=False, timeout=600)
+    except subprocess.TimeoutExpired:
+        raise SystemExit("post-install runtime probe timed out")
+    if proc.returncode != 0:
+        raise SystemExit(
+            f"post-install runtime probe failed: {(proc.stderr or '')[-500:]}")
+    try:
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+    except Exception:
+        raise SystemExit("post-install runtime probe returned no JSON")
+    if ((info.get("torch"), info.get("cuda_reported"))
+            != (EXPECTED_RUNTIME_TORCH, EXPECTED_CUDA)):
+        raise SystemExit(
+            f"post-install Torch/CUDA mismatch: {(info.get('torch'), info.get('cuda_reported'))}")
+    if info.get("vllm") != EXPECTED_VLLM:
+        raise SystemExit(f"post-install vLLM mismatch: {info.get('vllm')}")
+    pkgs = info.get("packages", {})
+    for name, want in EXPECTED_RUNTIME_PACKAGES.items():
+        if pkgs.get(name) != want:
+            raise SystemExit(f"post-install package drift: {name}={pkgs.get(name)}")
+    if info.get("cuda_available") is not True or info.get("matmul_pass") is not True:
+        raise SystemExit("post-install CUDA/matmul check failed")
+    if "T4" not in str(info.get("device_name", "")):
+        raise SystemExit(f"post-install GPU device mismatch: {info.get('device_name')}")
+    return info
 
 
 def find_input(name: str) -> Path:
@@ -171,7 +246,7 @@ def main() -> int:
 
     import torch
     before = (torch.__version__, str(torch.version.cuda or ""))
-    if before != (EXPECTED_TORCH, EXPECTED_CUDA):
+    if before != (EXPECTED_IMAGE_TORCH, EXPECTED_CUDA):
         raise SystemExit(f"Kaggle image Torch/CUDA mismatch: {before}")
     subprocess.run(
         [sys.executable, "-m", "pip", "install", "-q",
@@ -179,13 +254,7 @@ def main() -> int:
          f"transformers=={PINNED_TRANSFORMERS}"],
         check=True,
     )
-    probe = subprocess.run(
-        [sys.executable, "-c", "import json,torch; print(json.dumps([torch.__version__, str(torch.version.cuda or '')]))"],
-        capture_output=True, text=True, check=True,
-    )
-    after = tuple(json.loads(probe.stdout.strip().splitlines()[-1]))
-    if after != before:
-        raise SystemExit(f"package installation changed Kaggle Torch/CUDA: {before} -> {after}")
+    runtime_info = verify_post_install_runtime()
     os.environ["PAPER2_V3_CACHE_DIR"] = "/kaggle/working/cache_out"
     os.environ["LLM_BASE_URL"] = "http://127.0.0.1:8000/v1"
     os.environ["LLM_API_KEY"] = "local"
@@ -237,12 +306,14 @@ def main() -> int:
             (consumers.PROMPT_C3_DOC,
              f"Operator's own node: {smoke['entity_node']}\n\nEvidence document:\n{smoke['documents'][0]['text']}"),
         ]
+        smoke_raw_shas = []
         for prompt, user in smoke_users:
             response = smoke_client.chat.completions.create(
                 model=MODEL, temperature=0, max_tokens=256,
                 messages=[{"role": "system", "content": prompt}, {"role": "user", "content": user}],
             )
             raw = response.choices[0].message.content or ""
+            smoke_raw_shas.append(hashlib.sha256(raw.encode()).hexdigest())
             parsed = consumers._parse_json(raw)
             required = (
                 {"normal", "supplier_delay", "demand_surge",
@@ -256,6 +327,7 @@ def main() -> int:
         smoke_manifest = {
             "status": "pass", "fixture_sha256": EXPECTED_SMOKE_FIXTURE_SHA256,
             "schema": "C1/C3 JSON objects", "n_calls": 2,
+            "response_sha256": smoke_raw_shas,
         }
         belief_rows = []
         failures = []
@@ -361,6 +433,8 @@ def main() -> int:
             "qrels_read": False,
             "credential_source": credential_source,
             "credential_amendment": CREDENTIAL_AMENDMENT_ID,
+            "runtime_amendment": RUNTIME_AMENDMENT_ID,
+            "post_install_runtime": runtime_info,
             "prompt_shas": EXPECTED_PROMPT_SHAS,
             "decoding": {
                 "temperature": 0.0,

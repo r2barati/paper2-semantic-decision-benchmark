@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "status": "authorized",
+  "amendment_id": "sem2act-v5-qwen-runtime-amendment-2",
+  "scope": "runtime only (credential amendment 1 remains in force)",
+  "gate_utc": "2026-09-30T11:45:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "amends": {
+    "base_runtime_lock": "versions/sem2act-v5/manifests/kaggle_runtime_lock.json",
+    "base_runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+    "base_runtime_lock_unchanged": true,
+    "incompatibility": "vllm==0.11.0 requires torch==2.8.0 exactly, but the lock pinned torch 2.10.0+cu128 with policy exact-pins-preserve-image-torch-cuda-tuple; plain-pip install necessarily downgrades torch and trips the fail-closed guard (v3 evidence)"
+  },
+  "prior_attempts_preserved": {
+    "kernel_id": "136489209",
+    "v1": {"status": "ERROR", "cause": "credential channel", "n_calls": 0, "n_results": 0},
+    "v2": {"status": "ERROR", "cause": "credential channel", "n_calls": 0, "n_results": 0},
+    "v3": {"status": "ERROR", "cause": "post-install torch tuple 2.10.0+cu128 -> 2.8.0+cu128 tripped fail-closed guard; 0/2880 calls, no outputs", "n_calls": 0, "n_results": 0, "classification": "infrastructure-failure (runtime contract)"},
+    "detail_manifest": "versions/sem2act-v5/manifests/execution_attempts/v5-qwen-attempts.json"
+  },
+  "pre_install_image_state": {
+    "role": "image/preflight fact only; does not describe the inference runtime",
+    "python": "3.12",
+    "torch": "2.10.0+cu128",
+    "cuda_reported_by_torch": "12.8"
+  },
+  "post_install_inference_runtime": {
+    "role": "authorized and frozen inference runtime; asserted in-kernel after install, before any result-bearing calls",
+    "vllm": "0.11.0",
+    "torch": "2.8.0+cu128",
+    "cuda_reported_by_torch": "12.8",
+    "transformers": "4.57.6",
+    "tokenizers": "0.22.2",
+    "triton": "3.4.0",
+    "xformers": "0.0.32.post1",
+    "torchvision": "0.23.0",
+    "torchaudio": "2.8.0",
+    "openai": "2.48.0",
+    "pydantic": "2.12.5",
+    "recorded_only": {"numpy": "2.0.2", "safetensors": "0.7.0", "huggingface-hub": "0.36.2"},
+    "install_policy": "exact pins, plain pip, no --no-deps; vllm version unchanged"
+  },
+  "resolve_evidence": {
+    "probe_kernel_id": "136501316",
+    "probe_version_number": 1,
+    "probe_status": "complete",
+    "probe_platform": "Linux-6.12.90+-x86_64-with-glibc2.35, python 3.12.13",
+    "probe_pip_rc": 0,
+    "probe_install_command": "pip install -q vllm==0.11.0 openai==2.48.0 pydantic==2.12.5 transformers==4.57.6"
+  },
+  "in_kernel_gate": {
+    "order": "install -> assert post-install tuple -> CUDA/T4/matmul -> vLLM import -> start server (pinned revision) -> 2-call smoke -> 2880-call loop",
+    "assertions": ["torch 2.8.0+cu128 + cuda 12.8", "cuda_available + device_count>=1 + T4 in device name", "float16 CUDA matmul finite", "vllm 0.11.0 importable", "all frozen package versions", "prompt shas + model/tokenizer revision + decoding + schema + credential_source + qrel-free (existing smoke)"],
+    "on_failure": "fail closed with zero result-bearing calls; preserve as infrastructure attempt; no further package substitutions during EXEC"
+  },
+  "canary_scope": "the previous CUDA canary (136447237 v4) remains evidence that the Kaggle base image/GPU was healthy; it does NOT validate the torch-2.8/vLLM inference runtime; the post-install inference smoke is the relevant runtime gate",
+  "pins_unchanged": {
+    "model": "Qwen/Qwen3-8B-AWQ",
+    "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "prompt_shas": {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"},
+    "abstain_tau": 0.5,
+    "consumer_inputs_manifest_sha256": "76b7c04a3f0dd46830685e458e690249ea156fb053bd7331f88399754123b93e",
+    "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+    "decoding": {"temperature": 0.0, "top_p": 1.0, "max_tokens": 256, "max_model_len": 4096, "enable_thinking": false},
+    "execution_shape": {"n_queries": 240, "n_input_rows": 720, "expected_calls": 2880, "expected_belief_rows": 1440},
+    "credential_policy": "sem2act-v5-qwen-credential-amendment-1 (secret-first, public-only-for-pinned, fail-closed)"
+  },
+  "code_changes": {
+    "kernel": "versions/sem2act-v5/compute/kaggle_kernel/p2_v5_qwen_consumer.py: EXPECTED_TORCH -> EXPECTED_IMAGE_TORCH (2.10.0+cu128, pre-install fact) + EXPECTED_RUNTIME_TORCH (2.8.0+cu128) + EXPECTED_VLLM + EXPECTED_RUNTIME_PACKAGES; post-install probe asserts full tuple; verify_post_install_runtime() in a fresh subprocess (CUDA/T4/matmul/vLLM/versions); run_manifest gains post_install_runtime + runtime_amendment; smoke_manifest gains response_sha256",
+    "verifier": "scripts/kaggle_compute.py _verify_v5_qwen: require runtime_amendment id + post_install_runtime tuple/packages/CUDA/matmul/T4 + smoke response hashes; all prior gates retained"
+  },
+  "applies_from_commit": "git rev-parse HEAD after commit carrying this amendment",
+  "authorizes": {
+    "job": "v5-qwen",
+    "runtime": "post-install inference runtime above",
+    "credential": "sem2act-v5-qwen-credential-amendment-1",
+    "rules": ["run only from a fresh checkout of the commit carrying this amendment", "canary-passed + dataset-verified gates still required; do not re-run preflight or canary", "single v5-qwen run: in-kernel gate first, then 2880-call loop only if the gate passes", "STOP after fetch/verification; no v5-llama, v5-mistral, or assembly"]
+  }
+}

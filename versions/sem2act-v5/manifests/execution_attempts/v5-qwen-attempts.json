@@ -28,5 +28,12 @@
     "status": "complete",
     "finding": "internet ok; kaggle_secrets imports; get_secret raises ConnectionError for HF_TOKEN, DUMMY_NOT_PRESENT, and KAGGLE_USERNAME alike"
   },
-  "v3": "pending under sem2act-v5-qwen-credential-amendment-1"
+  "v3": {
+    "status": "ERROR",
+    "failure": "post-install torch tuple 2.10.0+cu128 -> 2.8.0+cu128 tripped the fail-closed guard at ~378s (credential gate had passed via public_unauthenticated; all pre-install gates passed)",
+    "n_calls": 0,
+    "n_results": 0,
+    "classification": "infrastructure-failure (runtime contract)"
+  },
+  "v4": "pending under sem2act-v5-qwen-runtime-amendment-2"
 }

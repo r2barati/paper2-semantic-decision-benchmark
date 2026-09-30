@@ -141,7 +141,7 @@ def install_runtime_pins() -> None:
     before = (torch.__version__, str(torch.version.cuda or ""))
     if before != (EXPECTED_TORCH, EXPECTED_CUDA):
         raise SystemExit(f"Kaggle image Torch/CUDA mismatch: {before}")
-    if ".".join(str(sys.version_info)[:2]) != EXPECTED_PYTHON:
+    if ".".join(str(part) for part in sys.version_info[:2]) != EXPECTED_PYTHON:
         raise SystemExit(f"Kaggle image Python drift: {sys.version_info[:2]}")
     subprocess.run(
         [sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir",

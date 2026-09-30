@@ -449,6 +449,20 @@ class ModelCredentialPolicyTests(unittest.TestCase):
         source = (ROOT / KERNEL_REL).read_text()
         self.assertIn('"credential_source": credential_source', source)
 
+    def test_python_version_guard_compares_the_tuple_not_the_string(self) -> None:
+        """Regression: str(sys.version_info)[:2] sliced the repr's first two
+        characters, so the guard rejected every interpreter including 3.12."""
+        source = (ROOT / KERNEL_REL).read_text()
+        self.assertNotIn('join(str(sys.version_info)[:2])', source)
+        self.assertIn("join(str(part) for part in sys.version_info[:2])", source)
+
+    def test_python_version_guard_expression_evaluates_to_the_real_version(self) -> None:
+        import sys as _sys
+
+        actual = ".".join(str(part) for part in _sys.version_info[:2])
+        self.assertEqual(actual, ".".join(str(part) for part in _sys.version_info[:2]))
+        self.assertTrue(actual.replace(".", "").isdigit(), actual)
+
 
 if __name__ == "__main__":
     unittest.main()

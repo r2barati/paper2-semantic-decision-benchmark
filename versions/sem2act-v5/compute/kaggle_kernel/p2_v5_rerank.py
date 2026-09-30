@@ -21,19 +21,36 @@ MAXLEN = 1024
 PINNED_TRANSFORMERS = "4.57.6"
 EXPECTED_TORCH = "2.10.0+cu128"
 EXPECTED_CUDA = "12.8"
+EXPECTED_PYTHON = "3.12"
 EXPECTED_RUNTIME_LOCK_SHA256 = "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10"
 EXPECTED_SMOKE_FIXTURE_SHA256 = "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
 
 
-def require_hf_secret():
+def resolve_model_token() -> str:
+    """Use the Kaggle secret when it is readable; ungated pins may load anonymously.
+
+    Mirrors the CPU canary policy and the accepted pilot. A transport-level
+    failure from the secrets backend must not hard-fail an ungated pin, but
+    must still hard-fail a gated one so a gated model is never silently
+    fetched without credentials.
+    """
+    gated = MODEL_ID.startswith("meta-llama/")
     try:
         from kaggle_secrets import UserSecretsClient
+
         token = UserSecretsClient().get_secret("HF_TOKEN")
     except Exception as exc:
-        raise SystemExit(f"HF_TOKEN Kaggle secret is unavailable: {type(exc).__name__}")
+        if gated:
+            raise SystemExit(f"HF_TOKEN Kaggle secret unavailable: {type(exc).__name__}") from exc
+        os.environ.pop("HF_TOKEN", None)
+        return "public_unauthenticated"
     if not token:
-        raise SystemExit("HF_TOKEN Kaggle secret is empty")
+        if gated:
+            raise SystemExit("HF_TOKEN Kaggle secret is empty")
+        os.environ.pop("HF_TOKEN", None)
+        return "public_unauthenticated"
     os.environ["HF_TOKEN"] = token
+    return "kaggle_secret"
 
 
 def install_runtime_pins():
@@ -41,6 +58,8 @@ def install_runtime_pins():
     before = (torch.__version__, str(torch.version.cuda or ""))
     if before != (EXPECTED_TORCH, EXPECTED_CUDA):
         raise SystemExit(f"Kaggle image Torch/CUDA mismatch: {before}")
+    if ".".join(str(part) for part in sys.version_info[:2]) != EXPECTED_PYTHON:
+        raise SystemExit(f"Kaggle image Python drift: {sys.version_info[:2]}")
     subprocess.run(
         [sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir",
          f"transformers=={PINNED_TRANSFORMERS}"],
@@ -78,11 +97,14 @@ def main():
     if not __import__("torch").cuda.is_available():
         raise SystemExit("v5 reranker requires CUDA")
 
-    require_hf_secret()
+    credential_source = resolve_model_token()
     install_runtime_pins()
 
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    os.environ["HF_HOME"] = "/tmp/hf-cache"
+    os.environ["HF_HUB_CACHE"] = "/tmp/hf-cache/hub"
 
     docs = {
         x["_id"]: x["text"]
@@ -101,7 +123,8 @@ def main():
     )
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID, revision=REVISION, trust_remote_code=True,
-        dtype=torch.float16, device_map="auto"
+        dtype=torch.float16, attn_implementation="eager",
+        device_map={"": "cuda:0"},
     ).eval()
 
     yes = tokenizer.convert_tokens_to_ids("yes")
@@ -175,6 +198,8 @@ def main():
         "model": MODEL_ID,
         "revision": REVISION,
         "runtime_lock_sha256": EXPECTED_RUNTIME_LOCK_SHA256,
+        "credential_source": credential_source,
+        "attention_backend": "eager",
         "smoke": smoke_manifest,
         "instruction_sha256": hashlib.sha256(INSTRUCTION.encode()).hexdigest(),
         "candidate_depth": TOPN,

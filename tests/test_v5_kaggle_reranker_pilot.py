@@ -192,19 +192,43 @@ class KaggleRerankerPilotTests(unittest.TestCase):
                 with tempfile_lock(self, snapshot):
                     self.assertRaises(SystemExit, freeze.expected_manifest)
 
-    def test_submission_gate_locks_the_full_reranker_behind_pilot_acceptance(self) -> None:
+    def test_submission_gate_accepts_the_pilot_and_authorizes_the_full_reranker(self) -> None:
         job = compute.JOBS["v5-rerank"]
         self.assertEqual(job["verify"], "v5rerank")
-        self.assertFalse(compute.V5_PILOT_ACCEPTANCE.exists())
-        with self.assertRaisesRegex(SystemExit, "Codex acceptance"):
-            compute._require_v5_full_reranker_acceptance("v5-rerank")
-        # The pilot and unrelated jobs are not gated on their own acceptance.
+        accepted = json.loads(compute.V5_PILOT_ACCEPTANCE.read_text())
+        self.assertEqual(accepted["status"], "accepted")
+        self.assertIsNone(compute._require_v5_full_reranker_acceptance("v5-rerank"))
         self.assertIsNone(compute._require_v5_full_reranker_acceptance("v5-rerank-pilot"))
         self.assertIsNone(compute._require_v5_full_reranker_acceptance("v5-qwen"))
+        self.assertEqual(accepted["job"], compute.JOBS["v5-rerank-pilot"]["slug"])
         self.assertIn("v5-rerank-pilot", compute.JOBS)
         self.assertEqual(compute.JOBS["v5-rerank-pilot"]["dataset_slug"],
                          "sem2act-v5-rerank-inputs")
         self.assertTrue(compute.JOBS["v5-rerank-pilot"]["gpu"])
+
+    def test_acceptance_record_binds_the_pilot_evidence_and_authorization(self) -> None:
+        accepted = json.loads(compute.V5_PILOT_ACCEPTANCE.read_text())
+        freeze = json.loads((ROOT / "versions/sem2act-v5/manifests/kaggle_reranker_runtime_freeze.json").read_text())
+        outputs = ROOT / compute.JOBS["v5-rerank-pilot"]["dest_dir"]
+        self.assertEqual(accepted["status"], "accepted")
+        self.assertEqual(accepted["protocol_hash"], PROTOCOL_HASH)
+        self.assertEqual(accepted["job"], compute.JOBS["v5-rerank-pilot"]["slug"])
+        self.assertEqual(accepted["lock_id"], freeze["lock_id"])
+        self.assertEqual(accepted["runtime_lock_sha256"], compute._sha(ROOT / LOCK_REL))
+        freeze_rel = "versions/sem2act-v5/manifests/kaggle_reranker_runtime_freeze.json"
+        self.assertEqual(accepted["runtime_freeze_sha256"], compute._sha(ROOT / freeze_rel))
+        self.assertEqual(accepted["rerank_trec_sha256"], compute._sha(outputs / "rerank.trec"))
+        self.assertEqual(accepted["n_queries"], 20)
+        self.assertEqual(accepted["n_scores"], 1000)
+        self.assertTrue(accepted["full_reranker_authorized"])
+        self.assertEqual(accepted["authorizes"]["job"], "v5-rerank")
+        self.assertEqual(accepted["authorizes"]["queries"], 240)
+        self.assertEqual(accepted["evidence"]["parent_runtime_lock_sha256"],
+                         compute._sha(ROOT / PARENT_LOCK_REL))
+        upload = json.loads((ROOT / UPLOAD_REL).read_text())["remote_sha256"]
+        self.assertEqual(accepted["evidence"]["input_sha256"], upload)
+        self.assertEqual(accepted["evidence"]["credential_source"], "public_unauthenticated")
+        self.assertEqual(accepted["evidence"]["n_fail"], 0)
 
     def test_pilot_and_full_reranker_share_one_remote_verified_input_dataset(self) -> None:
         pilot = compute.JOBS["v5-rerank-pilot"]
@@ -462,6 +486,104 @@ class ModelCredentialPolicyTests(unittest.TestCase):
         actual = ".".join(str(part) for part in _sys.version_info[:2])
         self.assertEqual(actual, ".".join(str(part) for part in _sys.version_info[:2]))
         self.assertTrue(actual.replace(".", "").isdigit(), actual)
+
+
+class FullRerankerPolicyTests(unittest.TestCase):
+    """The full 240-query kernel carries the same credential-fallback and
+    provenance guards as the accepted pilot, and never stages model weights
+    under /kaggle/working so outputs stay small."""
+
+    def _kernel(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "p2_v5_rerank_under_test", ROOT / FULL_KERNEL_REL
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def _with_fake_secrets(self, behaviour):
+        import sys
+        import types
+
+        class FakeClient:
+            def get_secret(self, key):
+                if isinstance(behaviour, BaseException):
+                    raise behaviour
+                if behaviour is None:
+                    return ""
+                return behaviour
+
+        sys.modules["kaggle_secrets"] = types.SimpleNamespace(UserSecretsClient=FakeClient)
+        self.addCleanup(sys.modules.pop, "kaggle_secrets", None)
+
+    def test_transport_failure_falls_back_to_anonymous_for_ungated_pin(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(ConnectionError("secrets backend unreachable"))
+        saved = os.environ.pop("HF_TOKEN", None)
+        self.addCleanup(lambda: os.environ.__setitem__("HF_TOKEN", saved) if saved else None)
+        self.assertEqual(kernel.resolve_model_token(), "public_unauthenticated")
+        self.assertNotIn("HF_TOKEN", os.environ)
+
+    def test_readable_secret_is_used_and_recorded(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets("hf_example_token")
+        self.addCleanup(os.environ.pop, "HF_TOKEN", None)
+        self.assertEqual(kernel.resolve_model_token(), "kaggle_secret")
+        self.assertEqual(os.environ["HF_TOKEN"], "hf_example_token")
+
+    def test_empty_secret_falls_back_to_anonymous(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(None)
+        saved = os.environ.pop("HF_TOKEN", None)
+        self.addCleanup(lambda: os.environ.__setitem__("HF_TOKEN", saved) if saved else None)
+        self.assertEqual(kernel.resolve_model_token(), "public_unauthenticated")
+
+    def test_gated_model_still_hard_fails_on_transport_failure(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(ConnectionError("secrets backend unreachable"))
+        original = kernel.MODEL_ID
+        kernel.MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
+        self.addCleanup(setattr, kernel, "MODEL_ID", original)
+        with self.assertRaises(SystemExit) as caught:
+            kernel.resolve_model_token()
+        self.assertIn("ConnectionError", str(caught.exception))
+
+    def test_gated_model_still_hard_fails_on_empty_secret(self) -> None:
+        kernel = self._kernel()
+        self._with_fake_secrets(None)
+        original = kernel.MODEL_ID
+        kernel.MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
+        self.addCleanup(setattr, kernel, "MODEL_ID", original)
+        with self.assertRaises(SystemExit):
+            kernel.resolve_model_token()
+
+    def test_kernel_uses_the_ungated_policy_not_the_old_hard_fail(self) -> None:
+        source = (ROOT / FULL_KERNEL_REL).read_text()
+        self.assertNotIn("require_hf_secret", source)
+        self.assertIn("resolve_model_token", source)
+
+    def test_manifest_records_credential_source_and_attention_backend(self) -> None:
+        source = (ROOT / FULL_KERNEL_REL).read_text()
+        self.assertIn('"credential_source": credential_source', source)
+        self.assertIn('"attention_backend": "eager"', source)
+
+    def test_python_version_guard_compares_the_tuple_not_the_string(self) -> None:
+        source = (ROOT / FULL_KERNEL_REL).read_text()
+        self.assertNotIn('join(str(sys.version_info)[:2])', source)
+        self.assertIn("join(str(part) for part in sys.version_info[:2])", source)
+        self.assertIn('EXPECTED_PYTHON = "3.12"', source)
+
+    def test_model_load_matches_the_accepted_pilot_eager_single_t4(self) -> None:
+        source = (ROOT / FULL_KERNEL_REL).read_text()
+        self.assertIn('attn_implementation="eager"', source)
+        self.assertIn('device_map={"": "cuda:0"}', source)
+
+    def test_model_cache_is_pinned_outside_the_kaggle_working_dir(self) -> None:
+        source = (ROOT / FULL_KERNEL_REL).read_text()
+        self.assertIn('os.environ["HF_HOME"] = "/tmp/hf-cache"', source)
+        self.assertIn('os.environ["HF_HUB_CACHE"] = "/tmp/hf-cache/hub"', source)
 
 
 if __name__ == "__main__":

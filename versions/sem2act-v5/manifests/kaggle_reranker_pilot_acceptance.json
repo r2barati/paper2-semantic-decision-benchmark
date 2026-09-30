@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "status": "accepted",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "job": "sem2act-v5-rerank-pilot",
+  "lock_id": "sem2act-v5-kaggle-reranker-pilot-v1",
+  "runtime_lock_sha256": "6c144ac7d1e36ba2d68914466b054aab1dd9e73e52127411d0a652680a3db34c",
+  "runtime_freeze_sha256": "e0c7fd0241fdf13f708a6e0b7a5905d24abb9e15a1bff5f487c487459a1e2def",
+  "rerank_trec_sha256": "90626d5442244fcda29f3fa9b2e29bd721e44e7c5f5b2cb841d0ce85fd15cde7",
+  "n_queries": 20,
+  "n_scores": 1000,
+  "full_reranker_authorized": true,
+  "authorizes": {
+    "job": "v5-rerank",
+    "queries": 240,
+    "candidate_depth": 50,
+    "expected_scores": 12000,
+    "gate": "Codex acceptance in kaggle_compute.py _require_v5_full_reranker_acceptance"
+  },
+  "evidence": {
+    "kernel_id": "136447376",
+    "kernel_version_number": 4,
+    "kernel_status": "complete",
+    "experiment_id": "v5-reranker-pilot",
+    "status": "pass",
+    "fetched_utc": "2026-09-30T04:01:42Z",
+    "credential_source": "public_unauthenticated",
+    "n_fail": 0,
+    "qrels_read": false,
+    "dtype": "float16",
+    "attention_backend": "eager",
+    "model": "Qwen/Qwen3-Reranker-0.6B",
+    "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "model_snapshot_files_sha256": "5219a20fa423e1054c34b93a5a8c0ffa640ca52320181603be32d7afe26de353",
+    "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+    "instruction_sha256": "27878869801ce25ce6722edf80f57169fc72ee528863f82e9a4a942e755f0ea0",
+    "parent_runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+    "input_sha256": {
+      "queries.jsonl": "c457d93ea195d82a738219ad152382380d89b4b5e0c3fabde5cf4d6d33434986",
+      "corpus.jsonl": "6cab24bc7420635674856f35345cd4c5c30a23d2d0ee243a79b69d36bc8ab0e1",
+      "rerank_candidates.jsonl": "11dcac88ad210447ac16f78decbb5dd09776648e14b083aa3d89f67c8b701803"
+    }
+  }
+}

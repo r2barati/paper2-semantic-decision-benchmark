@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "family": "qwen",
+  "status": "staged",
+  "staged_for": "kaggle_consumer_authorization_gate",
+  "execution_authorized": false,
+  "qrels_read": false,
+  "qrel_free": true,
+  "model_id": "Qwen/Qwen3-8B-AWQ",
+  "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "files": {
+    "consumers_v3.py": {
+      "sha256": "e8c607596a97141abbe662a84b41f874587f007b026687b91d4eb68fdaa74fce",
+      "bytes": 9515
+    },
+    "events.py": {
+      "sha256": "0c56ee0864e5b6b447176fa1eef4554469f586e14e0660c6d034855959cc9dc8",
+      "bytes": 14929
+    },
+    "evidence_inputs.jsonl": {
+      "sha256": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+      "bytes": 809569
+    },
+    "interpreter.py": {
+      "sha256": "8634dd3bfab604f92030ba64cb46932c718e51e3b82dc07547cea6bbb2659b73",
+      "bytes": 29068
+    },
+    "model_spec.json": {
+      "sha256": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be",
+      "bytes": 1318
+    },
+    "runtime_smoke_v1.json": {
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+      "bytes": 1184
+    }
+  },
+  "retrieval_bindings": {
+    "rerank_trec_sha256": "83143e440011603b6db295461b4c851c3232f91146064d329bd0b9a7cabdda99",
+    "run_manifest_sha256": "10df4193f5cf27aae67ae10a805fa83e9d072160dbdc60c9fd2eecb34e8e3cfe",
+    "runtime_versions_sha256": "a60190b96d0b87f5545d01c7b47b7a326e3c2376e569455ffd67603f55fbd0f1"
+  },
+  "staging": {
+    "tool": "versions/sem2act-v5/experiments/stage_consumer_inputs.py",
+    "tool_sha256": "45d54febc25231868951c61d2f602a9775f94df240f93da39f44cdb0b701b47e",
+    "staged_from_commit": "ef9f2ab9301108fb351b06fbc71c22b4cb11ef33",
+    "staged_on_branch": "sem2act-v5-pilot-execution-20260929"
+  },
+  "model_identity": {
+    "route": "kaggle-gpu-vllm",
+    "execution_identity": "huggingface:Qwen/Qwen3-8B-AWQ@4da05a8edb55c6046cce958586c33b61da07bb79",
+    "kernel_pins_revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "accepted_kaggle_snapshot": {
+      "manifest": "versions/sem2act-v5/manifests/cpu_source_probes/qwen/acceptance_manifest.json",
+      "content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+      "file_count": 12
+    },
+    "hf_revision_snapshot": {
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "verified_file_count": 12,
+      "byte_identical_to_accepted": 10,
+      "differing_files": [
+        "README.md",
+        "tokenizer_config.json"
+      ],
+      "weights_identical": true,
+      "aggregate_files_sha256": "04f7e629beeb5f8348cae7a5476ba915c9eca08f5556a5ba809cef42d9d08d1e"
+    },
+    "decision": "HF revision 4da05a8edb55c6046cce958586c33b61da07bb79 is the execution identity for this GPU (Kaggle vLLM) consumer route.",
+    "cpu_route_frozen_content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5",
+    "cpu_route_content_sha256_unchanged": true
+  }
+}

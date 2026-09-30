@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "family": "llama",
+  "status": "prepared",
+  "prepared_as": "provenance_only",
+  "execution_authorized": false,
+  "qrels_read": false,
+  "qrel_free": true,
+  "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+  "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "files": {
+    "evidence_inputs.jsonl": {
+      "sha256": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+      "bytes": 809569
+    },
+    "model_spec.json": {
+      "sha256": "9a75453a84dbc3fba2da1808d745e30fa14ebacb0db37f02f68d4ae284dd0d1e",
+      "bytes": 1332
+    },
+    "runtime_smoke_v1.json": {
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+      "bytes": 1184
+    }
+  },
+  "retrieval_bindings": {
+    "rerank_trec_sha256": "83143e440011603b6db295461b4c851c3232f91146064d329bd0b9a7cabdda99",
+    "run_manifest_sha256": "10df4193f5cf27aae67ae10a805fa83e9d072160dbdc60c9fd2eecb34e8e3cfe",
+    "runtime_versions_sha256": "a60190b96d0b87f5545d01c7b47b7a326e3c2376e569455ffd67603f55fbd0f1"
+  },
+  "staging": {
+    "tool": "versions/sem2act-v5/experiments/stage_consumer_inputs.py",
+    "tool_sha256": "45d54febc25231868951c61d2f602a9775f94df240f93da39f44cdb0b701b47e",
+    "staged_from_commit": "ef9f2ab9301108fb351b06fbc71c22b4cb11ef33",
+    "staged_on_branch": "sem2act-v5-pilot-execution-20260929"
+  }
+}

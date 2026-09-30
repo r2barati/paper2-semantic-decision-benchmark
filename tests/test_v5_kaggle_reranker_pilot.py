@@ -212,6 +212,7 @@ class KaggleRerankerPilotTests(unittest.TestCase):
         outputs = ROOT / compute.JOBS["v5-rerank-pilot"]["dest_dir"]
         self.assertEqual(accepted["status"], "accepted")
         self.assertEqual(accepted["protocol_hash"], PROTOCOL_HASH)
+        self.assertRegex(accepted["execution_sha"], "^[0-9a-f]{40}$")
         self.assertEqual(accepted["job"], compute.JOBS["v5-rerank-pilot"]["slug"])
         self.assertEqual(accepted["lock_id"], freeze["lock_id"])
         self.assertEqual(accepted["runtime_lock_sha256"], compute._sha(ROOT / LOCK_REL))

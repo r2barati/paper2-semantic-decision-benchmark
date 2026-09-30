@@ -4,6 +4,7 @@
   "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
   "job": "sem2act-v5-rerank-pilot",
   "lock_id": "sem2act-v5-kaggle-reranker-pilot-v1",
+  "execution_sha": "429a67dffe5c81a0feac7188f574d60d752775ff",
   "runtime_lock_sha256": "6c144ac7d1e36ba2d68914466b054aab1dd9e73e52127411d0a652680a3db34c",
   "runtime_freeze_sha256": "e0c7fd0241fdf13f708a6e0b7a5905d24abb9e15a1bff5f487c487459a1e2def",
   "rerank_trec_sha256": "90626d5442244fcda29f3fa9b2e29bd721e44e7c5f5b2cb841d0ce85fd15cde7",

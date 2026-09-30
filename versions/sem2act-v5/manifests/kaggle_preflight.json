@@ -1,4 +1,13 @@
 {
+  "canary_fetched_utc": "2026-09-30T06:25:37Z",
+  "canary_job": "sem2act-v5-canary",
+  "canary_output_sha256": "363b5c6f837ebdb70820f04310b0548985e422315f63488210b25d4b1e45a6b1",
+  "canary_verification": {
+    "cuda": "12.8",
+    "device": "Tesla T4",
+    "status": "pass",
+    "torch": "2.10.0+cu128"
+  },
   "checked_utc": "2026-09-30T06:21:28Z",
   "gpu": {
     "refreshAt": "2026-10-03T00:00:00",
@@ -18,5 +27,5 @@
   "runtime_freeze_sha256": "d4b59be43aebaa1d863db1d6291e666418aa897d973253369917374b4e95c326",
   "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
   "schema_version": 1,
-  "status": "quota-passed"
+  "status": "canary-passed"
 }

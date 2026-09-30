@@ -1528,6 +1528,8 @@ def _verify_v5_qwen(dest, job):
         raise SystemExit("wrong v5 Qwen experiment id")
     if manifest.get("status") != "pass" or manifest.get("qrels_read") is not False:
         raise SystemExit("v5 Qwen failure/qrel gate failed")
+    if manifest.get("credential_source") not in ("public_unauthenticated", "hf_token_kaggle_secret"):
+        raise SystemExit("v5 Qwen credential source gate failed")
     if manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
         raise SystemExit("v5 Qwen runtime lock hash drift")
     smoke = manifest.get("smoke", {})

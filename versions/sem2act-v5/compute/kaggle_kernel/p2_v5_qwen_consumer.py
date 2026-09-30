@@ -27,6 +27,14 @@ EXPECTED_CUDA = "12.8"
 EXPECTED_RUNTIME_LOCK_SHA256 = "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10"
 EXPECTED_SMOKE_FIXTURE_SHA256 = "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
 SYSTEMS = ("bm25", "rerank", "oracle")
+CREDENTIAL_AMENDMENT_ID = "sem2act-v5-qwen-credential-amendment-1"
+PUBLIC_MODEL = "Qwen/Qwen3-8B-AWQ"
+PUBLIC_REVISION = "4da05a8edb55c6046cce958586c33b61da07bb79"
+EXPECTED_PUBLIC_FILES = {
+    "config.json": "7457674d8044143cd4159e47deecf28fd6698a9826569094b60d7bead8f351ee",
+    "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+    "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+}
 
 
 def find_input(name: str) -> Path:
@@ -44,7 +52,53 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def require_hf_secret() -> None:
+def _anonymous_get(url: str, timeout: int) -> bytes:
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "sem2act-v5-qwen-consumer/1.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read()
+
+
+def verify_public_revision_anonymous() -> None:
+    """Pre-execution anonymous identity check for the exact pinned public revision.
+
+    No credentials are sent. Fails closed unless the pinned revision resolves
+    anonymously, is public, and the model/tokenizer file identities match.
+    """
+    if MODEL != PUBLIC_MODEL or EXPECTED_REVISION != PUBLIC_REVISION:
+        raise SystemExit(
+            "public credential fallback is restricted to the pinned public model/revision")
+    try:
+        payload = json.loads(_anonymous_get(
+            f"https://huggingface.co/api/models/{MODEL}/revision/{EXPECTED_REVISION}",
+            30).decode())
+    except Exception as exc:
+        raise SystemExit(f"anonymous revision check failed: {type(exc).__name__}")
+    if payload.get("sha") != EXPECTED_REVISION:
+        raise SystemExit("pinned revision sha mismatch (public check)")
+    if payload.get("private") is True:
+        raise SystemExit("pinned model is private; credentials required")
+    for fname, want in EXPECTED_PUBLIC_FILES.items():
+        try:
+            data = _anonymous_get(
+                f"https://huggingface.co/{MODEL}/resolve/{EXPECTED_REVISION}/{fname}", 60)
+        except Exception as exc:
+            raise SystemExit(f"anonymous file check failed for {fname}: {type(exc).__name__}")
+        if hashlib.sha256(data).hexdigest() != want:
+            raise SystemExit(f"{fname} identity drift (public check)")
+
+
+def resolve_credential() -> str:
+    """Secret-first credential resolution; returns the credential_source string.
+
+    Tries the HF_TOKEN Kaggle secret with bounded retries for host boot.
+    If the UserSecrets channel is unavailable (observed as OSError, e.g.
+    ConnectionError), falls back to public_unauthenticated ONLY for the exact
+    pinned, verified-public model/revision, after anonymous revision plus
+    model/tokenizer identity verification. Fails closed on empty secrets,
+    non-channel errors, any gated/private model, and any identity drift.
+    No token is ever written to datasets, files, logs, or the repo.
+    """
     token = None
     last_exc = None
     for _attempt in range(8):
@@ -55,19 +109,24 @@ def require_hf_secret() -> None:
         except Exception as exc:
             last_exc = exc
             time.sleep(15)
-    if token is None:
-        raise SystemExit(
-            "HF_TOKEN Kaggle secret is unavailable: "
-            f"{type(last_exc).__name__}" if last_exc else "HF_TOKEN Kaggle secret is unavailable"
-        )
-    if not token:
+    if token:
+        os.environ["HF_TOKEN"] = token
+        return "hf_token_kaggle_secret"
+    if token is not None and not token:
         raise SystemExit("HF_TOKEN Kaggle secret is empty")
-    os.environ["HF_TOKEN"] = token
+    if last_exc is None:
+        raise SystemExit("HF_TOKEN Kaggle secret is unavailable")
+    if not isinstance(last_exc, OSError):
+        raise SystemExit(f"HF_TOKEN Kaggle secret error: {type(last_exc).__name__}")
+    verify_public_revision_anonymous()
+    os.environ.pop("HF_TOKEN", None)
+    os.environ.pop("HUGGING_FACE_HUB_TOKEN", None)
+    return "public_unauthenticated"
 
 
 def main() -> int:
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    require_hf_secret()
+    credential_source = resolve_credential()
     if any("qrel" in path.name.lower()
            for root_name in ("/kaggle/input", "/kaggle/working")
            for root, _, names in os.walk(root_name)
@@ -300,6 +359,8 @@ def main() -> int:
             "n_cache_files": len(cache_files),
             "n_fail": len(failures),
             "qrels_read": False,
+            "credential_source": credential_source,
+            "credential_amendment": CREDENTIAL_AMENDMENT_ID,
             "prompt_shas": EXPECTED_PROMPT_SHAS,
             "decoding": {
                 "temperature": 0.0,

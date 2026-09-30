@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "job": "v5-qwen",
+  "kernel_id": "136489209",
+  "kernel_slug": "rezabarati2/sem2act-v5-qwen",
+  "attempts": [
+    {
+      "version_number": 1,
+      "status": "ERROR",
+      "failure": "HF_TOKEN Kaggle secret is unavailable: ConnectionError at ~1.2s (fail-closed, pre-compute)",
+      "n_calls": 0,
+      "n_results": 0,
+      "classification": "infrastructure-failure (credential channel)"
+    },
+    {
+      "version_number": 2,
+      "status": "ERROR",
+      "failure": "HF_TOKEN Kaggle secret is unavailable: ConnectionError after 8x15s startup retries (fail-closed, pre-compute)",
+      "n_calls": 0,
+      "n_results": 0,
+      "classification": "infrastructure-failure (credential channel)"
+    }
+  ],
+  "diagnostic_probe": {
+    "kernel_id": "136489803",
+    "kernel_slug": "rezabarati2/sem2act-v5-secrets-probe",
+    "version_number": 1,
+    "status": "complete",
+    "finding": "internet ok; kaggle_secrets imports; get_secret raises ConnectionError for HF_TOKEN, DUMMY_NOT_PRESENT, and KAGGLE_USERNAME alike"
+  },
+  "v3": "pending under sem2act-v5-qwen-credential-amendment-1"
+}

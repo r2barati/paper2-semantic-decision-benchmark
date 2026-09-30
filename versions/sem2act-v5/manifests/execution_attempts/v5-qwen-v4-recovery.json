@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "report_id": "sem2act-v5-qwen-v4-recovery",
+  "role": "recovery/adjudication report; does not rewrite v4 history",
+  "gate_utc": "2026-09-30T12:30:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "execution": {
+    "job": "v5-qwen",
+    "kernel_id": "136489209",
+    "version_number": 4,
+    "canonical_sha": "b458715ad85995fc87c55669bf8d9231b9eca45f",
+    "kernel_status": "ERROR",
+    "run_manifest_status": "failed (PRESERVED; not rewritten)",
+    "failures": [{"error": "expected 2880 cache files, got 0"}],
+    "n_fail": 1
+  },
+  "inference_complete_evidence": {
+    "input_rows": "720/720",
+    "consume_invocations": "2880/2880",
+    "belief_rows": "1440/1440",
+    "invocation_failures": 0,
+    "gates_passed": {
+      "model": "Qwen/Qwen3-8B-AWQ",
+      "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+      "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+      "credential_source": "public_unauthenticated",
+      "credential_amendment": "sem2act-v5-qwen-credential-amendment-1",
+      "runtime_amendment": "sem2act-v5-qwen-runtime-amendment-2",
+      "post_install_runtime": {"torch": "2.8.0+cu128", "cuda_reported": "12.8", "device_name": "Tesla T4", "matmul_pass": true, "vllm": "0.11.0"},
+      "prompt_shas": {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"},
+      "decoding": {"temperature": 0.0, "top_p": 1.0, "max_tokens": 256, "enable_thinking": false},
+      "smoke": {"status": "pass", "n_calls": 2, "response_sha256": ["727af3fa5e8e62925f98e2a988fdad39da02bde7df96ca89e64ab7843b8fc4fd", "bed721e6c48d9aa707476e1b5e7990ed42fc61161d22987d739dd4ab76695894"]},
+      "input_sha256": {"evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000", "model_spec.json": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be"},
+      "qrels_read": false
+    }
+  },
+  "key_accounting": {
+    "method": "recomputed every invocation key from frozen evidence rows + pinned model/prompt-shas with the exact consumers_v3 key formula, in canonical kernel loop order",
+    "total_invocations": 2880,
+    "unique_expected_science_keys": 743,
+    "unique_by_consumer": {"C1": 329, "C3": 414},
+    "multiplicity_distribution": {"1": 319, "2": 79, "3": 42, "4": 12, "5": 128, "6": 48, "7": 40, "8": 15, "9": 6, "11": 15, "12": 8, "13": 5, "14": 1, "16": 2, "17": 8, "18": 2, "19": 1, "22": 3, "23": 6, "24": 1, "28": 2},
+    "retrieved_cache_files": 743,
+    "expected_minus_retrieved": 0,
+    "retrieved_minus_expected": 0,
+    "sets_equal": true,
+    "smoke_note": "the 2 smoke calls bypass _llm_json (direct client calls), so smoke writes no cache files by design; smoke determinism is recorded via smoke.response_sha256"
+  },
+  "recovery": {
+    "method": "offline replay of the exact kernel loop against a copy of the 743 retrieved caches with the HTTP client stubbed to raise (any miss fails loudly); no network, no lockbox, no GPU",
+    "invocations_resolved_from_cache": "2880/2880 (zero HTTP attempts)",
+    "beliefs_reproduced": "1440/1440 byte-identical to retrieved v4 beliefs.jsonl (sha256 97ee47734011f8f816b70a75f9d535290498be3d025171b3d263fc6d4853869d)",
+    "beliefs_keyspace": "exact 240x3x2, 0 simplex violations",
+    "payload_identities": "743/743 model==Qwen/Qwen3-8B-AWQ; prompt split C1 329 / C3 414; 0 schema-bad payloads",
+    "conflicts": "none (one artifact per key; contents schema-valid)",
+    "qrels": "absent from evidence rows and all 743 cache payloads",
+    "reconstructed_raw_outputs": {"lines": 2880, "order": "canonical invocation order", "sha256": "3b637cba2f77b771aa57ad4f38287e0a87262eed19f0f0e3842afe6f04480ec3", "path": "artifacts/v5-qwen-v4-recovery/raw_outputs_canonical.jsonl (local, untracked)"}
+  },
+  "retrieved_artifact_shas": {
+    "beliefs.jsonl": "97ee47734011f8f816b70a75f9d535290498be3d025171b3d263fc6d4853869d",
+    "raw_outputs.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_manifest.json": "438f62a2ddcda236405f0bc807a7ecc9c377243fa223d5b9bbae4b5a7b724666",
+    "failures.json": "ed5281186dc24b909035d10cec601a7917a172515f765cc37f044652e743ae6b",
+    "runtime_versions.json": "2352dc21d6eeff79c57bbbcb5d3539cb076366e4efdfab96d95c8a0b83bf7bb9"
+  },
+  "classification": "inference-complete execution with post-inference archival failure (cache-path ordering bug). All scientific inference is proven in hand; only kernel-produced archival (raw_outputs.jsonl + cache placement) is defective.",
+  "gpu": {"v4_hours": "~2.77", "remaining_hours": 26.88}
+}

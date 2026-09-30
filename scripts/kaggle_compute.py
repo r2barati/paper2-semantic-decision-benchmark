@@ -1522,10 +1522,63 @@ def _verify_v5_rerank(dest, job):
     return {"status": "pass", "n_queries": 240, "n_fail": 0}
 
 
+V5_QWEN_MODEL = "Qwen/Qwen3-8B-AWQ"
+V5_QWEN_REVISION = "4da05a8edb55c6046cce958586c33b61da07bb79"
+V5_QWEN_PROMPT_SHAS = {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"}
+
+
+def _v5_qwen_cache_fname(model, prompt_sha16, user):
+    key_src = f"{model}||{prompt_sha16}||{hashlib.sha256(user.encode()).hexdigest()[:16]}"
+    return hashlib.sha256(key_src.encode()).hexdigest()[:16] + ".json"
+
+
+def _v5_qwen_expected_cache_keys():
+    """Recompute the 2880 canonical invocation cache keys from frozen inputs.
+
+    Mirrors the kernel loop order and consumers_v3 user-string construction.
+    Deduplication is expected: identical deterministic requests share a key.
+    """
+    evidence = ROOT / "versions/sem2act-v5/runtime/kaggle_qwen_inputs/evidence_inputs.jsonl"
+    if not evidence.is_file():
+        raise SystemExit("v5 Qwen coverage recomputation needs the staged evidence bundle")
+    rows = [json.loads(line) for line in evidence.read_text().splitlines() if line]
+    keys = []
+    for row in sorted(rows, key=lambda item: (item["system"], item["query_id"])):
+        docs = [{"doc_id": item["doc_id"], "text": item["text"]} for item in row["documents"]]
+        c1_user = ("Operator information need: " + row["query_text"] + "\n\nEvidence:\n" +
+                   "\n\n".join(f"[DOC {d['doc_id']}] {d['text']}" for d in docs))
+        keys.append(_v5_qwen_cache_fname(V5_QWEN_MODEL, V5_QWEN_PROMPT_SHAS["C1"], c1_user))
+        for d in docs:
+            c3_user = ("Operator's own node: " + row["metadata"]["entity_node"] +
+                       "\n\nEvidence document:\n" + d["text"])
+            keys.append(_v5_qwen_cache_fname(V5_QWEN_MODEL, V5_QWEN_PROMPT_SHAS["C3"], c3_user))
+    return keys
+
+
+def _v5_qwen_check_raw_coverage(raw_lines, expected_keys):
+    """Dedup-aware coverage: 2880 lines in canonical order, every invocation key resolves."""
+    if len(raw_lines) != len(expected_keys):
+        raise SystemExit("v5 Qwen raw-output coverage failed")
+    seen = []
+    for index, line in enumerate(raw_lines):
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            raise SystemExit("v5 Qwen raw-output parse failed")
+        if obj.get("cache_file") != expected_keys[index]:
+            raise SystemExit("v5 Qwen raw-output order/key gate failed")
+        seen.append(obj["cache_file"])
+    if set(seen) != set(expected_keys):
+        raise SystemExit("v5 Qwen invocation cache coverage failed")
+    return {"n_invocations": len(expected_keys), "n_unique_keys": len(set(expected_keys))}
+
+
 def _verify_v5_qwen(dest, job):
     manifest = json.loads((dest / "run_manifest.json").read_text())
     if manifest.get("experiment_id") != "v5-primary-qwen-consumer":
         raise SystemExit("wrong v5 Qwen experiment id")
+    if manifest.get("model") != V5_QWEN_MODEL or manifest.get("revision") != V5_QWEN_REVISION:
+        raise SystemExit("v5 Qwen model pin gate failed")
     if manifest.get("status") != "pass" or manifest.get("qrels_read") is not False:
         raise SystemExit("v5 Qwen failure/qrel gate failed")
     if manifest.get("credential_source") not in ("public_unauthenticated", "hf_token_kaggle_secret"):
@@ -1558,12 +1611,17 @@ def _verify_v5_qwen(dest, job):
         raise SystemExit("v5 Qwen smoke response gate failed")
     if manifest.get("expected_calls") != 2880 or manifest.get("actual_calls") != 2880:
         raise SystemExit("v5 Qwen call-count gate failed")
-    if manifest.get("n_cache_files") != 2880 or manifest.get("n_fail") != 0:
-        raise SystemExit("v5 Qwen cache/failure gate failed")
+    expected_keys = _v5_qwen_expected_cache_keys()
+    if len(expected_keys) != 2880:
+        raise SystemExit("v5 Qwen invocation recomputation failed")
+    if manifest.get("n_cache_files") != len(set(expected_keys)):
+        raise SystemExit("v5 Qwen cache cardinality gate failed")
+    if manifest.get("n_fail") != 0:
+        raise SystemExit("v5 Qwen failure gate failed")
     if manifest.get("prompt_shas") != {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"}:
         raise SystemExit("v5 Qwen prompt hash drift")
-    if len((dest / "raw_outputs.jsonl").read_text().splitlines()) != 2880:
-        raise SystemExit("v5 Qwen raw-output coverage failed")
+    raw_lines = (dest / "raw_outputs.jsonl").read_text().splitlines()
+    _v5_qwen_check_raw_coverage(raw_lines, expected_keys)
     rows = [json.loads(line) for line in (dest / "beliefs.jsonl").read_text().splitlines()]
     if len(rows) != 1440:
         raise SystemExit("v5 Qwen belief coverage failed")

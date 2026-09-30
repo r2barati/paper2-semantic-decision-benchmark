@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "status": "authorized",
+  "amendment_id": "sem2act-v5-qwen-cache-accounting-amendment-3",
+  "scope": "kernel archival path + verifier coverage semantics only",
+  "gate_utc": "2026-09-30T12:30:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "bug": {
+    "cache_path": "kernel set PAPER2_V3_CACHE_DIR after importing src.consumers_v3, but CACHE_DIR binds at module import; 743 science caches landed under v5src/results/v3proto/llm_cache/ instead of cache_out/, leaving raw_outputs.jsonl empty and tripping the 2880-file gate (v4 evidence)",
+    "runtime_versions": "runtime_versions.json reported the stale parent-process torch 2.10.0+cu128 instead of the post-install 2.8.0+cu128 inference runtime",
+    "counting": "verifier required file count == invocation count, but repeated identical deterministic requests intentionally share cache keys (v4: 2880 invocations -> 743 unique keys)"
+  },
+  "fix": {
+    "kernel": "set PAPER2_V3_CACHE_DIR/LLM_BASE_URL/LLM_API_KEY before importing src.consumers_v3 and fail closed unless consumers.CACHE_DIR equals the env path; build raw_outputs.jsonl in canonical invocation order from recomputed per-invocation keys; fail closed unless the expected-key set exactly equals the cache dir file set; report runtime_versions.json from the post-install probe record",
+    "verifier": "coverage means all expected invocation keys resolve to cache artifacts: 2880 canonical-order raw lines each naming its expected key, referenced set == recomputed unique set; n_cache_files must equal the recomputed unique count (743 for the frozen bundle); no weakening (missing/extra/order/parse all fail closed)"
+  },
+  "key_accounting_frozen_bundle": {
+    "total_invocations": 2880,
+    "unique_expected_keys": 743,
+    "unique_by_consumer": {"C1": 329, "C3": 414},
+    "smoke": "2 direct (uncached) calls by design; determinism recorded via smoke.response_sha256"
+  },
+  "pins_unchanged": {
+    "model": "Qwen/Qwen3-8B-AWQ",
+    "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "prompt_shas": {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"},
+    "consumer_inputs_manifest_sha256": "76b7c04a3f0dd46830685e458e690249ea156fb053bd7331f88399754123b93e",
+    "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+    "post_install_runtime": {"torch": "2.8.0+cu128", "cuda_reported": "12.8", "vllm": "0.11.0"},
+    "decoding": {"temperature": 0.0, "top_p": 1.0, "max_tokens": 256, "enable_thinking": false},
+    "execution_shape": {"n_queries": 240, "n_input_rows": 720, "expected_calls": 2880, "expected_belief_rows": 1440},
+    "credential_policy": "sem2act-v5-qwen-credential-amendment-1"
+  },
+  "tests": "tests/test_v5_qwen_cache_accounting.py: 12 tests (cache binding/order, dedup, kernel-verifier key agreement, raw coverage pass/fail modes, canonical raw construction, runtime-versions reporting, post-install gate logic, synthetic repeated-input end-to-end smoke); all offline, stubbed LLM, no lockbox/GPU/network",
+  "recovery_pointer": "versions/sem2act-v5/manifests/execution_attempts/v5-qwen-v4-recovery.json",
+  "applies_from_commit": "git rev-parse HEAD after commit carrying this amendment",
+  "note": "no new execution is authorized by this amendment alone; a clean v5 rerun decision is reported separately"
+}

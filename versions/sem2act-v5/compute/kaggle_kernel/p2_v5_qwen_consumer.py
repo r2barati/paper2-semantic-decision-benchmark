@@ -127,6 +127,24 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _invocation_cache_name(model: str, prompt_sha16: str, user: str) -> str:
+    """Mirror of consumers_v3._llm_json cache naming (model||psha||user-hash)."""
+    key_src = f"{model}||{prompt_sha16}||{hashlib.sha256(user.encode()).hexdigest()[:16]}"
+    return hashlib.sha256(key_src.encode()).hexdigest()[:16] + ".json"
+
+
+def _runtime_versions_doc(runtime_info: dict) -> dict:
+    """Report the actual post-install inference runtime (never the parent image)."""
+    return {
+        "python": platform.python_version(),
+        "torch": runtime_info["torch"],
+        "cuda_reported": runtime_info["cuda_reported"],
+        "device_name": runtime_info["device_name"],
+        "vllm": runtime_info["vllm"],
+        "transformers": runtime_info["packages"]["transformers"],
+    }
+
+
 def _anonymous_get(url: str, timeout: int) -> bytes:
     req = urllib.request.Request(
         url, headers={"User-Agent": "sem2act-v5-qwen-consumer/1.0"})
@@ -202,6 +220,9 @@ def resolve_credential() -> str:
 def main() -> int:
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     credential_source = resolve_credential()
+    os.environ["PAPER2_V3_CACHE_DIR"] = "/kaggle/working/cache_out"
+    os.environ["LLM_BASE_URL"] = "http://127.0.0.1:8000/v1"
+    os.environ["LLM_API_KEY"] = "local"
     if any("qrel" in path.name.lower()
            for root_name in ("/kaggle/input", "/kaggle/working")
            for root, _, names in os.walk(root_name)
@@ -237,6 +258,8 @@ def main() -> int:
         shutil.copy2(find_input(name), source_dir / name)
     sys.path.insert(0, str(source_dir.parent))
     import src.consumers_v3 as consumers
+    if consumers.CACHE_DIR != Path(os.environ["PAPER2_V3_CACHE_DIR"]):
+        raise SystemExit("consumer cache dir binding drift")
 
     if {
         "C1": consumers.prompt_sha(consumers.PROMPT_C1),
@@ -255,9 +278,6 @@ def main() -> int:
         check=True,
     )
     runtime_info = verify_post_install_runtime()
-    os.environ["PAPER2_V3_CACHE_DIR"] = "/kaggle/working/cache_out"
-    os.environ["LLM_BASE_URL"] = "http://127.0.0.1:8000/v1"
-    os.environ["LLM_API_KEY"] = "local"
     Path(os.environ["PAPER2_V3_CACHE_DIR"]).mkdir(parents=True, exist_ok=True)
     server = subprocess.Popen(
         [sys.executable, "-m", "vllm.entrypoints.openai.api_server",
@@ -379,11 +399,44 @@ def main() -> int:
 
         cache_dir = Path(os.environ["PAPER2_V3_CACHE_DIR"])
         cache_files = sorted(cache_dir.glob("*.json"))
+        expected_invocations = []
+        for row in sorted(rows, key=lambda item: (item["system"], item["query_id"])):
+            docs = [
+                {"doc_id": item["doc_id"], "text": item["text"]}
+                for item in row["documents"]
+            ]
+            c1_user = (
+                "Operator information need: " + row["query_text"] + "\n\nEvidence:\n" +
+                "\n\n".join(f"[DOC {d['doc_id']}] {d['text']}" for d in docs)
+            )
+            expected_invocations.append(_invocation_cache_name(
+                MODEL, consumers.prompt_sha(consumers.PROMPT_C1), c1_user))
+            for d in docs:
+                c3_user = (
+                    "Operator's own node: " + row["metadata"]["entity_node"] +
+                    "\n\nEvidence document:\n" + d["text"]
+                )
+                expected_invocations.append(_invocation_cache_name(
+                    MODEL, consumers.prompt_sha(consumers.PROMPT_C3_DOC), c3_user))
+        if len(expected_invocations) != 2880:
+            failures.append({
+                "error": f"expected 2880 invocations, recomputed {len(expected_invocations)}"
+            })
+        actual_names = {path.name for path in cache_files}
+        if set(expected_invocations) != actual_names:
+            failures.append({
+                "error": "invocation cache coverage failed: "
+                         f"missing={len(set(expected_invocations) - actual_names)} "
+                         f"extra={len(actual_names - set(expected_invocations))}"
+            })
         raw_path = Path("/kaggle/working/raw_outputs.jsonl")
         with raw_path.open("w") as handle:
-            for path in cache_files:
-                payload = json.loads(path.read_text())
-                payload["cache_file"] = path.name
+            for fname in expected_invocations:
+                fpath = cache_dir / fname
+                if not fpath.is_file():
+                    continue
+                payload = json.loads(fpath.read_text())
+                payload["cache_file"] = fname
                 handle.write(json.dumps(payload, sort_keys=True) + "\n")
         beliefs_path = Path("/kaggle/working/beliefs.jsonl")
         with beliefs_path.open("w") as handle:
@@ -394,10 +447,6 @@ def main() -> int:
                 handle.write(json.dumps(row, sort_keys=True) + "\n")
         if n_calls != 2880:
             failures.append({"error": f"expected 2880 calls, got {n_calls}"})
-        if len(cache_files) != 2880:
-            failures.append({
-                "error": f"expected 2880 cache files, got {len(cache_files)}"
-            })
         if len(belief_rows) != 1440:
             failures.append({
                 "error": f"expected 1440 belief rows, got {len(belief_rows)}"
@@ -466,12 +515,8 @@ def main() -> int:
         Path("/kaggle/working/failures.json").write_text(
             json.dumps(failures, indent=2) + "\n"
         )
-        Path("/kaggle/working/runtime_versions.json").write_text(json.dumps({
-            "python": platform.python_version(),
-            "torch": __import__("torch").__version__,
-            "vllm": __import__("vllm").__version__,
-            "transformers": __import__("transformers").__version__,
-        }, indent=2) + "\n")
+        Path("/kaggle/working/runtime_versions.json").write_text(json.dumps(
+            _runtime_versions_doc(runtime_info), indent=2) + "\n")
         print(json.dumps(manifest, indent=2), flush=True)
         if failures:
             raise SystemExit("Qwen consumer failed closed")

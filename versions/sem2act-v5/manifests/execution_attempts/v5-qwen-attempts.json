@@ -35,5 +35,14 @@
     "n_results": 0,
     "classification": "infrastructure-failure (runtime contract)"
   },
-  "v4": "pending under sem2act-v5-qwen-runtime-amendment-2"
+  "v4": {
+    "status": "ERROR",
+    "failure": "post-loop archival: expected 2880 cache files, got 0 (cache-path ordering bug); 720/720 rows, 2880/2880 invocations, 1440/1440 beliefs, 0 invocation failures; all model/runtime/prompt/bundle/qrel gates passed",
+    "n_calls": 2880,
+    "n_beliefs": 1440,
+    "n_unique_caches": 743,
+    "classification": "inference-complete execution with post-inference archival failure",
+    "recovery": "versions/sem2act-v5/manifests/execution_attempts/v5-qwen-v4-recovery.json"
+  },
+  "v5": "pending (requires explicit go; clean rerun with cache fix)"
 }

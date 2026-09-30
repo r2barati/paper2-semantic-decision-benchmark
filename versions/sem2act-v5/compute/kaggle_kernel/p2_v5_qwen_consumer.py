@@ -45,11 +45,21 @@ def sha(path: Path) -> str:
 
 
 def require_hf_secret() -> None:
-    try:
-        from kaggle_secrets import UserSecretsClient
-        token = UserSecretsClient().get_secret("HF_TOKEN")
-    except Exception as exc:
-        raise SystemExit(f"HF_TOKEN Kaggle secret is unavailable: {type(exc).__name__}")
+    token = None
+    last_exc = None
+    for _attempt in range(8):
+        try:
+            from kaggle_secrets import UserSecretsClient
+            token = UserSecretsClient().get_secret("HF_TOKEN")
+            break
+        except Exception as exc:
+            last_exc = exc
+            time.sleep(15)
+    if token is None:
+        raise SystemExit(
+            "HF_TOKEN Kaggle secret is unavailable: "
+            f"{type(last_exc).__name__}" if last_exc else "HF_TOKEN Kaggle secret is unavailable"
+        )
     if not token:
         raise SystemExit("HF_TOKEN Kaggle secret is empty")
     os.environ["HF_TOKEN"] = token

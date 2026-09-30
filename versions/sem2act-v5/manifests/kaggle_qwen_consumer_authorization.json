@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "status": "authorized",
+  "decision": "authorize",
+  "staged_for": "kaggle_consumer_authorization_gate",
+  "job": "v5-qwen",
+  "experiment_id": "v5-primary-qwen-consumer",
+  "gate_utc": "2026-09-30T06:20:39Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "lock_id": "sem2act-v5-kaggle-runtime-v3",
+  "execution_sha": "fe2b06eab4f505fed7a5c279543e25152362b434",
+  "consumer_inputs_manifest_sha256": "76b7c04a3f0dd46830685e458e690249ea156fb053bd7331f88399754123b93e",
+  "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+  "model_identity": {
+    "model": "Qwen/Qwen3-8B-AWQ",
+    "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "revision_equals_current_hf_head": true,
+    "kaggle_mirror": {
+      "source_ref": "qwen-lm/qwen-3/Transformers/8b-awq",
+      "version_number": 1,
+      "version_id": 391615,
+      "frozen_snapshot_content_sha256": "57f082c4a2ea54b2413677040731a10ec7dc1fbd43f44020958176c6215535b5"
+    },
+    "hf_at_revision_aggregate_sha256": "04f7e629beeb5f8348cae7a5476ba915c9eca08f5556a5ba809cef42d9d08d1e",
+    "file_identity": {
+      "identical_to_mirror": 10,
+      "total_files": 12,
+      "differing_files": ["README.md", "tokenizer_config.json"],
+      "weights_identical": true,
+      "model_00001_of_00002_sha256": "6e112429856bc65e3837a9f38d6f6b71ffdda832cb46299a12f4fa8f6352516e",
+      "model_00002_of_00002_sha256": "20c2d6366ab85c90786ccdd829cd2b9e7d30ef3b2ebbb998280e7e4014b542ff",
+      "tokenizer_json_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+    }
+  },
+  "differing_files_assessment": {
+    "README.md": {
+      "kaggle_mirror_sha256": "a3a2e63306192433147864c81f9d1921e222708ea82721abbe2a9f7cb298632b",
+      "huggingface_at_revision_sha256": "5c397e99916138e00686567882ea1308524c95c2962f05d0ef57ebfa0d2c81fb",
+      "role": "documentation",
+      "behavioral_impact": "none"
+    },
+    "tokenizer_config.json": {
+      "kaggle_mirror_sha256": "bbc2c089e3bef8753f63348c10595767be8998bc6ca7c7ebcaada346d401fba8",
+      "huggingface_at_revision_sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+      "mirror_file_equals_hf_commit": "9e07647a76ed",
+      "changed_after_hf_commit": "4a2d74b63371",
+      "fields_differing": ["chat_template"],
+      "non_chat_template_fields_identical": true
+    }
+  },
+  "tokenizer_behavioral_assessment": {
+    "classification": "behaviorally_inert_for_frozen_consumer_path",
+    "amendment_required": false,
+    "method": "byte-render of the frozen C1/C3 smoke message sets through both chat_templates (mirror vs HF@revision) with enable_thinking=false and add_generation_prompt=true, matching the kernel's vLLM chat path",
+    "delta_scope": "tool-mode type guards (message.content is string), reasoning_content string guard, and tool_response rendering; unreachable for the C1/C3 system+user requests with no tools and all-string contents",
+    "rendered_C1": {"sha256_both_templates": "71b21d3bbf73a87e", "byte_identical": true},
+    "rendered_C3": {"sha256_both_templates": "51235edf68f62a03", "byte_identical": true},
+    "tokenization": "tokenizer.json byte-identical (aeb13307...) and all special-token/added-token fields identical; token id assignment unchanged"
+  },
+  "credential_policy": {
+    "class": "HF_TOKEN_KAGGLE_SECRET",
+    "method": "HF_TOKEN read from Kaggle secrets (UserSecretsClient) and exported to the kernel environment; kernel fails closed if secret missing or empty",
+    "unauthenticated_access": false
+  },
+  "qrel_discipline": {
+    "qrels_read": false,
+    "qrel_free": true,
+    "fail_closed_in_kernel": true
+  },
+  "execution_shape": {
+    "n_queries": 240,
+    "systems": ["bm25", "rerank", "oracle"],
+    "consumers": ["C1", "C3"],
+    "k": 3,
+    "n_input_rows": 720,
+    "expected_calls": 2880,
+    "expected_cache_files": 2880,
+    "expected_belief_rows": 1440,
+    "call_budget": "C1 -> 1 call/row, C3 -> 3 calls/row; 240 x 3 x (1 + 3) = 2880",
+    "decoding": {"temperature": 0.0, "top_p": 1.0, "max_tokens": 256, "max_model_len": 4096, "enable_thinking": false}
+  },
+  "runtime_pins": {
+    "vllm": "0.11.0",
+    "openai": "2.48.0",
+    "pydantic": "2.12.5",
+    "transformers": "4.57.6",
+    "torch": "2.10.0+cu128",
+    "cuda": "12.8",
+    "quantization": "awq",
+    "dtype": "float16",
+    "gpu_memory_utilization": 0.85,
+    "device": "cuda:0",
+    "machine_shape": "NvidiaTeslaT4"
+  },
+  "prompt_shas": {
+    "C1": "66e6890ba9c5464c",
+    "C3": "5966cadde90e8236",
+    "abstain_tau": 0.5
+  },
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "bundle_file_sha256": {
+    "consumers_v3.py": "e8c607596a97141abbe662a84b41f874587f007b026687b91d4eb68fdaa74fce",
+    "events.py": "0c56ee0864e5b6b447176fa1eef4554469f586e14e0660c6d034855959cc9dc8",
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "interpreter.py": "8634dd3bfab604f92030ba64cb46932c718e51e3b82dc07547cea6bbb2659b73",
+    "model_spec.json": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be",
+    "runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+  },
+  "retrieval_bindings": {
+    "rerank_trec_sha256": "83143e440011603b6db295461b4c851c3232f91146064d329bd0b9a7cabdda99",
+    "run_manifest_sha256": "10df4193f5cf27aae67ae10a805fa83e9d072160dbdc60c9fd2eecb34e8e3cfe",
+    "runtime_versions_sha256": "a60190b96d0b87f5545d01c7b47b7a326e3c2376e569455ffd67603f55fbd0f1",
+    "full_reranker_kernel_id": "135760758",
+    "full_reranker_version_number": 2,
+    "full_reranker_status": "complete",
+    "full_reranker_n_scores": 12000,
+    "full_reranker_n_fail": 0
+  },
+  "authorizes": {
+    "job": "v5-qwen",
+    "execution_sha": "BOUND_TO_GIT_COMMIT_CARRYING_THIS_MANIFEST",
+    "rules": [
+      "may run only after this manifest is committed and the canonical SHA is the commit carrying it",
+      "ranker acceptance already satisfied",
+      "execution must be canary-gated (preflight quota-passed then canary-passed)",
+      "execution sequence: --preflight, v5-canary --push/--watch/--fetch, v5-qwen --push/--watch/--fetch",
+      "must stop at v5-qwen; do not launch v5-llama, v5-mistral, or assembly"
+    ],
+    "resolve_execution_sha": "git rev-parse HEAD after commit"
+  },
+  "dev_gate_evidence": [
+    "bundle files byte-identical between manifest and disk (6/6)",
+    "consumer_inputs_qwen.json manifest sha 76b7c04a confirms staged/execution_authorized=false at fe2b06e",
+    "evidence 720 rows, 3 documents/row, keyspace 240 x 3 = (v5-lb-q0001..q0240) x (bm25,rerank,oracle), no qrel tokens",
+    "C1 prompt sha 66e6890ba9c5464c and C3 prompt sha 5966cadde90e8236 reproduced from the frozen module literals",
+    "ABSTAIN_TAU == 0.5; assert_frozen_prompts passes; BeliefSchema/pydantic 2.12.5 round-trip OK",
+    "smoke fixture sha 9ab69722 and smoke user strings match the kernel construction exactly",
+    "tokenizer_config delta (chat_template only) proven byte-inert on rendered C1/C3 prompts",
+    "kernel constants (model/revision/prompt-shas/runtime-lock/smoke/counts) match the frozen lock",
+    "evidence derived deterministically from frozen input dataset v1 (queries c457d93e, corpus 6cab24bc, rerank_candidates 11dcac88)"
+  ]
+}

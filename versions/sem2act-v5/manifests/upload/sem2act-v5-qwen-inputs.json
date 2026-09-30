@@ -1,0 +1,133 @@
+{
+  "created_utc": "2026-09-30T06:21:49Z",
+  "dataset": "rezabarati2/sem2act-v5-qwen-inputs",
+  "files": {
+    "consumers_v3.py": "e8c607596a97141abbe662a84b41f874587f007b026687b91d4eb68fdaa74fce",
+    "events.py": "0c56ee0864e5b6b447176fa1eef4554469f586e14e0660c6d034855959cc9dc8",
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "interpreter.py": "8634dd3bfab604f92030ba64cb46932c718e51e3b82dc07547cea6bbb2659b73",
+    "model_spec.json": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be",
+    "runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+  },
+  "job": "sem2act-v5-qwen",
+  "kaggle_version_number": 1,
+  "local_files": {
+    "consumers_v3.py": {
+      "bytes": 9515,
+      "sha256": "e8c607596a97141abbe662a84b41f874587f007b026687b91d4eb68fdaa74fce"
+    },
+    "events.py": {
+      "bytes": 14929,
+      "sha256": "0c56ee0864e5b6b447176fa1eef4554469f586e14e0660c6d034855959cc9dc8"
+    },
+    "evidence_inputs.jsonl": {
+      "bytes": 809569,
+      "sha256": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000"
+    },
+    "interpreter.py": {
+      "bytes": 29068,
+      "sha256": "8634dd3bfab604f92030ba64cb46932c718e51e3b82dc07547cea6bbb2659b73"
+    },
+    "model_spec.json": {
+      "bytes": 1318,
+      "sha256": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_uploaded": false,
+  "remote_api_status": "DatabundleVersionStatus.READY",
+  "remote_file_list": [
+    {
+      "creation_date": "2026-09-30 06:21:58.614000",
+      "name": "consumers_v3.py",
+      "total_bytes": 9515
+    },
+    {
+      "creation_date": "2026-09-30 06:21:58.509000",
+      "name": "events.py",
+      "total_bytes": 14929
+    },
+    {
+      "creation_date": "2026-09-30 06:21:58.527000",
+      "name": "evidence_inputs.jsonl",
+      "total_bytes": 809569
+    },
+    {
+      "creation_date": "2026-09-30 06:21:58.443000",
+      "name": "interpreter.py",
+      "total_bytes": 29068
+    },
+    {
+      "creation_date": "2026-09-30 06:21:58.619000",
+      "name": "model_spec.json",
+      "total_bytes": 1318
+    },
+    {
+      "creation_date": "2026-09-30 06:21:58.477000",
+      "name": "runtime_smoke_v1.json",
+      "total_bytes": 1184
+    }
+  ],
+  "remote_file_list_match": true,
+  "remote_hash_match": true,
+  "remote_headers": {
+    "consumers_v3.py": {
+      "Content-Length": "9515",
+      "ETag": "\"441bc8d25333b03c5164f0d596f5c075\"",
+      "Last-Modified": "Wed, 30 Sep 2026 06:21:58 GMT",
+      "x-goog-hash": "crc32c=mwTDIg==, md5=RBvI0lMzsDxRZPDVlvXAdQ=="
+    },
+    "events.py": {
+      "Content-Length": "14929",
+      "ETag": "\"543ce91be05a7dc129cd9cffe35ad671\"",
+      "Last-Modified": "Wed, 30 Sep 2026 06:21:58 GMT",
+      "x-goog-hash": "crc32c=jcpO2w==, md5=VDzpG+BafcEpzZz/41rWcQ=="
+    },
+    "evidence_inputs.jsonl": {
+      "Content-Length": "809569",
+      "ETag": "\"06e3033812458ac77f2e0e486665e276\"",
+      "Last-Modified": "Wed, 30 Sep 2026 06:21:58 GMT",
+      "x-goog-hash": "crc32c=Nu551Q==, md5=BuMDOBJFisd/Lg5IZmXidg=="
+    },
+    "interpreter.py": {
+      "Content-Length": "29068",
+      "ETag": "\"d61a0b1af9c10127bd79c8a55ab15e4a\"",
+      "Last-Modified": "Wed, 30 Sep 2026 06:21:58 GMT",
+      "x-goog-hash": "crc32c=Av0udA==, md5=1hoLGvnBASe9ecilWrFeSg=="
+    },
+    "model_spec.json": {
+      "Content-Length": "1318",
+      "ETag": "\"beb5f53037e1bfa84fed3fcce8a3f0f4\"",
+      "Last-Modified": "Wed, 30 Sep 2026 06:21:58 GMT",
+      "x-goog-hash": "crc32c=NhVERg==, md5=vrX1MDfhv6hP7T/M6KPw9A=="
+    },
+    "runtime_smoke_v1.json": {
+      "Content-Length": "1184",
+      "ETag": "\"e942540809a37a2ef77be97bd21f7613\"",
+      "Last-Modified": "Wed, 30 Sep 2026 06:21:58 GMT",
+      "x-goog-hash": "crc32c=WJZGuw==, md5=6UJUCAmjei73e+l70h92Ew=="
+    }
+  },
+  "remote_sha256": {
+    "consumers_v3.py": "e8c607596a97141abbe662a84b41f874587f007b026687b91d4eb68fdaa74fce",
+    "events.py": "0c56ee0864e5b6b447176fa1eef4554469f586e14e0660c6d034855959cc9dc8",
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "interpreter.py": "8634dd3bfab604f92030ba64cb46932c718e51e3b82dc07547cea6bbb2659b73",
+    "model_spec.json": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be",
+    "runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+  },
+  "remote_verified_utc": "2026-09-30T06:23:02.686709+00:00",
+  "response_fields": {
+    "error": "",
+    "ref": "/datasets/rezabarati2/sem2act-v5-qwen-inputs",
+    "status": "Ok"
+  },
+  "schema_version": 1,
+  "status": "remote-verified",
+  "uploaded_utc": "2026-09-30T06:21:58Z",
+  "verification_command": "python3 scripts/verify_kaggle_dataset.py --manifest versions/sem2act-v5/manifests/upload/sem2act-v5-qwen-inputs.json --source-dir versions/sem2act-v5/runtime/kaggle_qwen_inputs --owner rezabarati2 --slug sem2act-v5-qwen-inputs --version <DATASET_VERSION>"
+}

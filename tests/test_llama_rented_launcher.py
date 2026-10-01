@@ -55,15 +55,13 @@ class CredentialChannelTests(unittest.TestCase):
             if old is not None:
                 os.environ["SEM2ACT_HF_TOKEN"] = old
 
-    def test_stub_returns_token_without_touching_disk(self):
-        launcher.install_stub_secrets("tok-value")
+    def test_arm_sets_explicit_rented_flag(self):
+        os.environ.pop("SEM2ACT_RENTED_RUN", None)
+        launcher.arm_rented_channel()
         try:
-            from kaggle_secrets import UserSecretsClient
-            self.assertEqual(UserSecretsClient().get_secret("HF_TOKEN"), "tok-value")
-            with self.assertRaises(KeyError):
-                UserSecretsClient().get_secret("OTHER")
+            self.assertEqual(os.environ.get("SEM2ACT_RENTED_RUN"), "1")
         finally:
-            sys.modules.pop("kaggle_secrets", None)
+            os.environ.pop("SEM2ACT_RENTED_RUN", None)
 
     def test_redact_strips_credentials(self):
         url = "https://user:secret@example.com/x?tok=abc"

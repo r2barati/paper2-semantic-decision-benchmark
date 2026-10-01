@@ -119,14 +119,24 @@ def verify_public_revision_anonymous(model_id: str, revision: str) -> None:
 def resolve_credential(model_id: str, revision: str) -> str:
     """Secret-first credential resolution; returns the credential_source string.
 
-    Tries the HF_TOKEN Kaggle secret with bounded retries for host boot.
-    If the UserSecrets channel is unavailable (observed as OSError), falls
-    back to public_unauthenticated ONLY for a pinned, verified-public
-    model/revision pair, after anonymous revision plus model/tokenizer
-    identity verification. Fails closed on empty secrets, non-channel
-    errors, any non-whitelisted pair, and any identity drift. No token is
-    ever written to datasets, files, logs, or the repo.
+    On rented hosts with SEM2ACT_RENTED_RUN=1, uses the SEM2ACT_HF_TOKEN
+    runtime secret directly (injected as a platform secret, never persisted
+    or printed) and records rented_runtime_secret. This branch is inert
+    unless explicitly opted in, so Kaggle behavior is unchanged.
+    Otherwise tries the HF_TOKEN Kaggle secret with bounded retries for
+    host boot. If the UserSecrets channel is unavailable (observed as
+    OSError), falls back to public_unauthenticated ONLY for a pinned,
+    verified-public model/revision pair, after anonymous revision plus
+    model/tokenizer identity verification. Fails closed on empty secrets,
+    non-channel errors, any non-whitelisted pair, and any identity drift.
+    No token is ever written to datasets, files, logs, or the repo.
     """
+    if os.environ.get("SEM2ACT_RENTED_RUN") == "1":
+        token = os.environ.get("SEM2ACT_HF_TOKEN", "")
+        if not token:
+            raise SystemExit("rented runtime secret SEM2ACT_HF_TOKEN is absent or empty")
+        os.environ["HF_TOKEN"] = token
+        return "rented_runtime_secret"
     token = None
     last_exc = None
     for _attempt in range(8):

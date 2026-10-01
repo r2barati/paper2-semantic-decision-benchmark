@@ -1643,7 +1643,7 @@ def _verify_v5_consumer(dest, job):
         raise SystemExit("wrong v5 consumer experiment id")
     if manifest.get("status") != "pass" or manifest.get("qrels_read") is not False:
         raise SystemExit("v5 consumer failure/qrel gate failed")
-    if manifest.get("credential_source") not in ("public_unauthenticated", "hf_token_kaggle_secret"):
+    if manifest.get("credential_source") not in ("public_unauthenticated", "hf_token_kaggle_secret", "rented_runtime_secret"):
         raise SystemExit("v5 consumer credential source gate failed")
     if manifest.get("runtime_lock_sha256") != _sha(V5_KAGGLE_LOCK):
         raise SystemExit("v5 consumer runtime lock hash drift")

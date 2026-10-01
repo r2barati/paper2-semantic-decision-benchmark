@@ -9,9 +9,11 @@ Credential model (infrastructure only, see
 versions/sem2act-v5/manifests/llama_rented_credential_amendment_1.json):
   - HF token arrives ONLY via the SEM2ACT_HF_TOKEN process environment
     variable, injected as a platform secret at container start.
-  - It is used solely for exact pinned-revision download through
-    huggingface_hub, then for the kernel's own secret-first resolution via
-    an in-memory kaggle_secrets stub (the frozen kernel path).
+  - The launcher sets SEM2ACT_RENTED_RUN=1 so the kernel takes its explicit
+    rented-secret branch and records credential_source=rented_runtime_secret
+    (no Kaggle-secrets masquerade; provenance states the actual channel).
+  - The token is used solely for exact pinned-revision download and the
+    kernel's authenticated transformers load.
   - It is never printed, never written to disk/datasets/logs/manifests/repo,
     and never embedded in URLs that are logged (all logged URLs redacted).
   - It lives only in process memory on the single-tenant rented host; host
@@ -109,20 +111,9 @@ def build_kaggle_layout(bundle_dir: Path, kaggle_root: Path) -> tuple[Path, Path
     return input_dir, working_dir
 
 
-def install_stub_secrets(token: str) -> None:
-    """Provide kaggle_secrets in-memory ONLY (never written anywhere)."""
-    import types
-
-    stub = types.ModuleType("kaggle_secrets")
-
-    class _Client:
-        def get_secret(self, name: str) -> str:
-            if name != "HF_TOKEN":
-                raise KeyError(name)
-            return token
-
-    stub.UserSecretsClient = _Client
-    sys.modules["kaggle_secrets"] = stub
+def arm_rented_channel() -> None:
+    """Opt the kernel into its explicit rented-secret branch (no stubs)."""
+    os.environ["SEM2ACT_RENTED_RUN"] = "1"
 
 
 def snapshot_and_verify(token: str, recovery_manifest: Path, cache_dir: Path) -> Path:
@@ -174,7 +165,7 @@ def main() -> int:
     print(f"snapshot verified: {snap}", flush=True)
     input_dir, working_dir = build_kaggle_layout(Path(args.bundle), Path(args.kaggle_root))
     print(f"staged: {input_dir} -> {working_dir}", flush=True)
-    install_stub_secrets(token)
+    arm_rented_channel()
     old_argv, old_cwd = sys.argv, os.getcwd()
     sys.argv = [str(kernel)]
     neutral_cwd = tempfile.mkdtemp(prefix="llama-run-")

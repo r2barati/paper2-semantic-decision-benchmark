@@ -106,6 +106,31 @@ class CredentialTests(unittest.TestCase):
         finally:
             sys.modules.pop("kaggle_secrets", None)
 
+    def test_rented_branch_records_actual_channel(self):
+        import os
+        sys.modules.pop("kaggle_secrets", None)
+        os.environ["SEM2ACT_RENTED_RUN"] = "1"
+        os.environ["SEM2ACT_HF_TOKEN"] = "tok-value"
+        try:
+            got = self.kernel.resolve_credential(LLAMA, LLAMA_REV)
+            self.assertEqual(got, "rented_runtime_secret")
+            self.assertEqual(os.environ.get("HF_TOKEN"), "tok-value")
+            self.assertNotIn("kaggle_secrets", sys.modules)
+        finally:
+            os.environ.pop("SEM2ACT_RENTED_RUN", None)
+            os.environ.pop("SEM2ACT_HF_TOKEN", None)
+            os.environ.pop("HF_TOKEN", None)
+
+    def test_rented_branch_missing_token_fails_closed(self):
+        import os
+        os.environ["SEM2ACT_RENTED_RUN"] = "1"
+        os.environ.pop("SEM2ACT_HF_TOKEN", None)
+        try:
+            with self.assertRaises(SystemExit):
+                self.kernel.resolve_credential(LLAMA, LLAMA_REV)
+        finally:
+            os.environ.pop("SEM2ACT_RENTED_RUN", None)
+
     def test_anonymous_verifier_pins_present(self):
         files = self.kernel.EXPECTED_PUBLIC_FILES[MISTRAL]
         self.assertEqual(files["config.json"],
@@ -143,6 +168,10 @@ class VerifierTests(unittest.TestCase):
     def test_public_credential_passes_gate(self):
         got = self._run({**self._base(), "credential_source": "public_unauthenticated"})
         # proceeds past credential gate to the next (raw-output) gate
+        self.assertIn("raw-output coverage failed", got)
+
+    def test_rented_credential_passes_gate(self):
+        got = self._run({**self._base(), "credential_source": "rented_runtime_secret"})
         self.assertIn("raw-output coverage failed", got)
 
 

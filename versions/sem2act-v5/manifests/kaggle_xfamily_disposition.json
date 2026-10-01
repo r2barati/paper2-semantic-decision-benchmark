@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "manifest_id": "sem2act-v5-cross-family-disposition",
+  "status": "final",
+  "gate_utc": "2026-10-01T07:00:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "failure_policy": "Failed official access or exact-schema preflight excludes the model; no third-party substitution. (versions/sem2act-v5/protocol/confirmation.yaml consumers.failure_policy)",
+  "outcome_independence": "all family decisions were made without inspecting Qwen results; no family was launched, repaired, or excluded on the basis of any outcome",
+  "families": {
+    "qwen": {
+      "status": "canonical completed result",
+      "acceptance": "versions/sem2act-v5/manifests/kaggle_qwen_consumer_acceptance.json"
+    },
+    "mistral": {
+      "status": "EXCLUDED — deterministic frozen-schema incompatibility",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+      "v1": {"kernel_id": "136628137", "version": 1, "failure": "smoke C1 probabilities sum 1.2 outside 0.05 tolerance", "calls": 0, "outputs": 0, "log_sha256": "1ef061f3dca8ddecd000a8a39fd52d88724179ace9e0c42610e18bf6a96c0b81"},
+      "diagnostic": {
+        "kernel_id": "136630855",
+        "log_sha256": "b795737919f680b788447adefea7400cca5b43fb28aec87a54e6a51a1c064d60",
+        "c1_raw_sha256": "398f44e5fd9b2d7337e7f86e250bbd23fb582c030358c76d4d6fc9be93c25cb0",
+        "c3_raw_sha256": "d0bb6fdd35e0ce5fc63a70025758081011775787958269849c7aaf038af3691f",
+        "repetitions_byte_identical": 3,
+        "c1": {"probs": [0.6, 0.4, 0.2], "sum": 1.2, "deviation": 0.2, "renormalized": [0.5, 0.33333333333333337, 0.16666666666666669], "renormalized_contract_ok": true},
+        "c3": {"keys_present": ["entity_match", "event", "fresh", "stance"], "missing": ["confidence"]}
+      },
+      "semantic_audit": {
+        "c1_compatible_with_existing_aggregation": true,
+        "c3_missing_confidence_has_no_frozen_default": true,
+        "confidence_affects": ["provenance weighting (p2_v5_consumer.py:245-247)", "shrinkage (L259/272)", "abstention (L253-261)"],
+        "accepting_c3_would_require": "newly invented imputation/default/parser semantics after observing output",
+        "verdict": "EXCLUDE-MISTRAL; no validator/prompt/parser amendment permitted"
+      },
+      "scientific_standing": "NOT evidence that Mistral is scientifically worse than Qwen; protocol/schema compatibility exclusion only",
+      "result_bearing_rows": 0
+    },
+    "llama": {
+      "status": "BLOCKED/EXCLUDED — authoritative model source inaccessible/unverifiable",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "evidence": {
+        "hf_gated": "manual",
+        "mirror": "metaresearch/llama-3.1 Transformers/8b-instruct v2 (Meta official)",
+        "probe_kernel_id": "136623792",
+        "probe_versions": [1, 2, 3],
+        "probe_result": "/kaggle/input empty on all attach variants; mirror file listing 403; no content hashes obtainable",
+        "verdict_manifest_sha256": "88349e8a1efcb29708eab0a744cc02ed81c20f66e9e20bbd7f8e6dda01956e7d"
+      },
+      "substitution": "refused; identity requirements not weakened",
+      "result_bearing_rows": 0
+    }
+  },
+  "cross_family_conclusion": "the planned cross-family confirmation was attempted outcome-independently but produced no valid result-bearing evidence beyond Qwen: Qwen canonical completed; Mistral excluded at the deterministic schema gate before scientific rows; Llama excluded/blocked at the model-access/provenance gate before scientific rows. No cross-family scientific comparison exists. Nothing here implies Mistral or Llama replicated or contradicted Qwen.",
+  "next_work": "manuscript/result reconciliation using only valid evidence: canonical Qwen V5, P1 second-controller confirmation, qrel provenance + sensitivity, existing V3/V4 evidence"
+}

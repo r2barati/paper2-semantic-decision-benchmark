@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "job": "v5-mistral",
+  "kernel_id": "136628137",
+  "kernel_slug": "rezabarati2/sem2act-v5-mistral",
+  "attempts": [
+    {
+      "version_number": 1,
+      "execution_sha": "8f526994a48bd66015a26151aec060443443c997",
+      "status": "ERROR",
+      "failure": "smoke C1 schema: model response probabilities do not sum within 0.05 tolerance (frozen validate_c1 gate); deterministic greedy decoding implies a retry would reproduce it",
+      "gates_passed_before_failure": ["dataset attached", "model_spec pin", "credential public_unauthenticated (anonymous HF download succeeded)", "torch image pins + package install", "model 3-shard bnb load", "tokenizer/chat-template generation", "smoke fixture sha", "smoke C1 key/range checks"],
+      "n_calls": 0,
+      "n_beliefs": 0,
+      "n_outputs": 0,
+      "classification": "preflight schema failure (model behavior vs frozen tolerance); zero result-bearing inference",
+      "gpu_hours": "~0.08"
+    }
+  ],
+  "v2": "pending (requires explicit authorization; identical retry is futile by determinism — needs either a diagnostic raw-logging run or a protocol decision on the tolerance)"
+}

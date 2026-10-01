@@ -142,7 +142,8 @@ def bootstrap_effect(diff: pd.DataFrame) -> dict:
             total += WEIGHTS[regime] * float(matrix[np.ix_(qi, si)].mean())
         draws[b] = total
     lo, hi = np.percentile(draws, [2.5, 97.5])
-    p = (1 + np.count_nonzero(np.abs(draws) >= abs(point))) / (B + 1)
+    centered = draws - point
+    p = (1 + np.count_nonzero(np.abs(centered) >= abs(point))) / (B + 1)
     return {
         "estimate": point,
         "ci_lo": float(lo),
@@ -188,7 +189,8 @@ def bootstrap_interaction(cells: dict[tuple[str, int, str], pd.DataFrame]) -> di
             )
         draws[b] = value
     lo, hi = np.percentile(draws, [2.5, 97.5])
-    p = (1 + np.count_nonzero(np.abs(draws) >= abs(point))) / (B + 1)
+    centered = draws - point
+    p = (1 + np.count_nonzero(np.abs(centered) >= abs(point))) / (B + 1)
     return {
         "estimate_I_40_1": float(point),
         "ci_lo": float(lo),
@@ -272,7 +274,7 @@ def selective_row(frame, consumer: str) -> dict:
     left = selective[["query_id", "seed", "true_regime", "profit"]].rename(
         columns={"profit": "selective_profit"}
     )
-    right = raw[["query_id", "seed", "profit"]].rename(
+    right = raw[["query_id", "seed", "true_regime", "profit"]].rename(
         columns={"profit": "always_profit"}
     )
     merged = left.merge(right, on=["query_id", "seed", "true_regime"],

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "report_id": "sem2act-v5-qwen-analysis-preservation-v1",
+  "role": "preservation of the first Qwen-only analysis state; superseded inferentially, retained for audit",
+  "gate_utc": "2026-10-01T01:00:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "inputs": {
+    "canonical_beliefs_sha256": "97ee47734011f8f816b70a75f9d535290498be3d025171b3d263fc6d4853869d",
+    "qwen_assembly_manifest_sha256": "7b31be16b7339c91bd83c38154f63f1b9cf6c9114ce5dc9e91a29eac8172a629",
+    "episodes_sha256": "ff4c8666a89221173ee51206edcd9ca288c51fc2f414565e04e48e26ca22dc6a",
+    "episodes_rows": 288000,
+    "analysis_script_sha256": "9b9e2b95547f6a7712c661edd51cc86757d171ffb6f38c67cb16c6d3deca6ef4"
+  },
+  "outputs_preserved": {
+    "analysis_sha256": "b8c8fbc482488bb736e9978f058fd6cf7f5f7a45a2e32689dc5d03a0d95b9b00",
+    "analysis_manifest_sha256": "8407b7e7a7a932b8d87610de15c195132cd7905ac5375b830c95761ae38e2276"
+  },
+  "inferential_status": "computed-point-estimates-valid / bootstrap-pvalues-invalid",
+  "point_estimates_and_cis": "retained as evidence pending independent verification; recomputed identically by the corrected rerun",
+  "invalid_parts": {
+    "bootstrap_p_values": "INVALID: computed as P(|uncentered_draw| >= |point|), which tends to ~0.5 for large effects instead of ~0; must not be cited",
+    "holm_decisions": "INVALID: all downstream of the defective p-values (zero rejections by construction); must not be cited",
+    "defect_scope": "bootstrap_effect and bootstrap_interaction in analyze_confirmation.py at script sha 9b9e2b95"
+  },
+  "selective_workaround": {
+    "frozen_selective_row": "crashes as written (merge on true_regime absent from right frame)",
+    "temporary_measure": "identical preregistered estimand computed via frozen paired_difference + bootstrap_effect in untracked glue; frozen file untouched at preservation time"
+  },
+  "primary_point_estimates_for_record": {
+    "CausalOptimizer": {"bm25/C1": -148.3, "bm25/C3": -123.5, "rerank/C1": -65.1, "rerank/C3": -12.7, "oracle/C1": 109.7, "oracle/C3": 245.5},
+    "BeliefBaseStock": {"bm25/C1": -73.0, "bm25/C3": 1.6, "rerank/C1": -15.7, "rerank/C3": -20.8, "oracle/C1": 98.7, "oracle/C3": 103.7},
+    "selective_rerank": {"C1": 28.4, "C3": 10.2},
+    "I_40_1": -79.5
+  }
+}

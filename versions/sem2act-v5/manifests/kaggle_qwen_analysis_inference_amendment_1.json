@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "status": "authorized",
+  "amendment_id": "sem2act-v5-analysis-inference-amendment-1",
+  "scope": "bootstrap p-value formula + selective_row merge keys in the analysis implementation only",
+  "gate_utc": "2026-10-01T01:00:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "defect": {
+    "location": ["bootstrap_effect", "bootstrap_interaction"],
+    "formula_used": "p = (1 + #{|draw| >= |point|}) / (B+1) on draws centered at the observed estimate",
+    "consequence": "p in ~[0.5, 1.0] always; Holm can never reject; all 26 reported p-values invalid"
+  },
+  "frozen_correction": {
+    "rule": "center the existing bootstrap draws by the observed point estimate BEFORE comparing against zero-effect magnitude",
+    "exact_formula_effect": "centered = draws - point; p = (1 + #{|centered| >= |point|}) / (B + 1)",
+    "exact_formula_interaction": "centered = draws - estimate_I_40_1; p = (1 + #{|centered| >= |estimate_I_40_1|}) / (B + 1)",
+    "null": "two-sided H0: effect = 0 (unchanged)"
+  },
+  "frozen_unchanged": {
+    "estimands": "all preregistered contrasts unchanged",
+    "bootstrap": "B = 5000, seed = 42, crossed query-seed resampling, balanced weights",
+    "families": "CausalOptimizer six, BeliefBaseStock six, selective two, cross-family eight (pending), primary null H0: I_40_1 = 0",
+    "holm": "families, step-down procedure, alpha 0.05",
+    "cis": "2.5/97.5 percentile construction unchanged",
+    "selective_definition": "selective_entropy_minus_always_consume on rerank/CausalOptimizer unchanged; only the merge/key crash is repaired"
+  },
+  "selective_repair": {
+    "change": "right frame of the selective merge selects true_regime alongside query_id/seed/profit (the only change); merge keys, estimand, and bootstrap path otherwise identical",
+    "equivalence_proof_required": "repaired helper output must equal the temporary paired-difference computation exactly on a fixture before acceptance"
+  },
+  "synthetic_test_requirements": [
+    "strong positive effect yields a small two-sided p",
+    "strong negative effect yields a small two-sided p",
+    "true zero effect yields a non-small p",
+    "sign symmetry of p-values and mirrored CIs",
+    "Holm step-down values match hand computation including the 1.0 cap"
+  ],
+  "rerun_scope": "ANALYSIS ONLY on episodes ff4c8666; no new episodes, no new LLM calls; Qwen families only; cross-family still pending",
+  "supersedes_inferentially": "v5_qwen_analysis.json b8c8fbc4 (point estimates/CIs retained as evidence; p-values/Holm not citable)"
+}

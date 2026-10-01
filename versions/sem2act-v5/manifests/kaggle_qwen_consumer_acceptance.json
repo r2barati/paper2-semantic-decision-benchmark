@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "status": "accepted",
+  "manifest_id": "sem2act-v5-qwen-consumer-acceptance",
+  "job": "v5-qwen",
+  "experiment_id": "v5-primary-qwen-consumer",
+  "gate_utc": "2026-10-01T00:00:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "lock_id": "sem2act-v5-kaggle-runtime-v3",
+  "execution_sha": "68ef8cee01bb4b4130ae498a3cf8cc5c24b2b782",
+  "kernel": {
+    "kernel_id": "136489209",
+    "version_number": 5,
+    "slug": "rezabarati2/sem2act-v5-qwen",
+    "status": "complete"
+  },
+  "model_identity": {
+    "model": "Qwen/Qwen3-8B-AWQ",
+    "revision": "4da05a8edb55c6046cce958586c33b61da07bb79",
+    "tokenizer_revision": "4da05a8edb55c6046cce958586c33b61da07bb79"
+  },
+  "runtime_tuple": {
+    "python": "3.12.13",
+    "torch": "2.8.0+cu128",
+    "cuda_reported": "12.8",
+    "device_name": "Tesla T4",
+    "vllm": "0.11.0",
+    "transformers": "4.57.6",
+    "tokenizers": "0.22.2",
+    "triton": "3.4.0",
+    "xformers": "0.0.32.post1",
+    "torchvision": "0.23.0",
+    "torchaudio": "2.8.0",
+    "openai": "2.48.0",
+    "pydantic": "2.12.5"
+  },
+  "bundle_sha256": {
+    "consumer_inputs_manifest": "76b7c04a3f0dd46830685e458e690249ea156fb053bd7331f88399754123b93e",
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "model_spec.json": "343f28dbbb195334465dab4efe06ed299d258295dbb796acfc524e756f2341be"
+  },
+  "retrieval_bindings": {
+    "rerank_trec_sha256": "83143e440011603b6db295461b4c851c3232f91146064d329bd0b9a7cabdda99",
+    "run_manifest_sha256": "10df4193f5cf27aae67ae10a805fa83e9d072160dbdc60c9fd2eecb34e8e3cfe",
+    "runtime_versions_sha256": "a60190b96d0b87f5545d01c7b47b7a326e3c2376e569455ffd67603f55fbd0f1"
+  },
+  "prompt_shas": {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236", "abstain_tau": 0.5},
+  "decoding": {"temperature": 0.0, "top_p": 1.0, "max_tokens": 256, "max_model_len": 4096, "enable_thinking": false},
+  "outputs": {
+    "raw_outputs.jsonl": "3b637cba2f77b771aa57ad4f38287e0a87262eed19f0f0e3842afe6f04480ec3",
+    "beliefs.jsonl": "97ee47734011f8f816b70a75f9d535290498be3d025171b3d263fc6d4853869d",
+    "run_manifest.json": "06c2ba4d7cad22b9d2239d79d592026fdc61c0d21276f41d75c654b5d86e4be7",
+    "runtime_versions.json": "9c5e5e26fc07c4f30e48465eb4e50bb141cc0caba766a37b9d6598b4bb8893d0",
+    "failures.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  "counts": {
+    "n_input_rows": 720,
+    "expected_calls": 2880,
+    "actual_calls": 2880,
+    "n_cache_files": 743,
+    "n_unique_expected_keys": 743,
+    "n_belief_rows": 1440,
+    "n_fail": 0
+  },
+  "smoke": {
+    "status": "pass",
+    "n_calls": 2,
+    "fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+    "response_sha256": ["727af3fa5e8e62925f98e2a988fdad39da02bde7df96ca89e64ab7843b8fc4fd", "bed721e6c48d9aa707476e1b5e7990ed42fc61161d22987d739dd4ab76695894"]
+  },
+  "verifier": {"status": "pass", "n_calls": 2880, "n_beliefs": 1440},
+  "qrels_read": false,
+  "qrel_free": true,
+  "credential_source": "public_unauthenticated",
+  "amendments": ["sem2act-v5-qwen-credential-amendment-1", "sem2act-v5-qwen-runtime-amendment-2", "sem2act-v5-qwen-cache-accounting-amendment-3"],
+  "superseded_history": {
+    "v1": "infrastructure-failure (credential channel), 0 calls",
+    "v2": "infrastructure-failure (credential channel), 0 calls",
+    "v3": "infrastructure-failure (runtime contract), 0 calls",
+    "v4": "inference-complete with post-inference archival failure; science recovered offline, history preserved as failed",
+    "note": "v1-v4 histories are preserved unmodified; only v5 is accepted"
+  },
+  "analysis_scope": "qwen-only confirmation permitted against this acceptance; cross-family (llama/mistral) authorization remains independent of the qwen outcome"
+}

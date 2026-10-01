@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "experiment_id": "v5-confirmation-analysis-qwen-only",
+  "status": "frozen",
+  "scope": "qwen-only",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "bootstrap": {
+    "method": "crossed query-seed bootstrap",
+    "replicates": 5000,
+    "seed": 42,
+    "weights": "balanced",
+    "p_formula": "null-centered: centered = draws - point; p = (1 + #{|centered| >= |point|}) / (B + 1)"
+  },
+  "holm_families": {
+    "CausalOptimizer": 6,
+    "BeliefBaseStock": 6,
+    "selective_consumption": 2,
+    "cross_family": "pending",
+    "alpha": 0.05
+  },
+  "primary_null": "H0: I_40_1 = 0",
+  "qrels_read": false,
+  "input_hashes": {
+    "episodes": "ff4c8666a89221173ee51206edcd9ca288c51fc2f414565e04e48e26ca22dc6a",
+    "simulation_manifest": "01fef4d5290ee78648f2a393b0875a59513df7db5b960131322e800bd38c7fe0",
+    "belief_assembly_qwen": "7b31be16b7339c91bd83c38154f63f1b9cf6c9114ce5dc9e91a29eac8172a629",
+    "model_preflight": "907d7118c7c656da92e85bd3779a6c79b93ed34851bce744e45d749a16ef8343",
+    "protocol": "2fc83da503ec3f61b30860a54197518528a918f69d564fc7ed941f12104d7402"
+  },
+  "analysis_script_sha256": "25c7e32c218465d0f804b55dfafb151bf1af4d0d7fe8aa655c4c8e3a5bb87feb",
+  "package_versions": {
+    "python": "3.9.19",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "pyarrow": "21.0.0",
+    "scipy": "1.13.1",
+    "pydantic": "2.13.4"
+  },
+  "outputs": {
+    "analysis": "versions/sem2act-v5/results/qwen_only/v5_qwen_analysis.json",
+    "analysis_sha256": "802ad135f3a6f8f22642ab3d3aa608d92843d3be4c9884c4bff7c61beb362eb5"
+  },
+  "inference_amendment": {
+    "amendment_id": "sem2act-v5-analysis-inference-amendment-1",
+    "commit": "0734d38c0206f9be2af33e8f82d7c9ab85f3eb63",
+    "manifest": "versions/sem2act-v5/manifests/kaggle_qwen_analysis_inference_amendment_1.json"
+  },
+  "supersedes": {
+    "analysis_sha256": "b8c8fbc482488bb736e9978f058fd6cf7f5f7a45a2e32689dc5d03a0d95b9b00",
+    "analysis_manifest_sha256": "8407b7e7a7a932b8d87610de15c195132cd7905ac5375b830c95761ae38e2276",
+    "status": "superseded/invalid for inference; point estimates and percentile CIs retained as historical evidence",
+    "preservation_manifest": "versions/sem2act-v5/manifests/execution_attempts/v5-qwen-analysis-preservation-v1.json"
+  },
+  "selective_repair_provenance": {
+    "change": "right frame of the selective merge now selects true_regime (sole change to analyze_confirmation.py selective_row)",
+    "equivalence": "repaired helper output proven exactly equal to the temporary paired-difference computation on a synthetic fixture (tests/test_v5_bootstrap_inference.py) and on the real episodes (inline assertion in analysis driver)",
+    "definition_unchanged": "selective_entropy_minus_always_consume on rerank/CausalOptimizer"
+  }
+}

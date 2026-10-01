@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "manifest_id": "sem2act-v5-llama-source-recovery",
+  "family": "llama",
+  "gate_utc": "2026-10-01T08:00:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "previous_status": "BLOCKED/EXCLUDED for license/access reasons (mirror_verdict.json preserved unmodified as historical infrastructure evidence)",
+  "new_status": "FROZEN-LLAMA RECOVERABLE — PENDING EXECUTION (identity proven after user license approval; no result-bearing calls made)",
+  "model_identity": {
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "revision_api": {"sha_match": true, "private": false, "gated": "manual", "siblings": 17},
+    "tokenizer_revision": "0e9e39f249a16976918f6564b8830bc894c89659"
+  },
+  "file_inventory_at_pin": [".gitattributes", "LICENSE", "README.md", "USE_POLICY.md", "config.json", "generation_config.json", "model-00001-of-00004.safetensors", "model-00002-of-00004.safetensors", "model-00003-of-00004.safetensors", "model-00004-of-00004.safetensors", "model.safetensors.index.json", "original/consolidated.00.pth", "original/params.json", "original/tokenizer.model", "special_tokens_map.json", "tokenizer.json", "tokenizer_config.json"],
+  "small_file_sha256": {
+    "config.json": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "tokenizer_config.json": "177c7b61e616fecb84c17ce0591acb92c6c4d60e9ac5ababfb940ff23bbcd424",
+    "tokenizer.json": "79e3e522635f3171300913bb421464a87de6222182a0570b9b2ccba2a964b2b4",
+    "special_tokens_map.json": "6f38c73729248f6c127296386e3cdde96e254636cc58b4169d3fd32328d9a8ec",
+    "generation_config.json": "189fb0c0d7fd8a527db217c0a60a0e013f0394cd8800f9697a666a9e75e5f7fd",
+    "model.safetensors.index.json": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b",
+    "original/params.json": "b15b6b31b2043c0400b028ecc25c8946e21d76ac260e9ac6a357ed8727c8865f",
+    "original/tokenizer.model": "82e9d31979e92ab929cd544440f129d9ecd797b69e327f80f17e1c50d5551b55"
+  },
+  "weight_shard_lfs_oid_sha256": {
+    "model-00001-of-00004.safetensors": {"bytes": 4976698672, "sha256": "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668"},
+    "model-00002-of-00004.safetensors": {"bytes": 4999802720, "sha256": "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15"},
+    "model-00003-of-00004.safetensors": {"bytes": 4915916176, "sha256": "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa"},
+    "model-00004-of-00004.safetensors": {"bytes": 1168138808, "sha256": "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b"}
+  },
+  "weight_verification": "all four shards streamed (16.06 GB total, nothing stored) and matched commit LFS OIDs byte-exactly",
+  "tokenizer_verification": {
+    "class": "PreTrainedTokenizerFast",
+    "bos_token": "<|begin_of_text|>",
+    "eos_token": "<|eot_id|>",
+    "chat_template_present": true,
+    "chat_template_renders_kernel_smoke_pattern": true,
+    "patch_required": false
+  },
+  "config_architecture": {"architectures": ["LlamaForCausalLM"], "model_type": "llama", "hidden_size": 4096, "num_hidden_layers": 32, "vocab_size": 128256, "num_attention_heads": 32, "num_key_value_heads": 8},
+  "frozen_model_spec": "versions/sem2act-v5/runtime/kaggle_llama_inputs/model_spec.json (model_id, revision, prompts, decoding, bnb-NF4 runtime unchanged)",
+  "prompt_shas": {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"},
+  "decoding": {"temperature": 0.0, "top_p": 1.0, "max_new_tokens": 256, "do_sample": false, "num_beams": 1, "seed": 0},
+  "evidence_bundle_sha256": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+  "expected_counts": {"n_input_rows": 720, "n_selected_rows": 480, "expected_calls": 1920, "expected_belief_rows": 960},
+  "contract_change": "none: no model/prompt/schema/consumer/decoding/evidence change was or is required",
+  "qrels_read": false,
+  "inference_calls": 0,
+  "result_bearing_execution_started": false
+}

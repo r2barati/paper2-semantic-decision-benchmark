@@ -1,0 +1,42 @@
+# Exact rented-host environment for the frozen Llama consumer.
+# Backend recommendation: RunPod Secure Cloud, 1x Tesla T4 (Vast.ai T4 fallback).
+# All pins are asserted live by run_llama_consumer.py; any drift fails closed.
+host:
+  provider: RunPod Secure Cloud (fallback: Vast.ai T4 on-demand)
+  gpu: 1x NVIDIA Tesla T4 (16 GB)
+  note: T4 matches the frozen cuda:0 device contract; A10 acceptable only with a runtime-contract note
+  container_disk_gb: 50
+  volume_for_cache_gb: 30
+base_image:
+  family: runpod/pytorch with CUDA 12.8 + Python 3.12
+  note: exact torch is (re)installed below regardless of base; pins are authoritative
+python: "3.12"
+pip_install_order:
+  - "torch==2.10.0+cu128 --index-url https://download.pytorch.org/whl/cu128"
+  - "transformers==4.57.6"
+  - "bitsandbytes==0.48.1"
+  - "huggingface_hub==0.36.2"
+assert_after_install:
+  torch: "2.10.0+cu128"
+  cuda_reported: "12.8"
+  cuda_available: true
+  transformers: "4.57.6"
+  bitsandbytes: "0.48.1"
+secrets:
+  SEM2ACT_HF_TOKEN:
+    source: platform secret created by the account owner (RunPod Secrets {{ RUNPOD_SECRET_hf_token }} or pod env at create time)
+    scope: process environment only; never written to disk, datasets, logs, manifests, repo, or image
+    lifetime: container process only; destroyed with the pod
+    forbidden: [print, log, commit, dataset, artifact, url-embed]
+repo_inputs:
+  checkout_sha: recorded at launch authorization (frozen kernel + scripts + manifests)
+  bundle_files: [evidence_inputs.jsonl, model_spec.json, runtime_smoke_v1.json]
+  model_snapshot: downloaded at runtime via huggingface_hub snapshot_download at the pinned revision, allow-listed files only
+outputs:
+  dir: operator-chosen --out (outside the container image)
+  files: [raw_outputs.jsonl, beliefs.jsonl, run_manifest.json, failures.json, runtime_versions.json]
+cost_estimate:
+  basis: RunPod Secure T4 class (~$0.30-0.50/hr; Vast.ai T4 from ~$0.10/hr) - verify at provisioning
+  expected_wall_time: ~3h (setup/download/verify ~45min + smoke/1920 calls ~2h)
+  expected_total: "$1-3"
+teardown: destroy the pod after artifacts are copied out; terminated host destroys the in-memory secret

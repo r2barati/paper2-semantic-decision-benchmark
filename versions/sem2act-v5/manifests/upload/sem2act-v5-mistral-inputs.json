@@ -1,0 +1,82 @@
+{
+  "created_utc": "2026-10-01T06:16:10Z",
+  "dataset": "rezabarati2/sem2act-v5-mistral-inputs",
+  "files": {
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "model_spec.json": "dd279c1914382816470d860792321f966d3a3070b2c670eff5ca59cd1a6bd913",
+    "runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+  },
+  "job": "sem2act-v5-mistral",
+  "kaggle_version_number": 1,
+  "local_files": {
+    "evidence_inputs.jsonl": {
+      "bytes": 809569,
+      "sha256": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000"
+    },
+    "model_spec.json": {
+      "bytes": 1336,
+      "sha256": "dd279c1914382816470d860792321f966d3a3070b2c670eff5ca59cd1a6bd913"
+    },
+    "runtime_smoke_v1.json": {
+      "bytes": 1184,
+      "sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+    }
+  },
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "qrels_uploaded": false,
+  "remote_api_status": "DatabundleVersionStatus.READY",
+  "remote_file_list": [
+    {
+      "creation_date": "2026-10-01 06:16:17.803000",
+      "name": "evidence_inputs.jsonl",
+      "total_bytes": 809569
+    },
+    {
+      "creation_date": "2026-10-01 06:16:17.863000",
+      "name": "model_spec.json",
+      "total_bytes": 1336
+    },
+    {
+      "creation_date": "2026-10-01 06:16:17.835000",
+      "name": "runtime_smoke_v1.json",
+      "total_bytes": 1184
+    }
+  ],
+  "remote_file_list_match": true,
+  "remote_hash_match": true,
+  "remote_headers": {
+    "evidence_inputs.jsonl": {
+      "Content-Length": "809569",
+      "ETag": "\"06e3033812458ac77f2e0e486665e276\"",
+      "Last-Modified": "Thu, 01 Oct 2026 06:16:17 GMT",
+      "x-goog-hash": "crc32c=Nu551Q==, md5=BuMDOBJFisd/Lg5IZmXidg=="
+    },
+    "model_spec.json": {
+      "Content-Length": "1336",
+      "ETag": "\"89742e4ee308d182ee31c90347e82d72\"",
+      "Last-Modified": "Thu, 01 Oct 2026 06:16:17 GMT",
+      "x-goog-hash": "crc32c=m5WlVw==, md5=iXQuTuMI0YLuMckDR+gtcg=="
+    },
+    "runtime_smoke_v1.json": {
+      "Content-Length": "1184",
+      "ETag": "\"e942540809a37a2ef77be97bd21f7613\"",
+      "Last-Modified": "Thu, 01 Oct 2026 06:16:17 GMT",
+      "x-goog-hash": "crc32c=WJZGuw==, md5=6UJUCAmjei73e+l70h92Ew=="
+    }
+  },
+  "remote_sha256": {
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "model_spec.json": "dd279c1914382816470d860792321f966d3a3070b2c670eff5ca59cd1a6bd913",
+    "runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+  },
+  "remote_verified_utc": "2026-10-01T06:16:30.885327+00:00",
+  "response_fields": {
+    "error": "",
+    "ref": "/datasets/rezabarati2/sem2act-v5-mistral-inputs",
+    "status": "Ok"
+  },
+  "schema_version": 1,
+  "status": "remote-verified",
+  "uploaded_utc": "2026-10-01T06:16:17Z",
+  "verification_command": "python3 scripts/verify_kaggle_dataset.py --manifest versions/sem2act-v5/manifests/upload/sem2act-v5-mistral-inputs.json --source-dir versions/sem2act-v5/runtime/kaggle_mistral_inputs --owner rezabarati2 --slug sem2act-v5-mistral-inputs --version <DATASET_VERSION>"
+}

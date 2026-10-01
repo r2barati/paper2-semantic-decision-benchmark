@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "status": "prepared",
+  "decision": "prepared-for-authorization",
+  "launch_authorized": false,
+  "launch_hold_reason": "no Kaggle GPU jobs are launched in the DEV preparation phase; launch requires a separate explicit authorization",
+  "job": "v5-mistral",
+  "experiment_id": "v5-cross-family-consumer",
+  "gate_utc": "2026-10-01T06:18:15Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "lock_id": "sem2act-v5-kaggle-runtime-v3",
+  "execution_sha": "76c439a851885c0333d22a8ac0f17e23df7e56bd",
+  "applies_from_commit": "git rev-parse HEAD after commit carrying this manifest",
+  "consumer_inputs_manifest_sha256": "b0fc1f5e41e0fa5fef5df2452df4b7c0937f2690ba9bfa8ab6754cece726623f",
+  "runtime_lock_sha256": "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10",
+  "runtime_lock_proposal": "existing v3 unchanged: transformers backend, bitsandbytes 4-bit NF4, image torch 2.10.0+cu128, transformers 4.57.6, bitsandbytes 0.48.1; CPU probe 136621607 v2 proves the pinned install preserves torch (2.10.0 pre and post)",
+  "model_identity": {
+    "model": "mistralai/Mistral-7B-Instruct-v0.3",
+    "revision": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+    "revision_resolves_anonymously": true,
+    "repo_gated": false,
+    "tokenizer": {"class": "LlamaTokenizer", "bos": "<s>", "eos": "</s>", "chat_template_renders_kernel_pattern": true, "no_patch_required": true},
+    "file_identities": {
+      "config.json": "affafc6478ec0fd07a32f0ca57aa2fc57743f4d17d6730f86a96ac24d1507f99",
+      "tokenizer_config.json": "cf7d90917f89931e443b02253432a581abef86379533a5b962f7f2d3b7ac8d90",
+      "tokenizer.json": "e553af6fff7d7ad76e830608b218c5c0b0822998d5a1a96099a74cd3c1cb1a49"
+    }
+  },
+  "bundle_file_sha256": {
+    "evidence_inputs.jsonl": "55cb120e7608e959e1d555cc6c6fd6367b77a53ba9528998575c83593df80000",
+    "model_spec.json": "dd279c1914382816470d860792321f966d3a3070b2c670eff5ca59cd1a6bd913",
+    "runtime_smoke_v1.json": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+  },
+  "dataset": {
+    "remote": "rezabarati2/sem2act-v5-mistral-inputs",
+    "version": 1,
+    "status": "remote-verified",
+    "files_match": true,
+    "hash_match": true,
+    "qrels_uploaded": false
+  },
+  "retrieval_bindings": {
+    "rerank_trec_sha256": "83143e440011603b6db295461b4c851c3232f91146064d329bd0b9a7cabdda99",
+    "run_manifest_sha256": "10df4193f5cf27aae67ae10a805fa83e9d072160dbdc60c9fd2eecb34e8e3cfe",
+    "runtime_versions_sha256": "a60190b96d0b87f5545d01c7b47b7a326e3c2376e569455ffd67603f55fbd0f1"
+  },
+  "prompt_shas": {"C1": "66e6890ba9c5464c", "C3": "5966cadde90e8236"},
+  "smoke_fixture_sha256": "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b",
+  "credential_policy": {
+    "amendment": "sem2act-v5-xfamily-credential-amendment-1",
+    "class": "secret-first, public-only-for-whitelisted-pinned-pair, fail-closed otherwise",
+    "whitelisted": {"mistralai/Mistral-7B-Instruct-v0.3": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef"}
+  },
+  "qrel_discipline": {"qrels_read": false, "qrel_free": true, "fail_closed_in_kernel": true},
+  "execution_shape": {
+    "n_input_rows": 720,
+    "systems": ["rerank", "oracle"],
+    "consumers": ["C1", "C3"],
+    "k": 3,
+    "n_selected_rows": 480,
+    "expected_calls": 1920,
+    "expected_belief_rows": 960,
+    "call_budget": "C1 -> 1 call/row, C3 -> 3 calls/row; 480 x (1 + 3) = 1920"
+  },
+  "decoding": {"temperature": 0.0, "top_p": 1.0, "max_new_tokens": 256, "do_sample": false, "num_beams": 1, "seed": 0},
+  "static_checks": ["prompt shas reproduced from kernel literals", "720 rows / 480 selected / 3 docs", "qrel-free evidence", "kernel constants match lock", "verifier credential gate unit-tested", "credential resolve paths unit-tested (9 tests)"],
+  "future_command": {
+    "note": "run only after explicit launch authorization; from a fresh checkout of the commit carrying this manifest",
+    "steps": [
+      "git worktree add ~/Sem2Act/worktrees/exec-mistral-<date> <NEW_SHA>",
+      "cp -R <dev-worktree>/versions/sem2act-v5/runtime/kaggle_mistral_inputs <fresh>/versions/sem2act-v5/runtime/ && verify 3/3 hashes against consumer_inputs_mistral.json",
+      "do NOT re-run --preflight (would reset canary-passed); no canary rerun needed",
+      "SEM2ACT_V5_QUOTA_CLI_CONFIRMED=1 python3 scripts/kaggle_compute.py v5-mistral --push",
+      "python3 scripts/kaggle_compute.py v5-mistral --watch",
+      "python3 scripts/kaggle_compute.py v5-mistral --fetch (runs _verify_v5_consumer: 1920 calls / 960 beliefs / credential gate)",
+      "STOP; do not launch v5-llama"
+    ]
+  }
+}

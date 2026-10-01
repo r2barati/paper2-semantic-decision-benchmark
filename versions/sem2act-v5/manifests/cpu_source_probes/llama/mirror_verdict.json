@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "family": "llama",
+  "verdict": "BLOCKED/EXCLUDED",
+  "gate_utc": "2026-10-01T06:30:00Z",
+  "protocol_hash": "2d75e4cb592c30c13b60316891bd489dfacb9e5824f49c11e0a18d6eccdf2022",
+  "frozen_pin": {
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "hf_head_matches_pin": true,
+    "hf_gated": "manual",
+    "hf_private": false,
+    "hf_file_inventory_at_pin": [".gitattributes", "LICENSE", "README.md", "USE_POLICY.md", "config.json", "generation_config.json", "model-00001-of-00004.safetensors", "model-00002-of-00004.safetensors", "model-00003-of-00004.safetensors", "model-00004-of-00004.safetensors", "model.safetensors.index.json", "original/consolidated.00.pth", "original/params.json", "original/tokenizer.model", "special_tokens_map.json", "tokenizer.json", "tokenizer_config.json"]
+  },
+  "official_mirror": {
+    "ref": "metaresearch/llama-3.1",
+    "variation": "Transformers/8b-instruct",
+    "version": 2,
+    "publisher": "Meta (official)"
+  },
+  "probe": {
+    "kernel_id": "136623792",
+    "versions": [1, 2, 3],
+    "status": "complete",
+    "gpu": "none (CPU only, zero GPU spend)",
+    "source_strings_tried": ["metaresearch/llama-3.1/transformers/8b-instruct/2", "metaresearch/llama-3.1/Transformers/8b-instruct/2", "metaresearch/llama-3.1/Transformers/8b-instruct"],
+    "result": "/kaggle/input empty on all three attempts; mirror never mounted (most plausibly Meta license-gating skipping the mount)",
+    "mirror_file_listing_api": "403 Forbidden from outside",
+    "hf_content_access": "401-class gated; anonymous file reads unavailable",
+    "secret_channel": "dead account-wide (probe 136489803); no token path by policy"
+  },
+  "equivalence_assessment": {
+    "exact_equivalence_to_pin": "NOT established: no content hashes obtainable for the pin from any authoritative channel; mirror inventory/config/tokenizer/weights unverified",
+    "gate_weakening": "refused: third-party mirrors and substitutions excluded by protocol"
+  },
+  "classification": "BLOCKED/EXCLUDED per protocol failure_policy (failed official access excludes the model; no third-party substitution)",
+  "user_action_unblock_path": "account owner accepts Meta's Llama license terms for metaresearch/llama-3.1 on Kaggle; then re-probe the mirror mount and verify content identity against the pin before any authorization (not taken in DEV)",
+  "qrels_read": false,
+  "inference_calls": 0,
+  "result_bearing_execution_started": false
+}

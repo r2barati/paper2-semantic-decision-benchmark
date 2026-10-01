@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import platform
 import re
 import subprocess
 import sys
+import time
+import urllib.request
 from pathlib import Path
 
 PROMPT_C1 = (
@@ -48,6 +51,17 @@ EXPECTED_TORCH = "2.10.0+cu128"
 EXPECTED_CUDA = "12.8"
 EXPECTED_RUNTIME_LOCK_SHA256 = "ce88bc5c2d61d30ecbf649fb09c65b2502e599c53a42732da1acec06b2808b10"
 EXPECTED_SMOKE_FIXTURE_SHA256 = "9ab69722e0062fc38eb27721f24e9cd83ca7944655973cbbe85f079372ccd74b"
+CREDENTIAL_AMENDMENT_ID = "sem2act-v5-xfamily-credential-amendment-1"
+PUBLIC_PINNED = {
+    "mistralai/Mistral-7B-Instruct-v0.3": "d79d1742f78eb0cc788c11e5b41a7539d7cb56ef",
+}
+EXPECTED_PUBLIC_FILES = {
+    "mistralai/Mistral-7B-Instruct-v0.3": {
+        "config.json": "affafc6478ec0fd07a32f0ca57aa2fc57743f4d17d6730f86a96ac24d1507f99",
+        "tokenizer_config.json": "cf7d90917f89931e443b02253432a581abef86379533a5b962f7f2d3b7ac8d90",
+        "tokenizer.json": "e553af6fff7d7ad76e830608b218c5c0b0822998d5a1a96099a74cd3c1cb1a49",
+    },
+}
 
 
 def find_input(name: str) -> Path:
@@ -65,16 +79,77 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def require_hf_secret() -> None:
+def _anonymous_get(url: str, timeout: int) -> bytes:
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "sem2act-v5-xfamily-consumer/1.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read()
+
+
+def verify_public_revision_anonymous(model_id: str, revision: str) -> None:
+    """Pre-execution anonymous identity check for an exact pinned public pair.
+
+    No credentials are sent. Fails closed unless the pinned revision resolves
+    anonymously, is public, and the model/tokenizer file identities match.
+    Gated repositories fail closed here by construction.
+    """
+    if PUBLIC_PINNED.get(model_id) != revision:
+        raise SystemExit(
+            "public credential fallback is restricted to pinned public model/revision pairs")
     try:
-        from kaggle_secrets import UserSecretsClient
-        token = UserSecretsClient().get_secret("HF_TOKEN")
+        payload = json.loads(_anonymous_get(
+            f"https://huggingface.co/api/models/{model_id}/revision/{revision}",
+            30).decode())
     except Exception as exc:
-        raise SystemExit(f"HF_TOKEN Kaggle secret is unavailable: {type(exc).__name__}")
-    if not token:
+        raise SystemExit(f"anonymous revision check failed: {type(exc).__name__}")
+    if payload.get("sha") != revision:
+        raise SystemExit("pinned revision sha mismatch (public check)")
+    if payload.get("private") is True:
+        raise SystemExit("pinned model is private; credentials required")
+    for fname, want in EXPECTED_PUBLIC_FILES[model_id].items():
+        try:
+            data = _anonymous_get(
+                f"https://huggingface.co/{model_id}/resolve/{revision}/{fname}", 60)
+        except Exception as exc:
+            raise SystemExit(f"anonymous file check failed for {fname}: {type(exc).__name__}")
+        if hashlib.sha256(data).hexdigest() != want:
+            raise SystemExit(f"{fname} identity drift (public check)")
+
+
+def resolve_credential(model_id: str, revision: str) -> str:
+    """Secret-first credential resolution; returns the credential_source string.
+
+    Tries the HF_TOKEN Kaggle secret with bounded retries for host boot.
+    If the UserSecrets channel is unavailable (observed as OSError), falls
+    back to public_unauthenticated ONLY for a pinned, verified-public
+    model/revision pair, after anonymous revision plus model/tokenizer
+    identity verification. Fails closed on empty secrets, non-channel
+    errors, any non-whitelisted pair, and any identity drift. No token is
+    ever written to datasets, files, logs, or the repo.
+    """
+    token = None
+    last_exc = None
+    for _attempt in range(8):
+        try:
+            from kaggle_secrets import UserSecretsClient
+            token = UserSecretsClient().get_secret("HF_TOKEN")
+            break
+        except Exception as exc:
+            last_exc = exc
+            time.sleep(15)
+    if token:
+        os.environ["HF_TOKEN"] = token
+        return "hf_token_kaggle_secret"
+    if token is not None and not token:
         raise SystemExit("HF_TOKEN Kaggle secret is empty")
-    import os
-    os.environ["HF_TOKEN"] = token
+    if last_exc is None:
+        raise SystemExit("HF_TOKEN Kaggle secret is unavailable")
+    if not isinstance(last_exc, OSError):
+        raise SystemExit(f"HF_TOKEN Kaggle secret error: {type(last_exc).__name__}")
+    verify_public_revision_anonymous(model_id, revision)
+    os.environ.pop("HF_TOKEN", None)
+    os.environ.pop("HUGGING_FACE_HUB_TOKEN", None)
+    return "public_unauthenticated"
 
 
 def install_runtime_pins() -> None:
@@ -200,9 +275,7 @@ def aggregate_c3(items: list[tuple[str, dict]], doc_ids: list[str]) -> dict:
 
 
 def main() -> int:
-    import os
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    require_hf_secret()
     install_runtime_pins()
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
@@ -226,6 +299,7 @@ def main() -> int:
         raise SystemExit("model spec protocol hash mismatch")
     if spec.get("runtime_lock_sha256") != EXPECTED_RUNTIME_LOCK_SHA256:
         raise SystemExit("runtime lock hash mismatch")
+    credential_source = resolve_credential(model_id, revision)
     if any("qrel" in path.name.lower() for path in (input_path, spec_path)):
         raise SystemExit("qrel-bearing input detected")
 
@@ -388,6 +462,8 @@ def main() -> int:
         "n_input_rows": len(rows), "n_selected_rows": len(selected),
         "expected_calls": 1920, "actual_calls": call_id,
         "n_fail": len(failures), "qrels_read": False,
+        "credential_source": credential_source,
+        "credential_amendment": CREDENTIAL_AMENDMENT_ID,
         "prompt_shas": PROMPT_SHAS,
         "decoding": {
             "temperature": 0.0, "top_p": 1.0, "do_sample": False,
